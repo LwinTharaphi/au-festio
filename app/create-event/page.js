@@ -1,146 +1,228 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Table, Form, Button, Container, Row, Col, Card, Alert, Modal } from 'react-bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import React, { useState, useRef } from 'react';
+import { Box, Button, Paper, Typography, TextField, IconButton } from '@mui/material';
+import FormField from '../components/FormField';
+import CloseIcon from '@mui/icons-material/Close';
 
-export default function EventForm() {
-  const router = useRouter();
-  const [events, setEvents] = useState([]);
-  const [eventData, setEventData] = useState({ title: "", date: "", description: "" });
-  const [isEditing, setIsEditing] = useState(false);  
-  const [currentEventId, setCurrentEventId] = useState(null);
+function EventForm() {
+  const [isArEnabled, setIsArEnabled] = useState(false);
+  const [isPaid, setIsPaid] = useState(false);
+  const [eventName, setEventName] = useState('');
+  const [location, setLocation] = useState('');
+  const [venueName, setVenueName] = useState('');
+  const [latitude, setLatitude] = useState('');
+  const [longitude, setLongitude] = useState('');
+  const [organizerName, setOrganizerName] = useState('');
+  const [poster, setPoster] = useState(null);
+  const [qrCode, setQrCode] = useState(null);
+  const [posterName, setPosterName] = useState('');
+  const [qrCodeName, setQrCodeName] = useState('');
+  // Create refs for the file input elements
+  const posterInputRef = useRef(null);
+  const qrCodeInputRef = useRef(null);
 
-  useEffect(() => {
-    fetchEvents();
-  }, []);
-
-  const fetchEvents = async () => {
-    const response = await fetch("/api/events");
-    const data = await response.json();
-    setEvents(data);
-  };
-
-  const handleChange = (e) => {
-    setEventData({ ...eventData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const method = isEditing ? "PUT" : "POST"; 
-    const url = isEditing ? `/api/events/${currentEventId}` : "/api/events";
-
-    const response = await fetch(url, {
-      method: method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(eventData),
-    });
-
-    if (response.ok) {
-      setEventData({ title: "", date: "", description: "" });
-      setIsEditing(false);  
-      setCurrentEventId(null);  
-      fetchEvents();  
+  const handleFileChange = (event, type) => {
+    const file = event.target.files[0];
+    if (file) {
+      const fileName = file.name;
+      if (type === 'poster') {
+        setPoster(file);
+        setPosterName(fileName);
+      } else if (type === 'qrCode') {
+        setQrCode(file);
+        setQrCodeName(fileName);
+      }
     }
   };
 
-  const handleDelete = async (id) => {
-    await fetch(`/api/events/${id}`, { method: "DELETE" });
-    fetchEvents();
-  };
-
-  const handleEdit = (event) => {
-    setEventData({
-      title: event.title,
-      date: event.date,
-      description: event.description,
-    });
-    setIsEditing(true);
-    setCurrentEventId(event._id);
-  };
-
-  // Navigate to the dashboard page when an event card is clicked
-  const handleCardClick = (id) => {
-    router.push(`/events/${id}/dashboard`);
+  const handleDeleteFile = (type) => {
+    if (type === 'poster') {
+      setPoster(null);
+      setPosterName('');
+    } else if (type === 'qrCode') {
+      setQrCode(null);
+      setQrCodeName('');
+    }
   };
 
   return (
-    <Container className="my-5">
-      {/* Event Creation/Update Form in a Bootstrap Card */}
-      <Card className="mb-4">
-        <Card.Header>
-          <h4>{isEditing ? "Edit Event" : "Create Event"}</h4>
-        </Card.Header>
-        <Card.Body>
-          <Form onSubmit={handleSubmit}>
-            <Form.Group className="mb-3">
-              <Form.Label>Event Title</Form.Label>
-              <Form.Control
-                name="title"
-                value={eventData.title}
-                onChange={handleChange}
+    <Paper
+      elevation={3}
+      sx={{
+        padding: 4,
+        backgroundColor: '#ffffff',
+        maxWidth: '800px',
+        margin: '20px auto',
+        borderRadius: '12px',
+      }}
+    >
+      <Typography variant="h5" align="center" sx={{ marginBottom: 3 }}>
+        Add a New Event
+      </Typography>
+
+      <Box sx={{ display: 'flex', gap: 4 }}>
+        {/* Left Side */}
+        <Box sx={{ flex: 1 }}>
+          <FormField
+            title="Event Name"
+            type="text"
+            placeholder="Enter event name"
+            value={eventName}
+            onChange={setEventName}
+          />
+          <FormField
+            title="Location"
+            type="text"
+            placeholder="Enter location"
+            value={location}
+            onChange={setLocation}
+          />
+          <FormField
+            title="AR Toggle"
+            type="switch"
+            value={isArEnabled}
+            onChange={setIsArEnabled}
+          />
+
+          {/* Conditional Venue and GPS Location Fields */}
+          {isArEnabled && (
+            <>
+              <FormField
+                title="Venue Name"
                 type="text"
-                placeholder="Enter event title"
-                required
+                placeholder="Enter main location"
+                value={venueName}
+                onChange={setVenueName}
               />
-            </Form.Group>
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                <FormField
+                  title="Latitude"
+                  type="text"
+                  placeholder="Enter latitude"
+                  value={latitude}
+                  onChange={setLatitude}
+                />
+                <FormField
+                  title="Longitude"
+                  type="text"
+                  placeholder="Enter longitude"
+                  value={longitude}
+                  onChange={setLongitude}
+                />
+              </Box>
+            </>
+          )}
+        </Box>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Event Date</Form.Label>
-              <Form.Control
-                name="date"
-                value={eventData.date}
-                onChange={handleChange}
-                type="date"
-                required
-              />
-            </Form.Group>
+        {/* Right Side */}
+        <Box sx={{ flex: 1 }}>
+          <FormField
+            title="Organizer Name"
+            type="text"
+            placeholder="Enter organizer name"
+            value={organizerName}
+            onChange={setOrganizerName}
+          />
+          <FormField
+            title="Event Type"
+            type="radio"
+            value={isPaid ? 'paid' : 'free'}
+            onChange={(value) => setIsPaid(value === 'paid')}
+            options={[
+              { label: 'Paid', value: 'paid' },
+              { label: 'Free', value: 'free' },
+            ]}
+          />
 
-            <Form.Group className="mb-3">
-              <Form.Label>Event Description</Form.Label>
-              <Form.Control
-                name="description"
-                value={eventData.description}
-                onChange={handleChange}
-                as="textarea"
-                rows={3}
-                placeholder="Enter event description"
-                required
-              />
-            </Form.Group>
+          {/* QR Code Upload for Event */}
 
-            <Button variant="primary" type="submit">
-              {isEditing ? "Update Event" : "Create Event"}
+          <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 2 }}>
+            <TextField
+              label="QR Code Name"
+              value={qrCodeName}
+              placeholder="No file uploaded"
+              variant="outlined"
+              fullWidth
+              InputProps={{
+                readOnly: true,
+                style: { backgroundColor: '#f5f5f5' },
+              }}
+              sx={{ marginRight: 2 }}
+            />
+            <Button
+              variant="contained"
+              component="span"
+              onClick={() => qrCodeInputRef.current.click()}
+            >
+              Upload
             </Button>
-          </Form>
-        </Card.Body>
-      </Card>
+            {qrCodeName && (
+              <IconButton
+                color="error"
+                onClick={() => handleDeleteFile('qrCode')}
+                sx={{ marginLeft: 1 }}
+              >
+                <CloseIcon />
+              </IconButton>
+            )}
+            <input
+              id="qr-code-upload"
+              type="file"
+              ref={qrCodeInputRef}
+              onChange={(e) => handleFileChange(e, 'qrCode')}
+              style={{ display: 'none' }}
+            />
+          </Box>
 
-      {/* Event List Section in a Bootstrap Card */}
-      <Card>
-        <Card.Header>
-          <h4>Event List</h4>
-        </Card.Header>
-        <Card.Body>
-          <Row>
-            {events.map((event) => (
-              <Col key={event._id} md={4} className="mb-4">
-                <Card className="shadow-sm" onClick={() => handleCardClick(event._id)} style={{ cursor: "pointer" }}>
-                  <Card.Body>
-                    <Card.Title>{event.title}</Card.Title>
-                    <Card.Text><strong>Date:</strong> {event.date}</Card.Text>
-                    <Card.Text><strong>Description:</strong> {event.description}</Card.Text>
-                    <div className="d-flex justify-content-between">
-                      <Button variant="warning" size="sm" onClick={(e) => { e.stopPropagation(); handleEdit(event); }}>Edit</Button>
-                      <Button variant="danger" size="sm" onClick={(e) => { e.stopPropagation(); handleDelete(event._id); }}>Delete</Button>
-                    </div>
-                  </Card.Body>
-                </Card>
-              </Col>
-            ))}
-          </Row>
-        </Card.Body>
-      </Card>
-    </Container>
+          {/* poster upload for event */}
+          <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 2 }}>
+            <TextField
+              label="Poster Name"
+              value={posterName}
+              placeholder="No file uploaded"
+              variant="outlined"
+              fullWidth
+              InputProps={{
+                readOnly: true,
+                style: { backgroundColor: '#f5f5f5' },
+              }}
+              sx={{ marginRight: 2 }}
+            />
+            <Button
+              variant="contained"
+              component="span"
+              onClick={() => posterInputRef.current.click()}
+            >
+              Upload
+            </Button>
+            {posterName && (
+              <IconButton
+                color="error"
+                onClick={() => handleDeleteFile('poster')}
+                sx={{ marginLeft: 1 }}
+              >
+                <CloseIcon />
+              </IconButton>
+            )}
+            <input
+              id="poster-upload"
+              type="file"
+              ref={posterInputRef}
+              onChange={(e) => handleFileChange(e, 'poster')}
+              style={{ display: 'none' }}
+            />
+          </Box>
+        </Box>
+      </Box>
+
+      {/* Add Event Button */}
+      <Box sx={{ textAlign: 'center', marginTop: 3 }}>
+        <Button variant="contained" color="primary">
+          Add Event
+        </Button>
+      </Box>
+    </Paper>
   );
 }
+
+export default EventForm;
