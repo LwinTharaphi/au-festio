@@ -427,9 +427,11 @@ function EventForm() {
                     }}
                   >
                     <MenuItem onClick={() =>{
+                      e.stopPropagation();
                       handleDelete(selectedEventIndex)}
                     }>Delete</MenuItem>
                     <MenuItem onClick={() =>{
+                      e.stopPropagation();
                       handleEdit(selectedEventIndex)}}>Edit</MenuItem>
                   </Menu>
                 </Card>

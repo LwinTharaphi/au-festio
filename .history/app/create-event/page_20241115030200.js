@@ -7,11 +7,11 @@ import { Box, Button, Paper, Typography, TextField,
 import FormField from '../components/FormField';
 import CloseIcon from '@mui/icons-material/Close';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/router';
 
 function EventForm() {
   const router = useRouter();
-
+  
   const [isArEnabled, setIsArEnabled] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
   const [eventName, setEventName] = useState('');
@@ -380,7 +380,7 @@ function EventForm() {
             {events.map((event, index) => (
               <Grid item xs={12} sm={6} md={4} key={index}>
                 <Card sx={{ position: 'relative', marginBottom: 2 }} key={index}>
-                  <CardActionArea onClick={()=> router.push(`/events/${event._id}/staffs`)}>
+                  <CardActionArea onClick={()=> router.push(`/events/${event._id}`)}>
                     {event.posterName && (
           
                       <CardMedia 
@@ -427,9 +427,11 @@ function EventForm() {
                     }}
                   >
                     <MenuItem onClick={() =>{
+                      e.stopPropagation();
                       handleDelete(selectedEventIndex)}
                     }>Delete</MenuItem>
                     <MenuItem onClick={() =>{
+                      e.stopPropagation();
                       handleEdit(selectedEventIndex)}}>Edit</MenuItem>
                   </Menu>
                 </Card>

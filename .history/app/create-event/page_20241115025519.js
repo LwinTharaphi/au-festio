@@ -7,11 +7,9 @@ import { Box, Button, Paper, Typography, TextField,
 import FormField from '../components/FormField';
 import CloseIcon from '@mui/icons-material/Close';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 function EventForm() {
-  const router = useRouter();
-
   const [isArEnabled, setIsArEnabled] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
   const [eventName, setEventName] = useState('');
@@ -378,62 +376,61 @@ function EventForm() {
         <Box sx={{ marginTop: 4 }}>
           <Grid container spacing={4}>
             {events.map((event, index) => (
-              <Grid item xs={12} sm={6} md={4} key={index}>
-                <Card sx={{ position: 'relative', marginBottom: 2 }} key={index}>
-                  <CardActionArea onClick={()=> router.push(`/events/${event._id}/staffs`)}>
-                    {event.posterName && (
-          
-                      <CardMedia 
-                        component="img"
-                        height="140"
-                        image={event.poster} 
-                        alt={event.posterName}
-                      />
-                    )}
-                  </CardActionArea>
-                  <CardContent>
-                    <Typography variant="h6" align='center'>{event.eventName}</Typography>
-                  </CardContent>
-                  {/* Delete Button */}
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      top: 8,
-                      right: 8
-                    }}
-                  >
-                    <IconButton 
-                      onClick={(e) =>{
-                        e.stopPropagation();
-                        handleMenuClick(e, index);}}
-                      sx={{ color: 'rgba(0, 0, 0, 0.54)' }}
+              <Link href={`/events/${event._id}/staffs`} key={event._id} passHref>
+                <Grid item xs={12} sm={6} md={4} key={index}>
+                  <Card sx={{ position: 'relative', marginBottom: 2 }} key={index}>
+                    <CardActionArea>
+                      {event.posterName && (
+            
+                        <CardMedia 
+                          component="img"
+                          height="140"
+                          image={event.poster} 
+                          alt={event.posterName}
+                        />
+                      )}
+                    </CardActionArea>
+                    <CardContent>
+                      <Typography variant="h6" align='center'>{event.eventName}</Typography>
+                    </CardContent>
+                    {/* Delete Button */}
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: 8,
+                        right: 8
+                      }}
                     >
-                      <MoreVertIcon />
-                    </IconButton>
-                  </Box>
+                      <IconButton 
+                        onClick={(e) =>{
+                          e.stopPropagation();
+                          handleMenuClick(e, index);}}
+                        sx={{ color: 'rgba(0, 0, 0, 0.54)' }}
+                      >
+                        <MoreVertIcon />
+                      </IconButton>
+                    </Box>
 
-                  {/* Menu with options for delete/edit */}
-                  <Menu
-                    anchorEl={anchorEl}
-                    open={Boolean(anchorEl)}
-                    onClose={handleCloseMenu}
-                    anchorOrigin={{
-                      vertical: 'top',
-                      horizontal: 'right',
-                    }}
-                    transformOrigin={{
-                      vertical: 'top',
-                      horizontal: 'right',
-                    }}
-                  >
-                    <MenuItem onClick={() =>{
-                      handleDelete(selectedEventIndex)}
-                    }>Delete</MenuItem>
-                    <MenuItem onClick={() =>{
-                      handleEdit(selectedEventIndex)}}>Edit</MenuItem>
-                  </Menu>
-                </Card>
-              </Grid>
+                    {/* Menu with options for delete/edit */}
+                    <Menu
+                      anchorEl={anchorEl}
+                      open={Boolean(anchorEl)}
+                      onClose={handleCloseMenu}
+                      anchorOrigin={{
+                        vertical: 'top',
+                        horizontal: 'right',
+                      }}
+                      transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'right',
+                      }}
+                    >
+                      <MenuItem onClick={() => handleDelete(selectedEventIndex)}>Delete</MenuItem>
+                      <MenuItem onClick={() => handleEdit(selectedEventIndex)}>Edit</MenuItem>
+                    </Menu>
+                  </Card>
+                </Grid>
+              </Link>
             ))}
           </Grid>
           

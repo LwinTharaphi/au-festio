@@ -7,11 +7,10 @@ import { Box, Button, Paper, Typography, TextField,
 import FormField from '../components/FormField';
 import CloseIcon from '@mui/icons-material/Close';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { useRouter } from 'next/navigation';
+import { RestoreFromTrashRounded } from '@mui/icons-material';
+import Link from 'next/link';
 
 function EventForm() {
-  const router = useRouter();
-
   const [isArEnabled, setIsArEnabled] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
   const [eventName, setEventName] = useState('');
@@ -380,7 +379,7 @@ function EventForm() {
             {events.map((event, index) => (
               <Grid item xs={12} sm={6} md={4} key={index}>
                 <Card sx={{ position: 'relative', marginBottom: 2 }} key={index}>
-                  <CardActionArea onClick={()=> router.push(`/events/${event._id}/staffs`)}>
+                  <CardActionArea>
                     {event.posterName && (
           
                       <CardMedia 
@@ -403,9 +402,7 @@ function EventForm() {
                     }}
                   >
                     <IconButton 
-                      onClick={(e) =>{
-                        e.stopPropagation();
-                        handleMenuClick(e, index);}}
+                      onClick={(e) => handleMenuClick(e, index)}
                       sx={{ color: 'rgba(0, 0, 0, 0.54)' }}
                     >
                       <MoreVertIcon />
@@ -426,11 +423,8 @@ function EventForm() {
                       horizontal: 'right',
                     }}
                   >
-                    <MenuItem onClick={() =>{
-                      handleDelete(selectedEventIndex)}
-                    }>Delete</MenuItem>
-                    <MenuItem onClick={() =>{
-                      handleEdit(selectedEventIndex)}}>Edit</MenuItem>
+                    <MenuItem onClick={() => handleDelete(selectedEventIndex)}>Delete</MenuItem>
+                    <MenuItem onClick={() => handleEdit(selectedEventIndex)}>Edit</MenuItem>
                   </Menu>
                 </Card>
               </Grid>
