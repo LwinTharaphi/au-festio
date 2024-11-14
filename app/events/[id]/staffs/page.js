@@ -120,7 +120,7 @@ export default function StaffPage() {
   // Handle deleting a staff member
   const handleDeleteStaff = async (staffId) => {
     try {
-      const response = await fetch(`/api/events/${id}/staff/${staffId}`, {
+      const response = await fetch(`/api/events/${id}/staffs/${staffId}`, {
         method: "DELETE",
       });
       if (!response.ok) {

@@ -1,37 +1,66 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { Container, Row, Col, Table, Button, Alert } from "react-bootstrap";
+import { Container, Row, Col, Table, Button, Alert, Modal } from "react-bootstrap";
+import { FaTrash, FaEdit } from "react-icons/fa";
 import Sidebar from "../../../components/Sidebar";
 import "../../../components/Sidebar.css";
 
 export default function RegisteredStudentsPage() {
-  const { id: eventId } = useParams();
+  const { id } = useParams(); // Use this as eventId
   const [students, setStudents] = useState([]);
   const [error, setError] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
 
   useEffect(() => {
     const fetchStudents = async () => {
       try {
-        const response = await fetch(`/api/events/${eventId}/students`);
+        const response = await fetch(`/api/events/${id}/students`);
         if (!response.ok) {
           throw new Error("Failed to fetch registered students.");
         }
         const data = await response.json();
+
+        console.log("Fetched data:", data); // Log the fetched data for debugging
         setStudents(data);
       } catch (err) {
         setError(err.message);
       }
     };
 
-    fetchStudents();
-  }, [eventId]);
+    if (id) {
+      fetchStudents();
+    }
+  }, [id]);
 
-  const updateStatus = (studentId, status) => {
-    setStudents(students.map(student => 
-      student._id === studentId ? { ...student, status } : student
-    ));
-    // Here you can also add a call to an API to update the status in the database
+  const handleRowClick = (student) => {
+    setSelectedStudent(student);
+    setShowModal(true);
+  };
+
+  const updateStatus = async (studentId, status) => {
+    try {
+      await fetch(`/api/events/${id}/students/${studentId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      setStudents(students.map(student =>
+        student._id === studentId ? { ...student, status } : student
+      ));
+    } catch (error) {
+      setError("Failed to update status.");
+    }
+  };
+
+  const handleDelete = async (studentId) => {
+    try {
+      await fetch(`/api/events/${id}/students/${studentId}`, { method: "DELETE" });
+      setStudents(students.filter(student => student._id !== studentId));
+    } catch (error) {
+      setError("Failed to delete student.");
+    }
   };
 
   return (
@@ -42,7 +71,7 @@ export default function RegisteredStudentsPage() {
         </Col>
         <Col xs={9} md={10} className="main-content">
           <Container className="my-5">
-            <h4>Registered Students for Event {eventId}</h4>
+            <h4>Registered Students for Event {id}</h4>
             {error ? (
               <Alert variant="danger">{error}</Alert>
             ) : (
@@ -51,40 +80,97 @@ export default function RegisteredStudentsPage() {
                   <tr>
                     <th>ID</th>
                     <th>Name</th>
+                    <th>Email</th>
+                    <th>Faculty</th>
+                    <th>Phone</th>
                     <th>Status</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {students.map(student => (
-                    <tr key={student._id}>
-                      <td>{student._id}</td>
-                      <td>{student.name}</td>
-                      <td>{student.status}</td>
-                      <td>
-                        <Button
-                          variant="success"
-                          onClick={() => updateStatus(student._id, "approved")}
-                          disabled={student.status === "approved"}
-                        >
-                          Approve
-                        </Button>{" "}
-                        <Button
-                          variant="danger"
-                          onClick={() => updateStatus(student._id, "denied")}
-                          disabled={student.status === "denied"}
-                        >
-                          Deny
-                        </Button>
+                  {students.length > 0 ? (
+                    students.map(student => (
+                      <tr key={student._id} onClick={() => handleRowClick(student)}>
+                        <td>{student.sid}</td>
+                        <td>{student.name}</td>
+                        <td>{student.email}</td>
+                        <td>{student.faculty}</td>
+                        <td>{student.phone}</td>
+                        <td>{student.status}</td>
+                        <td>
+                          <FaEdit
+                            style={{ cursor: "pointer", color: "blue", marginRight: "10px" }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // Implement edit logic here
+                            }}
+                          />
+                          <FaTrash
+                            style={{ cursor: "pointer", color: "red" }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(student._id);
+                            }}
+                          />
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="7" className="text-center">
+                        No students registered yet.
                       </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </Table>
             )}
           </Container>
         </Col>
       </Row>
+
+      {/* Modal for student details */}
+      {selectedStudent && (
+        <Modal show={showModal} onHide={() => setShowModal(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>Student Details</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p><strong>ID:</strong> {selectedStudent._id}</p>
+            <p><strong>Name:</strong> {selectedStudent.name}</p>
+            <div>
+              <strong>Payment Screenshot:</strong>
+              <img
+                src={selectedStudent.paymentScreenshotUrl}
+                alt="Payment Screenshot"
+                style={{ width: "100%", marginTop: "10px" }}
+              />
+            </div>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant="success"
+              onClick={() => {
+                updateStatus(selectedStudent._id, "approved");
+                setShowModal(false);
+              }}
+              disabled={selectedStudent.status === "approved"}
+            >
+              Approve
+            </Button>
+            <Button
+              variant="danger"
+              onClick={() => {
+                updateStatus(selectedStudent._id, "denied");
+                setShowModal(false);
+              }}
+              disabled={selectedStudent.status === "denied"}
+            >
+              Deny
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      )}
     </Container>
   );
 }
