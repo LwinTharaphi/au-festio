@@ -29,12 +29,6 @@ function EventForm() {
   const [selectedEventIndex, setSelectedEventIndex] = useState(null); 
   const [isEditing, setIsEditing] = useState(false);
 
-  const [hasSeatLimitation, setHasSeatLimitation] = useState(false);
-  const [seatAmount, setSeatAmount] = useState('');
-  const [hasFoodBooth, setHasFoodBooth] = useState(false);
-  const [foodBoothAmount, setFoodBoothAmount] = useState('');
-  const [ticketAmount, setTicketAmount] = useState(''); // For paid events
-
   const handleFileChange = async (event, type) => {
     const file = event.target.files[0];
     if (file) {     
@@ -83,20 +77,6 @@ function EventForm() {
      // Append the file data (poster and QR code, if present)
     if (poster) {
       formData.append('poster', poster); // Assuming 'poster' is the file data
-    }
-
-    formData.append('hasSeatLimitation', hasSeatLimitation);
-    if (hasSeatLimitation) {
-      formData.append('seats', seatAmount || '');
-    }
-
-    formData.append('hasFoodBooth', hasFoodBooth);
-    if (hasFoodBooth) {
-      formData.append('booths', foodBoothAmount || '');
-    }
-
-    if (isPaid) {
-      formData.append('price', ticketAmount || '');
     }
 
     try {
@@ -152,11 +132,6 @@ function EventForm() {
     setIsPaid(false);
     setSelectedEventIndex(null);
     setIsEditing(false);
-    setHasSeatLimitation(false);
-    setSeatAmount('');
-    setHasFoodBooth(false);
-    setFoodBoothAmount('');
-    setTicketAmount('');
   };
 
   const handleDelete = async (index) => {
@@ -270,6 +245,17 @@ function EventForm() {
 
         {/* Right Side */}
         <Box sx={{ flex: 1 }}>
+          <FormField
+            title="Event Type"
+            type="radio"
+            value={isPaid ? 'paid' : 'free'}
+            onChange={(value) => setIsPaid(value === 'paid')}
+            options={[
+              { label: 'Free', value: 'free' },
+              { label: 'Paid', value: 'paid' },
+            ]}
+          />
+
           {/* poster upload for event */}
           <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 2 }}>
             <TextField
@@ -310,56 +296,6 @@ function EventForm() {
               style={{ display: 'none' }}
             />
           </Box>
-
-          <FormField
-            title="Event Type"
-            type="radio"
-            value={isPaid ? 'paid' : 'free'}
-            onChange={(value) => setIsPaid(value === 'paid')}
-            options={[
-              { label: 'Free', value: 'free' },
-              { label: 'Paid', value: 'paid' },
-            ]}
-          />
-          {isPaid && (
-            <FormField
-              title="Ticket Amount"
-              type="number"
-              placeholder="Enter number of tickets"
-              value={ticketAmount}
-              onChange={setTicketAmount}
-            />
-          )}
-          <FormField
-            title="Seat Limitation"
-            type="switch"
-            value={hasSeatLimitation}
-            onChange={setHasSeatLimitation}
-          />
-          {hasSeatLimitation && (
-            <FormField
-              title="Seat Amount"
-              type="number"
-              placeholder="Enter number of seats"
-              value={seatAmount}
-              onChange={setSeatAmount}
-            />
-          )}
-          <FormField
-            title="Food Booth"
-            type="switch"
-            value={hasFoodBooth}
-            onChange={setHasFoodBooth}
-          />
-          {hasFoodBooth && (
-            <FormField
-              title="Food Booth Amount"
-              type="number"
-              placeholder="Enter number of food booths"
-              value={foodBoothAmount}
-              onChange={setFoodBoothAmount}
-            />
-          )}
         </Box>
       </Box>
 
@@ -426,7 +362,7 @@ function EventForm() {
                     <MenuItem onClick={() =>{
                       handleDelete(selectedEventIndex)}
                     }>Delete</MenuItem>
-                    <MenuItem onClick={() =>{
+                    <MenuItem onClick={() =>{p
                       handleEdit(selectedEventIndex)}}>Edit</MenuItem>
                   </Menu>
                 </Card>

@@ -10,9 +10,6 @@ const EventSchema = new mongoose.Schema({
   venueName: {type: String},
   latitude: {type: String},
   longitude: {type: String},
-  price: { type: Number, required: false },
-  seats: { type: Number, required: false},
-  booths: { type: Number, required: false},
 });
 
 export default mongoose.models.Event || mongoose.model("Event", EventSchema);

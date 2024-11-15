@@ -72,7 +72,6 @@ export async function POST(req) {
     const price = formData.get('price')? Number(formData.get('price')): undefined;
     const seats = formData.get('seats')? Number(formData.get('seats')): undefined;
     const booths = formData.get('booths')? Number(formData.get('booths')): undefined;
-    console.log(formData.get('price'))
 
     // Create event object
     const newEvent = {

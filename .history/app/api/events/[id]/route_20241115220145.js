@@ -32,9 +32,6 @@ export async function PUT(request, { params }) {
     const longitude = formData.get("longitude");
 
     const poster = formData.get("poster");
-    const price = formData.get('price')? Number(formData.get('price')): undefined;
-    const seats = formData.get('seats')? Number(formData.get('seats')): undefined;
-    const booths = formData.get('booths')? Number(formData.get('booths')): undefined;
 
     const updatedData = {
       eventName,
@@ -43,9 +40,6 @@ export async function PUT(request, { params }) {
       venueName,
       latitude,
       longitude,
-      price,
-      seats,
-      booths,
     };
 
     if (poster) {

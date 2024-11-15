@@ -26,30 +26,31 @@ export async function PUT(request, { params }) {
     const formData = await request.formData();
     const eventName = formData.get("eventName");
     const location = formData.get("location");
+    const organizerName = formData.get("organizerName");
     const isPaid = formData.get("isPaid") === "true";
     const venueName = formData.get("venueName");
     const latitude = formData.get("latitude");
     const longitude = formData.get("longitude");
 
     const poster = formData.get("poster");
-    const price = formData.get('price')? Number(formData.get('price')): undefined;
-    const seats = formData.get('seats')? Number(formData.get('seats')): undefined;
-    const booths = formData.get('booths')? Number(formData.get('booths')): undefined;
+    const qrCode = formData.get("qrCode");
 
     const updatedData = {
       eventName,
       location,
+      organizerName,
       isPaid,
       venueName,
       latitude,
       longitude,
-      price,
-      seats,
-      booths,
     };
 
     if (poster) {
       updatedData.poster = await uploadFile(poster, "posters");
+    }
+
+    if (qrCode) {
+      updatedData.qrCode = await uploadFile(qrCode, "qrCodes");
     }
 
     // Update the event with the new data

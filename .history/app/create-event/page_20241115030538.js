@@ -19,21 +19,19 @@ function EventForm() {
   const [venueName, setVenueName] = useState('');
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
+  const [organizerName, setOrganizerName] = useState('');
   const [poster, setPoster] = useState(null);
+  const [qrCode, setQrCode] = useState(null);
   const [posterName, setPosterName] = useState('');
+  const [qrCodeName, setQrCodeName] = useState('');
   // Create refs for the file input elements
   const posterInputRef = useRef(null);
+  const qrCodeInputRef = useRef(null);
 
   const [events, setEvents] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null); // For menu anchor
   const [selectedEventIndex, setSelectedEventIndex] = useState(null); 
   const [isEditing, setIsEditing] = useState(false);
-
-  const [hasSeatLimitation, setHasSeatLimitation] = useState(false);
-  const [seatAmount, setSeatAmount] = useState('');
-  const [hasFoodBooth, setHasFoodBooth] = useState(false);
-  const [foodBoothAmount, setFoodBoothAmount] = useState('');
-  const [ticketAmount, setTicketAmount] = useState(''); // For paid events
 
   const handleFileChange = async (event, type) => {
     const file = event.target.files[0];
@@ -41,6 +39,9 @@ function EventForm() {
       if (type === 'poster') {
         setPoster(file);
         setPosterName(file.name);
+      } else if (type === 'qrCode') {
+        setQrCode(file);
+        setQrCodeName(file.name);
       }
     }
   };
@@ -50,6 +51,9 @@ function EventForm() {
     if (type === 'poster') {
       setPoster(null);
       setPosterName('');
+    } else if (type === 'qrCode') {
+      setQrCode(null);
+      setQrCodeName('');
     }
   };
 
@@ -70,8 +74,10 @@ function EventForm() {
 
     formData.append('eventName',eventName || '');
     formData.append('location',location || '');
+    formData.append('organizerName',organizerName || '');
     formData.append('isPaid',isPaid);
     formData.append('posterName',posterName || '');
+    formData.append('qrCodeName',qrCodeName || '');
 
     // Add additional fields for AR
     if (isArEnabled) {
@@ -84,19 +90,8 @@ function EventForm() {
     if (poster) {
       formData.append('poster', poster); // Assuming 'poster' is the file data
     }
-
-    formData.append('hasSeatLimitation', hasSeatLimitation);
-    if (hasSeatLimitation) {
-      formData.append('seats', seatAmount || '');
-    }
-
-    formData.append('hasFoodBooth', hasFoodBooth);
-    if (hasFoodBooth) {
-      formData.append('booths', foodBoothAmount || '');
-    }
-
-    if (isPaid) {
-      formData.append('price', ticketAmount || '');
+    if (qrCode) {
+      formData.append('qrCode', qrCode); // Assuming 'qrCode' is the file data
     }
 
     try {
@@ -146,17 +141,15 @@ function EventForm() {
     setVenueName('');
     setLatitude('');
     setLongitude('');
+    setOrganizerName('');
     setPoster(null);
+    setQrCode(null);
     setPosterName('');
+    setQrCodeName('');
     setIsArEnabled(false);
     setIsPaid(false);
     setSelectedEventIndex(null);
     setIsEditing(false);
-    setHasSeatLimitation(false);
-    setSeatAmount('');
-    setHasFoodBooth(false);
-    setFoodBoothAmount('');
-    setTicketAmount('');
   };
 
   const handleDelete = async (index) => {
@@ -183,7 +176,9 @@ function EventForm() {
     setVenueName(eventToEdit.venueName || '');
     setLatitude(eventToEdit.latitude || '');
     setLongitude(eventToEdit.longitude || '');
+    setOrganizerName(eventToEdit.organizerName || '');
     setPosterName(eventToEdit.posterName || '');
+    setQrCodeName(eventToEdit.qrCodeName || '');
     setIsArEnabled(Boolean(eventToEdit.venueName));
     setIsPaid(eventToEdit.isPaid || false);
     setSelectedEventIndex(index); // Store the index for saving the updated event later
@@ -270,6 +265,64 @@ function EventForm() {
 
         {/* Right Side */}
         <Box sx={{ flex: 1 }}>
+          <FormField
+            title="Organizer Name"
+            type="text"
+            placeholder="Enter organizer name"
+            value={organizerName}
+            onChange={setOrganizerName}
+          />
+          <FormField
+            title="Event Type"
+            type="radio"
+            value={isPaid ? 'paid' : 'free'}
+            onChange={(value) => setIsPaid(value === 'paid')}
+            options={[
+              { label: 'Paid', value: 'paid' },
+              { label: 'Free', value: 'free' },
+            ]}
+          />
+
+          {/* QR Code Upload for Event */}
+
+          <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 2 }}>
+            <TextField
+              label="QR Code Name"
+              value={qrCodeName}
+              placeholder="No file uploaded"
+              variant="outlined"
+              fullWidth
+              InputProps={{
+                readOnly: true,
+                style: { backgroundColor: '#f5f5f5' },
+              }}
+              sx={{ marginRight: 2 }}
+            />
+            <Button
+              variant="contained"
+              component="span"
+              onClick={() => qrCodeInputRef.current.click()}
+            >
+              Upload
+            </Button>
+            {qrCodeName && (
+              <IconButton
+                color="error"
+                onClick={() => handleDeleteFile('qrCode')}
+                sx={{ marginLeft: 1 }}
+              >
+                <CloseIcon />
+              </IconButton>
+            )}
+            <input
+              id="qr-code-upload"
+              type="file"
+              ref={qrCodeInputRef}
+              onChange={(e) => handleFileChange(e, 'qrCode')}
+              style={{ display: 'none' }}
+            />
+          </Box>
+
           {/* poster upload for event */}
           <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 2 }}>
             <TextField
@@ -310,56 +363,6 @@ function EventForm() {
               style={{ display: 'none' }}
             />
           </Box>
-
-          <FormField
-            title="Event Type"
-            type="radio"
-            value={isPaid ? 'paid' : 'free'}
-            onChange={(value) => setIsPaid(value === 'paid')}
-            options={[
-              { label: 'Free', value: 'free' },
-              { label: 'Paid', value: 'paid' },
-            ]}
-          />
-          {isPaid && (
-            <FormField
-              title="Ticket Amount"
-              type="number"
-              placeholder="Enter number of tickets"
-              value={ticketAmount}
-              onChange={setTicketAmount}
-            />
-          )}
-          <FormField
-            title="Seat Limitation"
-            type="switch"
-            value={hasSeatLimitation}
-            onChange={setHasSeatLimitation}
-          />
-          {hasSeatLimitation && (
-            <FormField
-              title="Seat Amount"
-              type="number"
-              placeholder="Enter number of seats"
-              value={seatAmount}
-              onChange={setSeatAmount}
-            />
-          )}
-          <FormField
-            title="Food Booth"
-            type="switch"
-            value={hasFoodBooth}
-            onChange={setHasFoodBooth}
-          />
-          {hasFoodBooth && (
-            <FormField
-              title="Food Booth Amount"
-              type="number"
-              placeholder="Enter number of food booths"
-              value={foodBoothAmount}
-              onChange={setFoodBoothAmount}
-            />
-          )}
         </Box>
       </Box>
 

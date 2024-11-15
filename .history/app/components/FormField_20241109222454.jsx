@@ -16,16 +16,6 @@ function FormField({ title, type, placeholder, value, onChange, options, fileUpl
         />
       )}
 
-      {type === 'number' && (
-        <TextField
-          fullWidth
-          type="number"
-          placeholder={placeholder}
-          value={value}
-          onChange={(e) => onChange(Number(e.target.value))} // Ensure the value is a number
-        />
-      )}
-
       {type === 'switch' && (
         <FormControlLabel
           control={<Switch checked={value} onChange={(e) => onChange(e.target.checked)} />}

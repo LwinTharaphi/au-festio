@@ -58,6 +58,7 @@ export async function POST(req) {
     // Extract form data fields
     const eventName = formData.get('eventName');
     const location = formData.get('location');
+    const organizerName = formData.get('organizerName');
     const isPaid = formData.get('isPaid') === 'true'; // Convert to boolean if needed
     const venueName = formData.get('venueName');
     const latitude = formData.get('latitude');
@@ -65,28 +66,25 @@ export async function POST(req) {
 
     // Extract files from the form data
     const poster = formData.get('poster');
+    const qrCode = formData.get('qrCode');
 
     // Handle file uploads (adjust to your specific storage strategy)
     const posterPath = poster ? await uploadFile(poster, 'posters') : null;
-
-    const price = formData.get('price')? Number(formData.get('price')): undefined;
-    const seats = formData.get('seats')? Number(formData.get('seats')): undefined;
-    const booths = formData.get('booths')? Number(formData.get('booths')): undefined;
-    console.log(formData.get('price'))
+    const qrCodePath = qrCode ? await uploadFile(qrCode, 'qrCodes') : null;
 
     // Create event object
     const newEvent = {
       eventName,
       location,
+      organizerName,
       isPaid,
       venueName,
       latitude,
       longitude,
       poster: posterPath,
+      qrCode: qrCodePath,
       posterName: poster ? poster.name : null,
-      price,
-      seats,
-      booths,
+      qrCodeName: qrCode ? qrCode.name : null,
     };
 
     // Connect to your database and save the event

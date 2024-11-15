@@ -85,20 +85,6 @@ function EventForm() {
       formData.append('poster', poster); // Assuming 'poster' is the file data
     }
 
-    formData.append('hasSeatLimitation', hasSeatLimitation);
-    if (hasSeatLimitation) {
-      formData.append('seats', seatAmount || '');
-    }
-
-    formData.append('hasFoodBooth', hasFoodBooth);
-    if (hasFoodBooth) {
-      formData.append('booths', foodBoothAmount || '');
-    }
-
-    if (isPaid) {
-      formData.append('price', ticketAmount || '');
-    }
-
     try {
       let response;
 
@@ -152,11 +138,6 @@ function EventForm() {
     setIsPaid(false);
     setSelectedEventIndex(null);
     setIsEditing(false);
-    setHasSeatLimitation(false);
-    setSeatAmount('');
-    setHasFoodBooth(false);
-    setFoodBoothAmount('');
-    setTicketAmount('');
   };
 
   const handleDelete = async (index) => {
@@ -328,36 +309,6 @@ function EventForm() {
               placeholder="Enter number of tickets"
               value={ticketAmount}
               onChange={setTicketAmount}
-            />
-          )}
-          <FormField
-            title="Seat Limitation"
-            type="switch"
-            value={hasSeatLimitation}
-            onChange={setHasSeatLimitation}
-          />
-          {hasSeatLimitation && (
-            <FormField
-              title="Seat Amount"
-              type="number"
-              placeholder="Enter number of seats"
-              value={seatAmount}
-              onChange={setSeatAmount}
-            />
-          )}
-          <FormField
-            title="Food Booth"
-            type="switch"
-            value={hasFoodBooth}
-            onChange={setHasFoodBooth}
-          />
-          {hasFoodBooth && (
-            <FormField
-              title="Food Booth Amount"
-              type="number"
-              placeholder="Enter number of food booths"
-              value={foodBoothAmount}
-              onChange={setFoodBoothAmount}
             />
           )}
         </Box>

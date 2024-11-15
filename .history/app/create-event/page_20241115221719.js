@@ -87,16 +87,16 @@ function EventForm() {
 
     formData.append('hasSeatLimitation', hasSeatLimitation);
     if (hasSeatLimitation) {
-      formData.append('seats', seatAmount || '');
+      formData.append('seatAmount', seatAmount || '');
     }
 
     formData.append('hasFoodBooth', hasFoodBooth);
     if (hasFoodBooth) {
-      formData.append('booths', foodBoothAmount || '');
+      formData.append('foodBoothAmount', foodBoothAmount || '');
     }
 
     if (isPaid) {
-      formData.append('price', ticketAmount || '');
+      formData.append('ticketAmount', ticketAmount || '');
     }
 
     try {
