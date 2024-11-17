@@ -1,54 +1,79 @@
-/* Sidebar.css */
+/* Sidebar Styles */
 .sidebar {
-  background-color: #dee8f1; /* Sidebar background color */
-  color: white;
-  min-height: 100vh; /* Full viewport height */
-  padding-top: 20px;
+  background-color: #f8f9fa; /* Soft background */
+  color: #333; /* Text color */
+  min-height: 100vh; /* Full height */
+  padding: 20px; /* Spacing */
   position: sticky;
   top: 0;
   left: 0;
   z-index: 100;
+  border-right: 1px solid #e9ecef; /* Subtle border */
 }
 
+/* Logo */
 .sidebar .logo {
   text-align: center;
   margin-bottom: 20px;
 }
 
 .sidebar .logo-img {
-  width: 150px; /* Adjust the logo size */
+  width: 120px; /* Adjust size for a polished look */
 }
 
-.main-content {
-  padding-left: 20px;
+/* Nav Link Styles */
+.sidebar .sidebar-link {
+  font-size: 1rem; /* Standard size */
+  font-weight: 500;
+  color: #495057; /* Soft gray */
+  padding: 10px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  display: flex;
+  align-items: center; /* Align icons and text */
 }
 
-.navbar-nav {
-  flex-direction: column;
+.sidebar .sidebar-link:hover {
+  background-color: #007bff; /* Blue hover background */
+  color: white;
 }
 
-  
-  /* Logo styles */
-  .logo {
-    cursor: pointer;
+.sidebar .sidebar-link.text-danger {
+  color: #dc3545; /* Red for logout */
+}
+
+.sidebar .sidebar-link.text-danger:hover {
+  background-color: #f5c6cb; /* Light red hover */
+  color: #dc3545; /* Keep the red text */
+}
+
+/* Active Link Style */
+.sidebar .sidebar-link.active {
+  background-color: #007bff;
+  color: white;
+}
+
+/* Loading State */
+.sidebar-loading {
+  text-align: center;
+  color: #6c757d;
+  padding: 20px;
+  font-size: 1.2rem;
+}
+
+/* Sidebar Responsiveness */
+@media (max-width: 768px) {
+  .sidebar {
+    min-height: auto;
+    border-right: none;
+    padding: 10px;
   }
-  
-  .logo-img {
-    width: 100px; /* Adjust logo size as needed */
+
+  .sidebar .logo-img {
+    width: 80px; /* Smaller logo for mobile */
   }
-  
-  /* Navigation link styles */
-  .nav-link {
-    color: #333; /* Default link color */
-    font-weight: 500;
-    transition: color 0.2s;
+
+  .sidebar .sidebar-link {
+    font-size: 0.9rem; /* Slightly smaller links */
   }
-  
-  .nav-link:hover {
-    color: #0056b3; /* Hover color */
-  }
-  
-  .nav-link.active {
-    color: #007bff; /* Active link color */
-  }
-  
+}

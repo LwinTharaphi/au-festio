@@ -4,16 +4,22 @@ import { useRouter } from "next/navigation";
 import { Nav, Navbar } from "react-bootstrap";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Sidebar.css';
+import { BsGrid, BsPeople, BsShop, BsPerson, BsQrCodeScan, BsBoxArrowRight } from "react-icons/bs"; // Add icons
 
-export default function Sidebar({event}) {
+export default function Sidebar({ event }) {
   const router = useRouter();
+
   if (!event) {
-    return <div>Loading...</div>; // Handle cases where `event` isn't available yet
+    return <div className="sidebar-loading">Loading...</div>; // Handle loading state
   }
 
   return (
     <Navbar expand="lg" className="flex-column sidebar">
-      <Navbar.Brand className="mb-4 logo" onClick={() => router.push('/dashboard')}>
+      <Navbar.Brand
+        className="mb-4 logo"
+        onClick={() => router.push('/dashboard')}
+        style={{ cursor: "pointer" }}
+      >
         <img
           src="/path/to/your-logo.png" // Replace with the actual path to your logo
           alt="Project Logo"
@@ -22,27 +28,54 @@ export default function Sidebar({event}) {
       </Navbar.Brand>
 
       <Nav className="flex-column">
-        <Nav.Link onClick={()=> router.push(`/events/${event._id}/dashboard`)} className="my-2">
-          Dashboard
+        {/* Dashboard */}
+        <Nav.Link
+          onClick={() => router.push(`/events/${event._id}/dashboard`)}
+          className="sidebar-link my-2"
+        >
+          <BsGrid className="me-2" /> Dashboard
         </Nav.Link>
-        <Nav.Link onClick={()=> router.push(`/events/${event._id}/students`)} className="my-2">
-          Registered Students
+
+        {/* Registered Students */}
+        <Nav.Link
+          onClick={() => router.push(`/events/${event._id}/students`)}
+          className="sidebar-link my-2"
+        >
+          <BsPeople className="me-2" /> Registered Students
         </Nav.Link>
-        <Nav.Link onClick={()=> router.push(`/events/${event._id}/booths`)} className="my-2">
-          Booths
+
+        {/* Booths */}
+        <Nav.Link
+          onClick={() => router.push(`/events/${event._id}/booths`)}
+          className="sidebar-link my-2"
+        >
+          <BsShop className="me-2" /> Booths
         </Nav.Link>
-        <Nav.Link onClick={()=> router.push(`/events/${event._id}/staffs`)} className="my-2">
-          Staffs
+
+        {/* Staffs */}
+        <Nav.Link
+          onClick={() => router.push(`/events/${event._id}/staffs`)}
+          className="sidebar-link my-2"
+        >
+          <BsPerson className="me-2" /> Staffs
         </Nav.Link>
-        <Nav.Link onClick={()=> router.push(`/`)} className="my-2">
-          Scan QR
+
+        {/* Scan QR */}
+        <Nav.Link
+          onClick={() => router.push(`/events/${event._id}/scan`)}
+          className="sidebar-link my-2"
+        >
+          <BsQrCodeScan className="me-2" /> Scan QR
         </Nav.Link>
-        <Nav.Link onClick={()=> router.push(`/`)} className="my-2">
-          Logout
+
+        {/* Logout */}
+        <Nav.Link
+          onClick={() => router.push(`/`)}
+          className="sidebar-link my-2 text-danger"
+        >
+          <BsBoxArrowRight className="me-2" /> Logout
         </Nav.Link>
       </Nav>
     </Navbar>
   );
 }
-
-
