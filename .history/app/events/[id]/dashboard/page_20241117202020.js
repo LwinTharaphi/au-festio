@@ -68,7 +68,7 @@ export default function Dashboard() {
         {/* Main Content Section */}
         <Col xs={10} style={{ marginLeft: '250px' }}>
           <div className="main-content" style={{ padding: '20px', backgroundColor: '#f9f9f9' }}>
-            <h1 className="event-title">{data.event.eventName} Dashboard</h1>
+            <h1 className="event-title">{data.event.name} Dashboard</h1>
 
             {/* Card Section for Statistics */}
             <Row className="mb-4">

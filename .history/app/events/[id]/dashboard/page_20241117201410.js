@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Line, Bar } from 'react-chartjs-2';
 import { useParams } from "next/navigation";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
-import { Container, Row, Col, Nav, Navbar, Card, Spinner, Alert } from 'react-bootstrap';
+import { Container, Row, Col, Nav, Navbar, Card } from 'react-bootstrap';
 import Sidebar from '@/app/components/Sidebar';
 
 // Register the necessary components for Chart.js
@@ -21,29 +21,22 @@ ChartJS.register(
 export default function Dashboard() {
   const { id } = useParams(); // Get eventId from URL parameters
   const [data, setData] = useState(null);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        setLoading(true);
         const response = await fetch(`/api/events/${id}/dashboards`);
         if (!response.ok) throw new Error("Failed to fetch data");
         const json = await response.json();
         setData(json);
       } catch (error) {
-        setError(error.message);
         console.error("Error fetching dashboard data:", error.message);
-      } finally {
-        setLoading(false);
       }
     }
     fetchData();
   }, [id]);
 
-  if (loading) return <div className="loading"><Spinner animation="border" variant="primary" /> Loading...</div>;
-  if (error) return <Alert variant="danger">Error: {error}</Alert>;
+  if (!data) return <div className="loading">Loading...</div>;
 
   const { stats, entryTimes, monthData } = data;
 
@@ -61,15 +54,15 @@ export default function Dashboard() {
     <Container fluid>
       <Row>
         {/* Sidebar Section */}
-        <Col xs={2} className="bg-dark text-white p-3" style={{ position: 'fixed', height: '100vh' }}>
+        <Col xs={3} className="bg-dark text-white p-3" style={{ position: 'fixed', height: '100vh' }}>
           <Sidebar event={{_id: id}} />
         </Col>
 
         {/* Main Content Section */}
-        <Col xs={10} style={{ marginLeft: '250px' }}>
+        <Col xs={9} className="offset-3" style={{ marginLeft: '250px' }}>
           <div className="main-content" style={{ padding: '20px', backgroundColor: '#f9f9f9' }}>
-            <h1 className="event-title">{data.event.eventName} Dashboard</h1>
-
+            <h1 className="event-title">{data.event.name} Dashboard</h1>
+            
             {/* Card Section for Statistics */}
             <Row className="mb-4">
               <Col>

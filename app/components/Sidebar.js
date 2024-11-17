@@ -5,8 +5,11 @@ import { Nav, Navbar } from "react-bootstrap";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Sidebar.css';
 
-export default function Sidebar() {
+export default function Sidebar({event}) {
   const router = useRouter();
+  if (!event) {
+    return <div>Loading...</div>; // Handle cases where `event` isn't available yet
+  }
 
   return (
     <Navbar expand="lg" className="flex-column sidebar">
@@ -19,22 +22,22 @@ export default function Sidebar() {
       </Navbar.Brand>
 
       <Nav className="flex-column">
-        <Nav.Link as={Link} href={`/dashboard`} className="my-2">
+        <Nav.Link onClick={()=> router.push(`/events/${event._id}/dashboard`)} className="my-2">
           Dashboard
         </Nav.Link>
-        <Nav.Link as={Link} href={`/dashboard/students`} className="my-2">
+        <Nav.Link onClick={()=> router.push(`/events/${event._id}/students`)} className="my-2">
           Registered Students
         </Nav.Link>
-        <Nav.Link as={Link} href="/dashboard/booths" className="my-2">
+        <Nav.Link onClick={()=> router.push(`/events/${event._id}/booths`)} className="my-2">
           Booths
         </Nav.Link>
-        <Nav.Link as={Link} href="/dashboard/stuffs" className="my-2">
+        <Nav.Link onClick={()=> router.push(`/events/${event._id}/staffs`)} className="my-2">
           Staffs
         </Nav.Link>
-        <Nav.Link as={Link} href="/dashboard/scan-qr" className="my-2">
+        <Nav.Link onClick={()=> router.push(`/`)} className="my-2">
           Scan QR
         </Nav.Link>
-        <Nav.Link as={Link} href="/logout" className="my-2">
+        <Nav.Link onClick={()=> router.push(`/`)} className="my-2">
           Logout
         </Nav.Link>
       </Nav>

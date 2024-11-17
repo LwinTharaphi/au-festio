@@ -1,0 +1,115 @@
+/* styles/Dashboard.css */
+
+/* General Dashboard container layout */
+.dashboard-container {
+    display: flex;
+    margin-left: 250px; /* Make space for the fixed sidebar */
+  }
+  
+  .sidebar {
+    width: 250px; /* Fixed sidebar width */
+    background-color: #333;
+    color: white;
+    height: 100vh; /* Full viewport height */
+    padding: 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+  }
+  
+  .main-content {
+    flex: 1;
+    margin-left: 250px; /* Adjust main content to make space for sidebar */
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    overflow-x: hidden;
+  }
+  
+  .event-title {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .card-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+  
+  .card {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    flex: 1;
+    min-width: 250px;
+    transition: transform 0.2s ease-in-out;
+  }
+  
+  .card h3 {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #444;
+  }
+  
+  .card p {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+  }
+  
+  .card:hover {
+    transform: scale(1.05);
+  }
+  
+  .charts-container {
+    margin-top: 30px;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 15px;
+    text-align: center;
+  }
+  
+  .loading {
+    font-size: 1.5rem;
+    color: #888;
+    text-align: center;
+    margin-top: 50px;
+  }
+  
+  /* Responsive adjustments for smaller screens */
+  @media (max-width: 768px) {
+    .dashboard-container {
+      flex-direction: column;
+      margin-left: 0; /* No margin on smaller screens */
+    }
+  
+    .sidebar {
+      width: 100%;
+      height: auto; /* Remove fixed height for smaller screens */
+      position: static; /* Make sidebar static for small screens */
+    }
+  
+    .main-content {
+      margin-left: 0; /* No margin on smaller screens */
+    }
+  
+    .card-container {
+      flex-direction: column;
+      gap: 10px;
+    }
+  
+    .card {
+      width: 100%;
+    }
+  }
+  

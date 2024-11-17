@@ -136,7 +136,7 @@ export default function StaffPage() {
     <Container fluid>
       <Row>
         <Col xs={3} md={2} className="sidebar">
-          <Sidebar /> {/* Sidebar component */}
+          <Sidebar event={{_id: id}}/> {/* Sidebar component */}
         </Col>
         <Col xs={9} md={10} className="main-content">
           <Container className="my-5">
