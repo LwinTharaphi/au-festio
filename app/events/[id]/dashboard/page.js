@@ -91,7 +91,7 @@ export default function Dashboard() {
         {/* Sidebar */}
         <Col
           xs={2}
-          className="sidebar bg-dark text-white p-3"
+          className="sidebar bg-white text-white p-3"
           style={{ minHeight: "100vh" }}
         >
           <Sidebar event={{ _id: id }} />
