@@ -1,7 +1,16 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { Container, Row, Col, Alert, Card, Button, Modal, Form } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Alert,
+  Card,
+  Button,
+  Modal,
+  Form,
+} from "react-bootstrap";
 import Sidebar from "../../../components/Sidebar";
 import "../../../components/Sidebar.css";
 
@@ -10,6 +19,7 @@ export default function BoothPage() {
   const [eventName, setEventName] = useState(""); // State to hold the event name
   const [booths, setBooths] = useState([]); // State to hold booth data
   const [error, setError] = useState(null); // State to handle any error
+  const [selectedBooth, setSelectedBooth] = useState(null); // State for the selected booth
   const [showModal, setShowModal] = useState(false); // Modal state
   const [newBooth, setNewBooth] = useState({
     boothId: "",
@@ -72,10 +82,17 @@ export default function BoothPage() {
   const handleDeleteBooth = async (boothId) => {
     try {
       await fetch(`/api/events/${id}/booths/${boothId}`, { method: "DELETE" });
-      setBooths((prevBooths) => prevBooths.filter((booth) => booth.boothId !== boothId));
+      setBooths((prevBooths) =>
+        prevBooths.filter((booth) => booth.boothId !== boothId)
+      );
     } catch (err) {
       setError("Failed to delete booth.");
     }
+  };
+
+  // Handle selecting a booth to show details
+  const handleBoothClick = (booth) => {
+    setSelectedBooth(booth);
   };
 
   // Handle input change in the modal form
@@ -87,41 +104,91 @@ export default function BoothPage() {
   return (
     <Container fluid>
       <Row>
+        {/* Sidebar */}
         <Col xs={3} md={2} className="sidebar">
-          <Sidebar /> {/* Sidebar component */}
+          <Sidebar />
         </Col>
+
+        {/* Main Content */}
         <Col xs={9} md={10} className="main-content">
           <Container className="my-5">
-            {error && <Alert variant="danger">{error}</Alert>} {/* Show error if any */}
-            {!error && eventName && <h4>Booths for Event: {eventName}</h4>}
-            {!error && !eventName && <p>Loading event name...</p>} {/* Show loading state */}
+            {error && <Alert variant="danger">{error}</Alert>} {/* Show error */}
+            {!error && eventName && <h4>{eventName}: Booths</h4>}
+            {!error && !eventName && <p>Loading event name...</p>}
 
-            {/* Booth Cards */}
             <Row>
-              {booths.map((booth) => (
-                <Col md={4} key={booth.boothId}>
-                  <Card className="mb-3">
-                    <Card.Body>
-                      <Card.Title>{booth.boothNumber}</Card.Title>
-                      <Card.Text>Status: {booth.status}</Card.Text>
-                      <Card.Text>Vendor: {booth.vendorName}</Card.Text>
-                      <Button
-                        variant="danger"
-                        onClick={() => handleDeleteBooth(booth.boothId)}
+              {/* Booths Grid */}
+              <Col md={8}>
+                <Row>
+                  {booths.map((booth) => (
+                    <Col md={6} key={booth.boothId}>
+                      <Card
+                        className="mb-3"
+                        onClick={() => handleBoothClick(booth)}
+                        style={{ cursor: "pointer" }}
                       >
-                        Delete
-                      </Button>
+                        <Card.Body>
+                          <Card.Title>Booth {booth.boothNumber}</Card.Title>
+                          <Card.Text>Status: {booth.status}</Card.Text>
+                          <Card.Text>Vendor: {booth.vendorName}</Card.Text>
+                          <Button
+                            variant="danger"
+                            onClick={(e) => {
+                              e.stopPropagation(); // Prevent selecting booth
+                              handleDeleteBooth(booth.boothId);
+                            }}
+                          >
+                            Delete
+                          </Button>
+                        </Card.Body>
+                      </Card>
+                    </Col>
+                  ))}
+                  {/* Add New Booth */}
+                  <Col md={6}>
+                    <Card
+                      className="mb-3"
+                      onClick={() => setShowModal(true)}
+                      style={{
+                        cursor: "pointer",
+                        textAlign: "center",
+                        height: "100%",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Card.Body>
+                        <Card.Title>Add New Booth</Card.Title>
+                      </Card.Body>
+                    </Card>
+                  </Col>
+                </Row>
+              </Col>
+
+              {/* Booth Details */}
+              <Col md={4}>
+                {selectedBooth ? (
+                  <Card>
+                    <Card.Body>
+                      <Card.Title>Booth Details</Card.Title>
+                      <Card.Text>
+                        <strong>Booth Number:</strong> {selectedBooth.boothNumber}
+                        <br />
+                        <strong>Booth Name:</strong> {selectedBooth.boothName || "N/A"}
+                        <br />
+                        <strong>Vendor Name:</strong> {selectedBooth.vendorName}
+                        <br />
+                        <strong>Status:</strong> {selectedBooth.status}
+                        <br />
+                        <strong>Registered On:</strong>{" "}
+                        {new Date(selectedBooth.registerationTime).toLocaleString()}
+                      </Card.Text>
                     </Card.Body>
                   </Card>
-                </Col>
-              ))}
-              {/* Add New Booth Card */}
-              <Col md={4}>
-                <Card className="mb-3" onClick={() => setShowModal(true)} style={{ cursor: "pointer" }}>
-                  <Card.Body>
-                    <Card.Title>Add New Booth</Card.Title>
-                  </Card.Body>
-                </Card>
+                ) : (
+                  <p>Select a booth to view details.</p>
+                )}
               </Col>
             </Row>
           </Container>
