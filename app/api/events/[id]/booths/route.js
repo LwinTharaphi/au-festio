@@ -15,16 +15,23 @@ export async function GET(request, { params }) {
 }
 
 // POST: Create a new booth for a specific event
-export async function POST(request, { params }) {
-  await dbConnect();
-  const { id } = params; // Event ID
-  try {
-    const data = await request.json();
-    const newBooth = new Booth({ ...data, eventId: id });
-    await newBooth.save();
-    return new Response(JSON.stringify(newBooth), { status: 201 });
-  } catch (error) {
-    console.error("Error creating booth:", error);
-    return new Response("Error creating booth", { status: 500 });
+export async function POST(req, { params }) {
+    await dbConnect();
+    const { id } = params; // Event ID from the URL
+  
+    try {
+      const data = await req.json();
+      const newBooth = new Booth({
+        ...data,
+        eventId: id, // Associate the booth with the event
+      });
+      await newBooth.save();
+      return new Response(JSON.stringify(newBooth), { status: 201 });
+    } catch (error) {
+      console.error("Error creating booth:", error);
+      return new Response(JSON.stringify({ message: "Error creating booth" }), {
+        status: 500,
+      });
+    }
   }
-}
+  

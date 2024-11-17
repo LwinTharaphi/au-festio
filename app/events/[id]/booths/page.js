@@ -1,16 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { Container, Row, Col, Alert, Card, Button, Modal, Form, Dropdown } from "react-bootstrap";
 import { useParams } from "next/navigation";
-import {
-  Container,
-  Row,
-  Col,
-  Alert,
-  Card,
-  Button,
-  Modal,
-  Form,
-} from "react-bootstrap";
 import Sidebar from "../../../components/Sidebar";
 import "../../../components/Sidebar.css";
 
@@ -90,6 +81,28 @@ export default function BoothPage() {
     }
   };
 
+  // Handle updating booth status
+  const handleUpdateStatus = async (boothId, newStatus) => {
+    try {
+      const response = await fetch(`/api/events/${id}/booths/${boothId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update booth status.");
+      }
+      const updatedBooth = await response.json();
+      setBooths((prevBooths) =>
+        prevBooths.map((booth) =>
+          booth.boothId === boothId ? { ...booth, status: updatedBooth.status } : booth
+        )
+      );
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   // Handle selecting a booth to show details
   const handleBoothClick = (booth) => {
     setSelectedBooth(booth);
@@ -131,8 +144,32 @@ export default function BoothPage() {
                           <Card.Title>Booth {booth.boothNumber}</Card.Title>
                           <Card.Text>Status: {booth.status}</Card.Text>
                           <Card.Text>Vendor: {booth.vendorName}</Card.Text>
+                          <Dropdown>
+                            <Dropdown.Toggle variant="info" size="sm">
+                              Update Status
+                            </Dropdown.Toggle>
+                            <Dropdown.Menu>
+                              <Dropdown.Item
+                                onClick={() => handleUpdateStatus(booth.boothId, "Occupied")}
+                              >
+                                Occupied
+                              </Dropdown.Item>
+                              <Dropdown.Item
+                                onClick={() => handleUpdateStatus(booth.boothId, "Available")}
+                              >
+                                Available
+                              </Dropdown.Item>
+                              <Dropdown.Item
+                                onClick={() => handleUpdateStatus(booth.boothId, "Not Checked")}
+                              >
+                                Not Checked
+                              </Dropdown.Item>
+                            </Dropdown.Menu>
+                          </Dropdown>
                           <Button
                             variant="danger"
+                            size="sm"
+                            className="mt-2"
                             onClick={(e) => {
                               e.stopPropagation(); // Prevent selecting booth
                               handleDeleteBooth(booth.boothId);
