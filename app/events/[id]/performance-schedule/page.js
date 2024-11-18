@@ -11,6 +11,7 @@ export default function EventPerformancesPage() {
   const { id } = useParams(); // Get eventId from the URL params
   const [performances, setPerformances] = useState([]);
   const [eventData, setEventData] = useState(null); // State to store event data
+  const [eventName, setEventName] = useState("");
   const [error, setError] = useState("");
 
   // State for individual form fields
@@ -30,7 +31,9 @@ export default function EventPerformancesPage() {
         if (!response.ok) {
           throw new Error("Failed to fetch event data.");
         }
+
         const event = await response.json();
+        setEventName(event.eventName);
         setEventData(event); // Store event data in the state
       } catch (err) {
         setError(err.message);
@@ -152,7 +155,7 @@ export default function EventPerformancesPage() {
         {/* Main Content */}
         <Col xs={9} md={10} className="main-content">
           <Container className="my-5">
-            <h4>Performances for Event {id}</h4>
+            <h4>Performances for Event {eventName}</h4>
 
             {/* Display Event Details */}
             {eventData && (
@@ -243,7 +246,7 @@ export default function EventPerformancesPage() {
                   <th>Description</th>
                   <th>Start Time</th>
                   <th>End Time</th>
-                  <th>Actions</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -256,15 +259,18 @@ export default function EventPerformancesPage() {
                       <td>{moment(performance.startTime).format("h:mm A")}</td>
                       <td>{moment(performance.endTime).format("h:mm A")}</td>
                       <td>
-                        <FaEdit
-                          style={{ cursor: "pointer", color: "blue", marginRight: "10px" }}
-                          onClick={() => handleEdit(performance)}
-                        />
-                        <FaTrash
-                          style={{ cursor: "pointer", color: "red" }}
-                          onClick={() => handleDelete(performance._id)}
-                        />
+                        <div style={{ display: "flex", alignItems: "center" }}>
+                          <FaEdit
+                            style={{ cursor: "pointer", color: "blue", marginRight: "10px" }}
+                            onClick={() => handleEdit(performance)}
+                          />
+                          <FaTrash
+                            style={{ cursor: "pointer", color: "red" }}
+                            onClick={() => handleDelete(performance._id)}
+                          />
+                        </div>
                       </td>
+
                     </tr>
                   ))
                 ) : (

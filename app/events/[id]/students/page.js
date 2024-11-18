@@ -8,18 +8,36 @@ import "../../../components/Sidebar.css";
 
 export default function RegisteredStudentsPage() {
   const { id } = useParams(); // Use this as eventId
+  const [eventData, setEventData] = useState(null);
+  const [eventName, setEventName] = useState("");
   const [students, setStudents] = useState([]);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
 
   useEffect(() => {
+    const fetchEventData = async () => {
+      setError(null); // Clear previous errors before fetching data
+      try {
+        const response = await fetch(`/api/events/${id}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch event data.");
+        }
+
+        const event = await response.json();
+        setEventName(event.eventName);
+        setEventData(event); // Store event data in the state
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+    
     const fetchStudents = async () => {
       try {
         const response = await fetch(`/api/events/${id}/students`);
         if (!response.ok) {
           throw new Error("Failed to fetch registered students.");
-        }
+        }      
         const data = await response.json();
 
         console.log("Fetched data:", data); // Log the fetched data for debugging
@@ -30,6 +48,7 @@ export default function RegisteredStudentsPage() {
     };
 
     if (id) {
+      fetchEventData();
       fetchStudents();
     }
   }, [id]);
@@ -71,7 +90,7 @@ export default function RegisteredStudentsPage() {
         </Col>
         <Col xs={9} md={10} className="main-content">
           <Container className="my-5">
-            <h4>Registered Students for Event {id}</h4>
+            <h4>Registered Students for {eventName}</h4>
             {error ? (
               <Alert variant="danger">{error}</Alert>
             ) : (
@@ -98,6 +117,7 @@ export default function RegisteredStudentsPage() {
                         <td>{student.phone}</td>
                         <td>{student.status}</td>
                         <td>
+                        <div style={{ display: "flex", alignItems: "center" }}>
                           <FaEdit
                             style={{ cursor: "pointer", color: "blue", marginRight: "10px" }}
                             onClick={(e) => {
@@ -112,6 +132,7 @@ export default function RegisteredStudentsPage() {
                               handleDelete(student._id);
                             }}
                           />
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -136,7 +157,7 @@ export default function RegisteredStudentsPage() {
             <Modal.Title>Student Details</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <p><strong>ID:</strong> {selectedStudent._id}</p>
+            <p><strong>ID:</strong> {selectedStudent.sid}</p>
             <p><strong>Name:</strong> {selectedStudent.name}</p>
             <div>
               <strong>Payment Screenshot:</strong>

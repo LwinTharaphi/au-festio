@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Container, Row, Col, Alert, Card, Button, Modal, Form, Table } from "react-bootstrap";
+import { FaTrash, FaEdit } from "react-icons/fa";
 import Sidebar from "../../../components/Sidebar";
 import "../../../components/Sidebar.css";
 
@@ -16,6 +17,18 @@ export default function StaffPage() {
   const [isEditing, setIsEditing] = useState(false); // State to check if we are editing
   const [editRoleId, setEditRoleId] = useState(null); // State to hold the role ID being edited
 
+  const [showStaffModal, setShowStaffModal] = useState(false);
+  const [isEditingStaff, setIsEditingStaff] = useState(false);
+  const [editStaffId, setEditStaffId] = useState(null);
+  const [newStaff, setNewStaff] = useState({
+    name: "",
+    id: "",
+    email: "",
+    faculty: "",
+    phone: "",
+    role: "",
+  });
+
   // Fetch event name, roles, and staff based on eventId
   useEffect(() => {
     const fetchEventData = async () => {
@@ -25,7 +38,7 @@ export default function StaffPage() {
           throw new Error("Failed to fetch event data.");
         }
         const event = await eventResponse.json();
-        setEventName(event.title);
+        setEventName(event.eventName);
 
         // Fetch roles data
         const rolesResponse = await fetch(`/api/events/${id}/staffroles`);
@@ -49,6 +62,49 @@ export default function StaffPage() {
 
     fetchEventData();
   }, [id]);
+
+  // Function to handle showing the staff modal
+  const handleShowStaffModal = (staffMember = null) => {
+    if (staffMember) {
+      setIsEditingStaff(true);
+      setEditStaffId(staffMember._id);
+      setNewStaff({
+        name: staffMember.name,
+        id: staffMember.id,
+        email: staffMember.email,
+        faculty: staffMember.faculty,
+        phone: staffMember.phone,
+        role: staffMember.role._id, // Assuming role is an object with an _id
+      });
+    } else {
+      setIsEditingStaff(false);
+      setNewStaff({ name: "", id: "", email: "", faculty: "", phone: "", role: "" });
+    }
+    setShowStaffModal(true);
+  };
+
+  const handleCloseStaffModal = () => {
+    setShowStaffModal(false);
+    setNewStaff({ name: "", id: "", email: "", faculty: "", phone: "", role: "" });
+  };
+
+  const handleSaveStaff = async () => {
+    try {
+      if (isEditingStaff) {
+        const response = await fetch(`/api/events/${id}/staffs/${editStaffId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newStaff),
+        });
+        if (!response.ok) throw new Error("Failed to update staff.");
+        const updatedStaff = await response.json();
+        setStaff(staff.map((s) => (s._id === editStaffId ? updatedStaff : s)));
+      }
+      handleCloseStaffModal();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
 
   // Handle showing the modal for adding or editing a role
   const handleShowModal = (role = null) => {
@@ -136,7 +192,7 @@ export default function StaffPage() {
     <Container fluid>
       <Row>
         <Col xs={3} md={2} className="sidebar">
-          <Sidebar event={{_id: id}}/> {/* Sidebar component */}
+          <Sidebar event={{ _id: id }} /> {/* Sidebar component */}
         </Col>
         <Col xs={9} md={10} className="main-content">
           <Container className="my-5">
@@ -193,17 +249,91 @@ export default function StaffPage() {
                     <td>{staffMember.phone}</td>
                     <td>{staffMember.role.name}</td>
                     <td>
-                      <Button variant="warning" size="sm" className="mr-2">
-                        Update
-                      </Button>
-                      <Button variant="danger" size="sm" onClick={() => handleDeleteStaff(staffMember._id)}>
-                        Delete
-                      </Button>
-                    </td>
+                        <div style={{ display: "flex", alignItems: "center" }}>
+                          <FaEdit
+                            style={{ cursor: "pointer", color: "blue", marginRight: "10px" }}
+                            onClick={() => handleShowStaffModal(staffMember)}
+                          />
+                          <FaTrash
+                            style={{ cursor: "pointer", color: "red" }}
+                            onClick={() => handleDeleteStaff(staffMember._id)}
+                          />
+                        </div>
+                      </td>
                   </tr>
                 ))}
               </tbody>
             </Table>
+
+            {/* Modal for Adding/Editing Staff */}
+            <Modal show={showStaffModal} onHide={handleCloseStaffModal}>
+              <Modal.Header closeButton>
+                <Modal.Title>{isEditingStaff ? "Edit Staff" : "Add Staff"}</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <Form>
+                  <Form.Group controlId="formStaffName">
+                    <Form.Label>Name</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter name"
+                      value={newStaff.name}
+                      onChange={(e) => setNewStaff({ ...newStaff, name: e.target.value })}
+                    />
+                  </Form.Group>
+                  <Form.Group controlId="formStaffEmail" className="mt-3">
+                    <Form.Label>Email</Form.Label>
+                    <Form.Control
+                      type="email"
+                      placeholder="Enter email"
+                      value={newStaff.email}
+                      onChange={(e) => setNewStaff({ ...newStaff, email: e.target.value })}
+                    />
+                  </Form.Group>
+                  <Form.Group controlId="formStaffFaculty" className="mt-3">
+                    <Form.Label>Faculty</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter faculty"
+                      value={newStaff.faculty}
+                      onChange={(e) => setNewStaff({ ...newStaff, faculty: e.target.value })}
+                    />
+                  </Form.Group>
+                  <Form.Group controlId="formStaffPhone" className="mt-3">
+                    <Form.Label>Phone No</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter phone number"
+                      value={newStaff.phone}
+                      onChange={(e) => setNewStaff({ ...newStaff, phone: e.target.value })}
+                    />
+                  </Form.Group>
+                  <Form.Group controlId="formStaffRole" className="mt-3">
+                    <Form.Label>Role</Form.Label>
+                    <Form.Control
+                      as="select"
+                      value={newStaff.role}
+                      onChange={(e) => setNewStaff({ ...newStaff, role: e.target.value })}
+                    >
+                      <option value="">Select a role</option>
+                      {roles.map((role) => (
+                        <option key={role._id} value={role._id}>
+                          {role.name}
+                        </option>
+                      ))}
+                    </Form.Control>
+                  </Form.Group>
+                </Form>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="secondary" onClick={handleCloseStaffModal}>
+                  Close
+                </Button>
+                <Button variant="primary" onClick={handleSaveStaff}>
+                  Save Changes
+                </Button>
+              </Modal.Footer>
+            </Modal>
 
             {/* Modal for Adding/Editing Role */}
             <Modal show={showModal} onHide={handleCloseModal}>
