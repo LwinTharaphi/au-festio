@@ -4,7 +4,7 @@ import dbConnect from "@/lib/db";
 // GET: Fetch all booths for a specific event
 export async function GET(request, { params }) {
   await dbConnect();
-  const { id } = params; // Event ID
+  const { id } = await params; // Event ID
   try {
     const booths = await Booth.find({ eventId: id });
     return new Response(JSON.stringify(booths), { status: 200 });
@@ -17,7 +17,7 @@ export async function GET(request, { params }) {
 // POST: Create a new booth for a specific event
 export async function POST(req, { params }) {
     await dbConnect();
-    const { id } = params; // Event ID from the URL
+    const { id } = await params; // Event ID from the URL
   
     try {
       const data = await req.json();

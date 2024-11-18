@@ -35,6 +35,12 @@ export default function Sidebar({ event }) {
         >
           <BsGrid className="me-2" /> Dashboard
         </Nav.Link>
+        <Nav.Link
+          onClick={() => router.push(`/events/${event._id}/performance-schedule`)}
+          className="sidebar-link my-2"
+        >
+          <BsGrid className="me-2" /> Performance Schedule
+        </Nav.Link>
 
         {/* Registered Students */}
         <Nav.Link

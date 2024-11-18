@@ -146,7 +146,7 @@ export default function EventPerformancesPage() {
       <Row>
         {/* Sidebar */}
         <Col xs={3} md={2} className="sidebar">
-          <Sidebar />
+          <Sidebar event={{ _id: id }} />
         </Col>
 
         {/* Main Content */}
