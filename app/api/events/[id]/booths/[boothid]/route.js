@@ -1,12 +1,10 @@
-//api for update and delete for each booth
-
 import Booth from "@/models/Booth";
 import dbConnect from "@/lib/db";
 
 // GET: Fetch a specific booth by boothId
 export async function GET(request, { params }) {
   await dbConnect();
-  const { id, boothid } = await params; // Event ID and Booth ID
+  const { id, boothid } = params; // Event ID and Booth ID
   try {
     const booth = await Booth.findOne({ boothId: boothid, eventId: id });
     if (!booth) return new Response("Booth not found", { status: 404 });
@@ -20,7 +18,7 @@ export async function GET(request, { params }) {
 // PUT: Update a specific booth
 export async function PUT(request, { params }) {
   await dbConnect();
-  const { id, boothid } = await params; // Event ID and Booth ID
+  const { id, boothid } = params; // Event ID and Booth ID
   const data = await request.json();
   try {
     const updatedBooth = await Booth.findOneAndUpdate(
@@ -39,7 +37,7 @@ export async function PUT(request, { params }) {
 // DELETE: Delete a specific booth
 export async function DELETE(request, { params }) {
   await dbConnect();
-  const { id, boothid } = await params; // Event ID and Booth ID
+  const { id, boothid } = params; // Event ID and Booth ID
   try {
     const deletedBooth = await Booth.findOneAndDelete({ boothId: boothid, eventId: id });
     if (!deletedBooth) return new Response("Booth not found", { status: 404 });

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Alert, Card, Button, Modal, Form, Dropdown } from "react-bootstrap";
+import { Container, Row, Col, Alert, Card, Button, Modal, Form } from "react-bootstrap";
 import { useParams } from "next/navigation";
 import Sidebar from "../../../components/Sidebar";
 import "../../../components/Sidebar.css";
@@ -11,13 +11,14 @@ export default function BoothPage() {
   const [booths, setBooths] = useState([]); // State to hold booth data
   const [error, setError] = useState(null); // State to handle any error
   const [selectedBooth, setSelectedBooth] = useState(null); // State for the selected booth
-  const [showModal, setShowModal] = useState(false); // Modal state
-  const [newBooth, setNewBooth] = useState({
-    boothId: "",
+  const [showModal, setShowModal] = useState(false); // Modal state for adding/updating booth
+  const [editMode, setEditMode] = useState(false); // State to toggle between add and edit modes
+  const [currentBooth, setCurrentBooth] = useState(null); // State for the booth being edited
+  const [formBooth, setFormBooth] = useState({
     boothNumber: "",
     boothName: "",
     vendorName: "",
-  }); // State for new booth data
+  }); // State for new/edit booth data
 
   // Fetch event name and booths based on eventId
   useEffect(() => {
@@ -35,7 +36,7 @@ export default function BoothPage() {
           throw new Error("Failed to fetch booth data.");
         }
         const boothsData = await boothsResponse.json();
-        setBooths(boothsData); // Set booths only once here
+        setBooths(boothsData);
       } catch (err) {
         setError(err.message);
       }
@@ -44,26 +45,37 @@ export default function BoothPage() {
     fetchEventAndBooths();
   }, [id]);
 
-  // Handle adding a new booth
-  const handleAddBooth = async () => {
+  // Handle adding or updating a booth
+  const handleSaveBooth = async () => {
     try {
-      const response = await fetch(`/api/events/${id}/booths`, {
-        method: "POST",
+      const url = editMode
+        ? `/api/events/${id}/booths/${currentBooth.boothId}`
+        : `/api/events/${id}/booths`;
+      const method = editMode ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...newBooth, status: "Occupied" }), // Default status
+        body: JSON.stringify(formBooth),
       });
+
       if (!response.ok) {
-        throw new Error("Failed to add booth.");
+        throw new Error(editMode ? "Failed to update booth." : "Failed to add booth.");
       }
-      const addedBooth = await response.json();
-      setBooths((prevBooths) => [...prevBooths, addedBooth]); // Add only the new booth
+
+      const booth = await response.json();
+
+      if (editMode) {
+        setBooths((prevBooths) =>
+          prevBooths.map((b) => (b.boothId === booth.boothId ? booth : b))
+        );
+      } else {
+        setBooths((prevBooths) => [...prevBooths, booth]);
+      }
+
       setShowModal(false);
-      setNewBooth({
-        boothId: "",
-        boothNumber: "",
-        boothName: "",
-        vendorName: "",
-      });
+      setFormBooth({ boothNumber: "", boothName: "", vendorName: "" });
+      setEditMode(false);
     } catch (err) {
       setError(err.message);
     }
@@ -73,189 +85,98 @@ export default function BoothPage() {
   const handleDeleteBooth = async (boothId) => {
     try {
       await fetch(`/api/events/${id}/booths/${boothId}`, { method: "DELETE" });
-      setBooths((prevBooths) =>
-        prevBooths.filter((booth) => booth.boothId !== boothId)
-      );
+      setBooths((prevBooths) => prevBooths.filter((booth) => booth.boothId !== boothId));
     } catch (err) {
       setError("Failed to delete booth.");
     }
   };
 
-  // Handle updating booth status
-  const handleUpdateStatus = async (boothId, newStatus) => {
-    try {
-      const response = await fetch(`/api/events/${id}/booths/${boothId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
-      });
-      if (!response.ok) {
-        throw new Error("Failed to update booth status.");
-      }
-      const updatedBooth = await response.json();
-      setBooths((prevBooths) =>
-        prevBooths.map((booth) =>
-          booth.boothId === boothId ? { ...booth, status: updatedBooth.status } : booth
-        )
-      );
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  // Handle selecting a booth to show details
-  const handleBoothClick = (booth) => {
-    setSelectedBooth(booth);
+  // Handle selecting a booth for editing
+  const handleEditBooth = (booth) => {
+    setEditMode(true);
+    setCurrentBooth(booth);
+    setFormBooth({ boothNumber: booth.boothNumber, boothName: booth.boothName, vendorName: booth.vendorName });
+    setShowModal(true);
   };
 
   // Handle input change in the modal form
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewBooth((prevBooth) => ({ ...prevBooth, [name]: value }));
+    setFormBooth((prevBooth) => ({ ...prevBooth, [name]: value }));
   };
 
   return (
     <Container fluid>
       <Row>
-        {/* Sidebar */}
         <Col xs={3} md={2} className="sidebar">
           <Sidebar event={{ _id: id }} />
         </Col>
 
-        {/* Main Content */}
         <Col xs={9} md={10} className="main-content">
           <Container className="my-5">
-            {error && <Alert variant="danger">{error}</Alert>} {/* Show error */}
+            {error && <Alert variant="danger">{error}</Alert>}
             {!error && eventName && <h4>{eventName}: Booths</h4>}
-            {!error && !eventName && <p>Loading event name...</p>}
-
             <Row>
-              {/* Booths Grid */}
-              <Col md={8}>
-                <Row>
-                  {booths.map((booth) => (
-                    <Col md={6} key={booth.boothId}>
-                      <Card
-                        className="mb-3"
-                        onClick={() => handleBoothClick(booth)}
-                        style={{ cursor: "pointer" }}
-                      >
-                        <Card.Body>
-                          <Card.Title>Booth {booth.boothNumber}</Card.Title>
-                          <Card.Text>Status: {booth.status}</Card.Text>
-                          <Card.Text>Vendor: {booth.vendorName}</Card.Text>
-                          <Dropdown>
-                            <Dropdown.Toggle variant="info" size="sm">
-                              Update Status
-                            </Dropdown.Toggle>
-                            <Dropdown.Menu>
-                              <Dropdown.Item
-                                onClick={() => handleUpdateStatus(booth.boothId, "Occupied")}
-                              >
-                                Occupied
-                              </Dropdown.Item>
-                              <Dropdown.Item
-                                onClick={() => handleUpdateStatus(booth.boothId, "Available")}
-                              >
-                                Available
-                              </Dropdown.Item>
-                              <Dropdown.Item
-                                onClick={() => handleUpdateStatus(booth.boothId, "Not Checked")}
-                              >
-                                Not Checked
-                              </Dropdown.Item>
-                            </Dropdown.Menu>
-                          </Dropdown>
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            className="mt-2"
-                            onClick={(e) => {
-                              e.stopPropagation(); // Prevent selecting booth
-                              handleDeleteBooth(booth.boothId);
-                            }}
-                          >
-                            Delete
-                          </Button>
-                        </Card.Body>
-                      </Card>
-                    </Col>
-                  ))}
-                  {/* Add New Booth */}
-                  <Col md={6}>
-                    <Card
-                      className="mb-3"
-                      onClick={() => setShowModal(true)}
-                      style={{
-                        cursor: "pointer",
-                        textAlign: "center",
-                        height: "100%",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Card.Body>
-                        <Card.Title>Add New Booth</Card.Title>
-                      </Card.Body>
-                    </Card>
-                  </Col>
-                </Row>
-              </Col>
-
-              {/* Booth Details */}
-              <Col md={4}>
-                {selectedBooth ? (
-                  <Card>
+              {booths.map((booth) => (
+                <Col md={6} key={booth.boothId}>
+                  <Card className="mb-3">
                     <Card.Body>
-                      <Card.Title>Booth Details</Card.Title>
-                      <Card.Text>
-                        <strong>Booth Number:</strong> {selectedBooth.boothNumber}
-                        <br />
-                        <strong>Booth Name:</strong> {selectedBooth.boothName || "N/A"}
-                        <br />
-                        <strong>Vendor Name:</strong> {selectedBooth.vendorName}
-                        <br />
-                        <strong>Status:</strong> {selectedBooth.status}
-                        <br />
-                        <strong>Registered On:</strong>{" "}
-                        {new Date(selectedBooth.registerationTime).toLocaleString()}
-                      </Card.Text>
+                      <Card.Title>Booth {booth.boothNumber}</Card.Title>
+                      <Card.Text>Status: {booth.status}</Card.Text>
+                      <Card.Text>Vendor: {booth.vendorName}</Card.Text>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => handleEditBooth(booth)}
+                      >
+                        Update
+                      </Button>{" "}
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => handleDeleteBooth(booth.boothId)}
+                      >
+                        Delete
+                      </Button>
                     </Card.Body>
                   </Card>
-                ) : (
-                  <p>Select a booth to view details.</p>
-                )}
+                </Col>
+              ))}
+              <Col md={6}>
+                <Card
+                  className="mb-3"
+                  onClick={() => setShowModal(true)}
+                  style={{
+                    cursor: "pointer",
+                    textAlign: "center",
+                    height: "100%",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <Card.Body>
+                    <Card.Title>Add New Booth</Card.Title>
+                  </Card.Body>
+                </Card>
               </Col>
             </Row>
           </Container>
         </Col>
       </Row>
 
-      {/* Add Booth Modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Add New Booth</Modal.Title>
+          <Modal.Title>{editMode ? "Update Booth" : "Add New Booth"}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
-            <Form.Group>
-              <Form.Label>Booth ID</Form.Label>
-              <Form.Control
-                type="text"
-                name="boothId"
-                placeholder="Enter booth ID"
-                value={newBooth.boothId}
-                onChange={handleInputChange}
-              />
-            </Form.Group>
             <Form.Group>
               <Form.Label>Booth Number</Form.Label>
               <Form.Control
                 type="text"
                 name="boothNumber"
-                placeholder="Enter booth number"
-                value={newBooth.boothNumber}
+                value={formBooth.boothNumber}
                 onChange={handleInputChange}
               />
             </Form.Group>
@@ -264,8 +185,7 @@ export default function BoothPage() {
               <Form.Control
                 type="text"
                 name="boothName"
-                placeholder="Enter booth name"
-                value={newBooth.boothName}
+                value={formBooth.boothName}
                 onChange={handleInputChange}
               />
             </Form.Group>
@@ -274,8 +194,7 @@ export default function BoothPage() {
               <Form.Control
                 type="text"
                 name="vendorName"
-                placeholder="Enter vendor name"
-                value={newBooth.vendorName}
+                value={formBooth.vendorName}
                 onChange={handleInputChange}
               />
             </Form.Group>
@@ -285,8 +204,8 @@ export default function BoothPage() {
           <Button variant="secondary" onClick={() => setShowModal(false)}>
             Close
           </Button>
-          <Button variant="primary" onClick={handleAddBooth}>
-            Add Booth
+          <Button variant="primary" onClick={handleSaveBooth}>
+            {editMode ? "Update Booth" : "Add Booth"}
           </Button>
         </Modal.Footer>
       </Modal>
