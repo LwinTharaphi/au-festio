@@ -35,7 +35,7 @@ export default function BoothPage() {
           throw new Error("Failed to fetch booth data.");
         }
         const boothsData = await boothsResponse.json();
-        setBooths(boothsData);
+        setBooths(boothsData); // Set booths only once here
       } catch (err) {
         setError(err.message);
       }
@@ -50,13 +50,13 @@ export default function BoothPage() {
       const response = await fetch(`/api/events/${id}/booths`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newBooth),
+        body: JSON.stringify({ ...newBooth, status: "Occupied" }), // Default status
       });
       if (!response.ok) {
         throw new Error("Failed to add booth.");
       }
       const addedBooth = await response.json();
-      setBooths((prevBooths) => [...prevBooths, addedBooth]);
+      setBooths((prevBooths) => [...prevBooths, addedBooth]); // Add only the new booth
       setShowModal(false);
       setNewBooth({
         boothId: "",
