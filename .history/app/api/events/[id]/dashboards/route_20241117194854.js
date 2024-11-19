@@ -2,7 +2,6 @@ import dbConnect from "@/lib/db";
 import Event from "@/models/Event";
 import Registeration from "@/models/Registeration";
 import Booth from "@/models/Booth";
-import Feedback from "@/models/Feedback";
 
 export async function GET(req, { params }) {
   const { id } = await params; // Get dynamic ID from the request parameters
@@ -22,13 +21,6 @@ export async function GET(req, { params }) {
     // Fetch related data
     const registrations = await Registeration.find({ eventId: id });
     const booths = await Booth.find({ eventId: id });
-    const feedbacks = await Feedback.find({eventId: id});
-
-    // average reating
-    const totalRatings = feedbacks.length;
-    const ratings = feedbacks.filter((feedback)=> feedback.stars).map((feedback)=>feedback.stars);
-    const sumRatings = ratings.reduce((acc,rating) => acc + rating,0);
-    const averageRating = totalRatings > 0 ? sumRatings/totalRatings : 0;
 
     // Calculate stats
     const checkInCount = registrations.filter((reg) => reg.checkInTime).length;
@@ -58,7 +50,6 @@ export async function GET(req, { params }) {
         },
         entryTimes,
         monthData,
-        averageRating,
       }),
       {
         status: 200,

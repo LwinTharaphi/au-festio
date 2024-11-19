@@ -23,11 +23,11 @@ export async function GET(req, { params }) {
     const registrations = await Registeration.find({ eventId: id });
     const booths = await Booth.find({ eventId: id });
     const feedbacks = await Feedback.find({eventId: id});
+    console.log(feedbacks)
 
     // average reating
     const totalRatings = feedbacks.length;
-    const ratings = feedbacks.filter((feedback)=> feedback.stars).map((feedback)=>feedback.stars);
-    const sumRatings = ratings.reduce((acc,rating) => acc + rating,0);
+    const sumRatings = feedbacks.reduce((acc,feedback)=> acc + feedback.value,0);
     const averageRating = totalRatings > 0 ? sumRatings/totalRatings : 0;
 
     // Calculate stats

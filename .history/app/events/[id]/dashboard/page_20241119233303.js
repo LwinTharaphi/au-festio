@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Line, Bar } from "react-chartjs-2";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -24,6 +24,7 @@ import {
 } from "react-bootstrap";
 import Sidebar from "@/app/components/Sidebar";
 import { BsPeopleFill, BsShop, BsCheckCircle } from "react-icons/bs";
+import { useRouter } from "next/router";
 
 // Register Chart.js components
 ChartJS.register(
@@ -108,7 +109,7 @@ export default function Dashboard() {
           <h1 className="display-5 mb-4 text-primary">
             {event.eventName} Dashboard
           </h1>
-          <button onClick={()=> route.push(`/events/${id}/performance-schedule`)}>{averageRating.toFixed(2)}</button>
+          <button onClick={()=> route.push(`/events/${id}/performances`)}>{averageRating.toFixed(2)}</button>
 
         {/* Statistics Cards */}
         <Row className="mb-4 g-4">

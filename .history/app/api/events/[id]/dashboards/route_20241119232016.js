@@ -26,8 +26,8 @@ export async function GET(req, { params }) {
 
     // average reating
     const totalRatings = feedbacks.length;
-    const ratings = feedbacks.filter((feedback)=> feedback.stars).map((feedback)=>feedback.stars);
-    const sumRatings = ratings.reduce((acc,rating) => acc + rating,0);
+    console.log(totalRatings)
+    const sumRatings = feedbacks.reduce((acc,feedback)=> acc + feedback.value,0);
     const averageRating = totalRatings > 0 ? sumRatings/totalRatings : 0;
 
     // Calculate stats

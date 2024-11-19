@@ -108,7 +108,7 @@ export default function Dashboard() {
           <h1 className="display-5 mb-4 text-primary">
             {event.eventName} Dashboard
           </h1>
-          <button onClick={()=> route.push(`/events/${id}/performance-schedule`)}>{averageRating.toFixed(2)}</button>
+          <button onClick={()=> route.push(`/events/${id}/performances`)}>{averageRating.toFixed(2)}</button>
 
         {/* Statistics Cards */}
         <Row className="mb-4 g-4">

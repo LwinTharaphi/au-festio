@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Line, Bar } from "react-chartjs-2";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -39,7 +39,6 @@ ChartJS.register(
 
 export default function Dashboard() {
   const { id } = useParams(); // Get eventId from URL parameters
-  const route = useRouter();
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -71,6 +70,7 @@ export default function Dashboard() {
   if (error) return <Alert variant="danger">Error: {error}</Alert>;
 
   const { stats, entryTimes, monthData, event, averageRating } = data;
+  console.log(averageRating)
 
   // Formatting Entry Times Data
   const timeLabels = Array.from(
@@ -108,7 +108,7 @@ export default function Dashboard() {
           <h1 className="display-5 mb-4 text-primary">
             {event.eventName} Dashboard
           </h1>
-          <button onClick={()=> route.push(`/events/${id}/performance-schedule`)}>{averageRating.toFixed(2)}</button>
+          <p>Average Rating: {averageRating}</p>
 
         {/* Statistics Cards */}
         <Row className="mb-4 g-4">
