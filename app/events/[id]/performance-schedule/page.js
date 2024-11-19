@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
-import { Container, Row, Col, Table, Button, Alert, Form } from "react-bootstrap";
+import { useParams, useRouter } from "next/navigation";
+import { Container, Row, Col, Table, Button, Alert, Form, Dropdown } from "react-bootstrap";
 import { FaTrash, FaEdit } from "react-icons/fa";
 import Sidebar from "../../../components/Sidebar";
 import "../../../components/Sidebar.css";
@@ -9,9 +9,11 @@ import moment from 'moment';
 
 export default function EventPerformancesPage() {
   const { id } = useParams(); // Get eventId from the URL params
+  const router = useRouter();
   const [performances, setPerformances] = useState([]);
   const [eventData, setEventData] = useState(null); // State to store event data
   const [eventName, setEventName] = useState("");
+  const [eventsList, setEventsList] = useState([]);
   const [error, setError] = useState("");
 
   // State for individual form fields
@@ -58,6 +60,24 @@ export default function EventPerformancesPage() {
       fetchPerformances(); // Fetch performances data
     }
   }, [id]);
+
+  useEffect(() => {
+    const fetchEventsList = async () => {
+      try {
+        const response = await fetch("/api/events");
+        if (!response.ok) {
+          throw new Error("Failed to fetch events list.");
+        }
+        const data = await response.json();
+        setEventsList(data);
+        console.log("Fetched events:", data); // Log the fetched events
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+  
+    fetchEventsList();
+  }, []);
 
   // Handle form submission to add or update performance
   const handleSubmit = async (e) => {
@@ -144,6 +164,10 @@ export default function EventPerformancesPage() {
     setEditPerformanceId(performance._id);
   };
 
+  const handleEventChange = (id) => {
+    router.push(`/events/${id}/performance-schedule`);
+  };
+
   return (
     <Container fluid>
       <Row>
@@ -157,14 +181,22 @@ export default function EventPerformancesPage() {
           <Container className="my-5">
             <h4>Performances for Event {eventName}</h4>
 
-            {/* Display Event Details */}
-            {eventData && (
-              <div className="event-details mb-4">
-                <h5>{eventData.name}</h5>
-                <p>{eventData.description}</p>
-                <p><strong>Date: </strong>{moment(eventData.date).format("MMMM Do YYYY")}</p>
-              </div>
-            )}
+            <Dropdown className="mb-4" style={{ textAlign: "right" }}>
+              <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+                Select Event
+              </Dropdown.Toggle>
+              <Dropdown.Menu>
+                {eventsList.length > 0 ? (
+                  eventsList.map((event) => (
+                    <Dropdown.Item key={event._id} onClick={() => handleEventChange(event._id)}>
+                      {event.eventName}
+                    </Dropdown.Item>
+                  ))
+                ) : (
+                  <Dropdown.Item disabled>No events found</Dropdown.Item>
+                )}
+              </Dropdown.Menu>
+            </Dropdown>
 
             {/* Error Display */}
             {error && <Alert variant="danger">{error}</Alert>}

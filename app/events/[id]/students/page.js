@@ -1,15 +1,17 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
-import { Container, Row, Col, Table, Button, Alert, Modal, Form } from "react-bootstrap";
+import { useParams, useRouter } from "next/navigation";
+import { Container, Row, Col, Table, Button, Alert, Modal, Form, Dropdown } from "react-bootstrap";
 import { FaTrash, FaEdit } from "react-icons/fa";
 import Sidebar from "../../../components/Sidebar";
 import "../../../components/Sidebar.css";
 
 export default function RegisteredStudentsPage() {
   const { id } = useParams(); // Use this as eventId
+  const router = useRouter();
   const [eventData, setEventData] = useState(null);
   const [eventName, setEventName] = useState("");
+  const [eventsList, setEventsList] = useState([]);
   const [students, setStudents] = useState([]);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -62,6 +64,25 @@ export default function RegisteredStudentsPage() {
       fetchStudents();
     }
   }, [id]);
+
+  useEffect(() => {
+    const fetchEventsList = async () => {
+      try {
+        const response = await fetch("/api/events");
+        if (!response.ok) {
+          throw new Error("Failed to fetch events list.");
+        }
+        const data = await response.json();
+        setEventsList(data);
+        console.log("Fetched events:", data); // Log the fetched events
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+  
+    fetchEventsList();
+  }, []);
+
   const handleRowClick = (student) => {
     setSelectedStudent(student);
     setShowRefundModal(true); // Show the refund request modal
@@ -130,6 +151,10 @@ export default function RegisteredStudentsPage() {
     }
   };
 
+  const handleEventChange = (id) => {
+    router.push(`/events/${id}/students`);
+  };
+
   return (
     <Container fluid>
       <Row>
@@ -139,6 +164,22 @@ export default function RegisteredStudentsPage() {
         <Col xs={9} md={10} className="main-content">
           <Container className="my-5">
             <h4>Registered Students for {eventName}</h4>
+            <Dropdown className="mb-4" style={{ textAlign: "right" }}>
+              <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+                Select Event
+              </Dropdown.Toggle>
+              <Dropdown.Menu>
+                {eventsList.length > 0 ? (
+                  eventsList.map((event) => (
+                    <Dropdown.Item key={event._id} onClick={() => handleEventChange(event._id)}>
+                      {event.eventName}
+                    </Dropdown.Item>
+                  ))
+                ) : (
+                  <Dropdown.Item disabled>No events found</Dropdown.Item>
+                )}
+              </Dropdown.Menu>
+            </Dropdown>
             {error ? (
               <Alert variant="danger">{error}</Alert>
             ) : (

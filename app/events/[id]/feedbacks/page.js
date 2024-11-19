@@ -1,6 +1,8 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { Dropdown } from "react-bootstrap";
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 // Function to render stars
 const renderStars = (rating) => {
@@ -23,6 +25,8 @@ const renderStars = (rating) => {
 
 export default function FeedbackPage() {
   const [eventName, setEventName] = useState("");
+  const router = useRouter();
+  const [eventsList, setEventsList] = useState([]);
   const [feedbacks, setFeedbacks] = useState([]);
   const [error, setError] = useState(null);
   const { id } = useParams(); // Event ID from URL parameters
@@ -61,12 +65,50 @@ export default function FeedbackPage() {
     }
   }, [id]);
 
+  useEffect(() => {
+    const fetchEventsList = async () => {
+      try {
+        const response = await fetch("/api/events");
+        if (!response.ok) {
+          throw new Error("Failed to fetch events list.");
+        }
+        const data = await response.json();
+        setEventsList(data);
+        console.log("Fetched events:", data); // Log the fetched events
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+  
+    fetchEventsList();
+  }, []);
+
+  const handleEventChange = (id) => {
+    router.push(`/events/${id}/feedbacks`);
+  };
+
   return (
     <div style={{ padding: "20px" }}>
       {error && <p style={{ color: "red" }}>{error}</p>}
       <h4 style={{ marginBottom: "20px", fontSize: "2rem" }}>
         Feedbacks for {eventName}
       </h4>
+      <Dropdown className="mb-4" style={{ textAlign: "right" }}>
+              <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+                Select Event
+              </Dropdown.Toggle>
+              <Dropdown.Menu>
+                {eventsList.length > 0 ? (
+                  eventsList.map((event) => (
+                    <Dropdown.Item key={event._id} onClick={() => handleEventChange(event._id)}>
+                      {event.eventName}
+                    </Dropdown.Item>
+                  ))
+                ) : (
+                  <Dropdown.Item disabled>No events found</Dropdown.Item>
+                )}
+              </Dropdown.Menu>
+            </Dropdown>
       {feedbacks.length > 0 ? (
         feedbacks.map((feedback) => (
           <div

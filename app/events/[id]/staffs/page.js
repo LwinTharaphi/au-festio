@@ -1,14 +1,16 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
-import { Container, Row, Col, Alert, Card, Button, Modal, Form, Table } from "react-bootstrap";
+import { useParams, useRouter } from "next/navigation";
+import { Container, Row, Col, Alert, Card, Button, Modal, Form, Table,Dropdown } from "react-bootstrap";
 import { FaTrash, FaEdit } from "react-icons/fa";
 import Sidebar from "../../../components/Sidebar";
 import "../../../components/Sidebar.css";
 
 export default function StaffPage() {
   const { id } = useParams(); // Get eventId from URL parameters
+  const router = useRouter();
   const [eventName, setEventName] = useState(""); // State to hold the event name
+  const [eventsList, setEventsList] = useState([]);
   const [error, setError] = useState(null); // State to handle any error
   const [roles, setRoles] = useState([]); // State to hold the list of roles
   const [staff, setStaff] = useState([]); // State to hold the list of staff
@@ -62,6 +64,24 @@ export default function StaffPage() {
 
     fetchEventData();
   }, [id]);
+
+  useEffect(() => {
+    const fetchEventsList = async () => {
+      try {
+        const response = await fetch("/api/events");
+        if (!response.ok) {
+          throw new Error("Failed to fetch events list.");
+        }
+        const data = await response.json();
+        setEventsList(data);
+        console.log("Fetched events:", data); // Log the fetched events
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+  
+    fetchEventsList();
+  }, []);
 
   // Function to handle showing the staff modal
   const handleShowStaffModal = (staffMember = null) => {
@@ -188,6 +208,10 @@ export default function StaffPage() {
     }
   };
 
+  const handleEventChange = (id) => {
+    router.push(`/events/${id}/staffs`);
+  };
+
   return (
     <Container fluid>
       <Row>
@@ -199,6 +223,23 @@ export default function StaffPage() {
             {error && <Alert variant="danger">{error}</Alert>} {/* Show error if any */}
             {!error && eventName && <h4>Staff List for Event: {eventName}</h4>}
             {!error && !eventName && <p>Loading event name...</p>} {/* Show loading state */}
+
+            <Dropdown className="mb-4" style={{ textAlign: "right" }}>
+              <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+                Select Event
+              </Dropdown.Toggle>
+              <Dropdown.Menu>
+                {eventsList.length > 0 ? (
+                  eventsList.map((event) => (
+                    <Dropdown.Item key={event._id} onClick={() => handleEventChange(event._id)}>
+                      {event.eventName}
+                    </Dropdown.Item>
+                  ))
+                ) : (
+                  <Dropdown.Item disabled>No events found</Dropdown.Item>
+                )}
+              </Dropdown.Menu>
+            </Dropdown>
 
             {/* Role Cards */}
             <div className="d-flex flex-wrap">

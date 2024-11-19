@@ -5,7 +5,7 @@ import { nanoid } from "nanoid"; // Import nanoid for unique boothId
 // GET: Fetch all booths for a specific event
 export async function GET(req, { params }) {
   await dbConnect();
-  const { id } = params; // Event ID
+  const { id } = await params; // Event ID
   try {
     const booths = await Booth.find({ eventId: id });
     return new Response(JSON.stringify(booths), { status: 200 });
@@ -18,7 +18,7 @@ export async function GET(req, { params }) {
 // POST: Create a new booth for a specific event
 export async function POST(req, { params }) {
   await dbConnect();
-  const { id } = params; // Event ID
+  const { id } = await params; // Event ID
 
   try {
     const data = await req.json();
@@ -38,7 +38,7 @@ export async function POST(req, { params }) {
 // PUT: Update a specific booth
 export async function PUT(req, { params }) {
   await dbConnect();
-  const { id, boothid } = params; // Event ID and Booth ID
+  const { id, boothid } = await params; // Event ID and Booth ID
   const data = await req.json();
 
   try {
@@ -58,7 +58,7 @@ export async function PUT(req, { params }) {
 // DELETE: Delete a specific booth
 export async function DELETE(req, { params }) {
   await dbConnect();
-  const { id, boothid } = params; // Event ID and Booth ID
+  const { id, boothid } = await params; // Event ID and Booth ID
   try {
     const deletedBooth = await Booth.findOneAndDelete({ boothId: boothid, eventId: id });
     if (!deletedBooth) return new Response("Booth not found", { status: 404 });

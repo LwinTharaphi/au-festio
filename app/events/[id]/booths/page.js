@@ -11,13 +11,15 @@ import {
   Form,
   Dropdown,
 } from "react-bootstrap";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Sidebar from "../../../components/Sidebar";
 import "../../../components/Sidebar.css";
 
 export default function BoothPage() {
   const { id } = useParams(); // Get eventId from URL parameters
+  const router = useRouter();
   const [eventName, setEventName] = useState(""); // State to hold the event name
+  const [eventsList, setEventsList] = useState([]);
   const [booths, setBooths] = useState([]); // State to hold booth data
   const [error, setError] = useState(null); // State to handle any error
   const [selectedBooth, setSelectedBooth] = useState(null); // State for the selected booth
@@ -55,6 +57,24 @@ export default function BoothPage() {
 
     fetchEventAndBooths();
   }, [id]);
+
+  useEffect(() => {
+    const fetchEventsList = async () => {
+      try {
+        const response = await fetch("/api/events");
+        if (!response.ok) {
+          throw new Error("Failed to fetch events list.");
+        }
+        const data = await response.json();
+        setEventsList(data);
+        console.log("Fetched events:", data); // Log the fetched events
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+  
+    fetchEventsList();
+  }, []);
 
   // Handle adding or updating a booth
   const handleSaveBooth = async () => {
@@ -152,6 +172,10 @@ export default function BoothPage() {
     setFormBooth((prevBooth) => ({ ...prevBooth, [name]: value }));
   };
 
+  const handleEventChange = (id) => {
+    router.push(`/events/${id}/booths`);
+  };
+
   return (
     <Container fluid>
       <Row>
@@ -163,6 +187,22 @@ export default function BoothPage() {
           <Container className="my-5">
             {error && <Alert variant="danger">{error}</Alert>}
             {!error && eventName && <h4>{eventName}: Booths</h4>}
+            <Dropdown className="mb-4" style={{ textAlign: "right" }}>
+              <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+                Select Event
+              </Dropdown.Toggle>
+              <Dropdown.Menu>
+                {eventsList.length > 0 ? (
+                  eventsList.map((event) => (
+                    <Dropdown.Item key={event._id} onClick={() => handleEventChange(event._id)}>
+                      {event.eventName}
+                    </Dropdown.Item>
+                  ))
+                ) : (
+                  <Dropdown.Item disabled>No events found</Dropdown.Item>
+                )}
+              </Dropdown.Menu>
+            </Dropdown>
             <Row>
               <Col md={8}>
                 <Row>
