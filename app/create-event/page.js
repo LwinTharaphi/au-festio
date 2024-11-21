@@ -377,7 +377,7 @@ function EventForm() {
             {events.map((event, index) => (
               <Grid item xs={12} sm={6} md={4} key={index}>
                 <Card sx={{ position: 'relative', marginBottom: 2 }} key={index}>
-                  <CardActionArea onClick={()=> router.push(`/events/${event._id}/staffs`)}>
+                  <CardActionArea onClick={()=> router.push(`/events/${event._id}/dashboard`)}>
                     {event.posterName && (
           
                       <CardMedia 
