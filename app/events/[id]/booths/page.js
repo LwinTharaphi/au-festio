@@ -32,6 +32,7 @@ export default function BoothPage() {
     vendorName: "",
     status: "Available", // Default status
   }); // State for new/edit booth data
+  const [searchQuery, setSearchQuery] = useState(""); // State for search query
 
   // Fetch event name and booths based on eventId
   useEffect(() => {
@@ -72,7 +73,7 @@ export default function BoothPage() {
         setError(err.message);
       }
     };
-  
+
     fetchEventsList();
   }, []);
 
@@ -176,6 +177,21 @@ export default function BoothPage() {
     router.push(`/events/${id}/booths`);
   };
 
+  // Handle search input change
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  // Filter booths based on search query
+  const filteredBooths = booths.filter((booth) => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      (booth.boothName && booth.boothName.toLowerCase().includes(query)) ||
+      (booth.vendorName && booth.vendorName.toLowerCase().includes(query))
+    );
+  });
+
   return (
     <Container fluid>
       <Row>
@@ -203,10 +219,20 @@ export default function BoothPage() {
                 )}
               </Dropdown.Menu>
             </Dropdown>
+
+            {/* Search Input */}
+            <Form.Control
+              type="text"
+              placeholder="Search Booths by Name or Vendor"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              className="mb-3"
+            />
+
             <Row>
               <Col md={8}>
                 <Row>
-                  {booths.map((booth) => (
+                  {filteredBooths.map((booth) => (
                     <Col md={6} key={booth.boothId}>
                       <Card
                         className="mb-3"
