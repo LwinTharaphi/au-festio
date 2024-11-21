@@ -105,53 +105,55 @@ export default function Dashboard() {
             <Breadcrumb.Item href="/events">Events</Breadcrumb.Item>
             <Breadcrumb.Item active>{event.eventName}</Breadcrumb.Item>
           </Breadcrumb>
-          <h1 className="display-5 mb-4 text-primary">
-            {event.eventName} Dashboard
-          </h1>
-          <button onClick={()=> route.push(`/events/${id}/feedbacks`)}>{averageRating.toFixed(2)}</button>
+          <div className="d-flex aligh-items-center justify-content-between">
+            <h1 className="display-5 mb-4 text-primary">
+              {event.eventName} Dashboard
+            </h1>
+            <button className="btn btn-primary" onClick={()=> route.push(`/events/${id}/feedbacks`)}>AverageRating:{averageRating.toFixed(2)}</button>
+          </div>
 
-        {/* Statistics Cards */}
-        <Row className="mb-4 g-4">
-          <Col md={4}>
-            <Card className="text-center shadow-sm">
-              <Card.Body>
-                <BsPeopleFill size={30} className="mb-2 text-primary" />
-                <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
-                  Total Registrations
-                </Card.Title>
-                <Card.Text style={{ fontSize: "1.5rem" }}>
-                  {stats.totalRegistrations}
-                </Card.Text>
-              </Card.Body>
-            </Card>
-          </Col>
-          <Col md={4}>
-            <Card className="text-center shadow-sm">
-              <Card.Body>
-                <BsShop size={30} className="mb-2 text-success" />
-                <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
-                  Booths Registered
-                </Card.Title>
-                <Card.Text style={{ fontSize: "1.5rem" }}>
-                  {stats.boothsRegistered}
-                </Card.Text>
-              </Card.Body>
-            </Card>
-          </Col>
-          <Col md={4}>
-            <Card className="text-center shadow-sm">
-              <Card.Body>
-                <BsCheckCircle size={30} className="mb-2 text-info" />
-                <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
-                  Check-Ins
-                </Card.Title>
-                <Card.Text style={{ fontSize: "1.5rem" }}>
-                  {stats.checkIns}
-                </Card.Text>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
+          {/* Statistics Cards */}
+          <Row className="mb-4 g-4">
+            <Col md={4}>
+              <Card className="text-center shadow-sm">
+                <Card.Body>
+                  <BsPeopleFill size={30} className="mb-2 text-primary" />
+                  <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
+                    Total Registrations
+                  </Card.Title>
+                  <Card.Text style={{ fontSize: "1.5rem" }}>
+                    {stats.totalRegistrations}
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={4}>
+              <Card className="text-center shadow-sm">
+                <Card.Body>
+                  <BsShop size={30} className="mb-2 text-success" />
+                  <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
+                    Booths Registered
+                  </Card.Title>
+                  <Card.Text style={{ fontSize: "1.5rem" }}>
+                    {stats.boothsRegistered}
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={4}>
+              <Card className="text-center shadow-sm">
+                <Card.Body>
+                  <BsCheckCircle size={30} className="mb-2 text-info" />
+                  <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
+                    Check-Ins
+                  </Card.Title>
+                  <Card.Text style={{ fontSize: "1.5rem" }}>
+                    {stats.checkIns}
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
 
 
           {/* Charts Section */}
