@@ -36,7 +36,6 @@ export default function OrganizerLogin() {
         if (!isSignUp) {
           // Handle successful sign-in (e.g., redirect to dashboard)
           console.log('User signed in:', data.user);
-          router.push('/create-event');
         }
       }
     } catch (err) {

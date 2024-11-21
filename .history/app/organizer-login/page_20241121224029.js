@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-export default function OrganizerLogin() {
+export default function Home() {
   const router = useRouter();
   const [isSignUp, setIsSignUp] = useState(false); // Toggle between Sign Up and Sign In
   const [formData, setFormData] = useState({
@@ -36,7 +36,6 @@ export default function OrganizerLogin() {
         if (!isSignUp) {
           // Handle successful sign-in (e.g., redirect to dashboard)
           console.log('User signed in:', data.user);
-          router.push('/create-event');
         }
       }
     } catch (err) {
