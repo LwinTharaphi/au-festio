@@ -9,8 +9,8 @@ const StudentSchema = new mongoose.Schema({
   eventId: { type: mongoose.Schema.Types.ObjectId, ref: 'Event', required: true },
   status: { 
     type: String, 
-    enum: ['approved', 'denied', 'not viewed'], 
-    default: 'not viewed' 
+    enum: ['refund requested', 'refunded', 'paid'], 
+    default: 'paid' 
   },
   paymentScreenshotUrl: { type: String },
 }, {

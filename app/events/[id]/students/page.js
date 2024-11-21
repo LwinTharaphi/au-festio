@@ -13,13 +13,15 @@ export default function RegisteredStudentsPage() {
   const [eventName, setEventName] = useState("");
   const [eventsList, setEventsList] = useState([]);
   const [students, setStudents] = useState([]);
+  const [filteredStudents, setFilteredStudents] = useState([]);
+  const [searchID, setSearchID] = useState("");
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [showRefundModal, setShowRefundModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [updatedStudent, setUpdatedStudent] = useState({
-    sid:"",
+    sid: "",
     name: "",
     email: "",
     faculty: "",
@@ -54,6 +56,7 @@ export default function RegisteredStudentsPage() {
 
         console.log("Fetched data:", data); // Log the fetched data for debugging
         setStudents(data);
+        setFilteredStudents(data);
       } catch (err) {
         setError(err.message);
       }
@@ -79,41 +82,34 @@ export default function RegisteredStudentsPage() {
         setError(err.message);
       }
     };
-  
+
     fetchEventsList();
   }, []);
 
   const handleRowClick = (student) => {
-    setSelectedStudent(student);
-    setShowRefundModal(true); // Show the refund request modal
-  };
-
-  // const handleRowClick = (student) => {
-  //   setSelectedStudent(student);
-  //   setUpdatedStudent({
-  //     name: student.name,
-  //     email: student.email,
-  //     faculty: student.faculty,
-  //     phone: student.phone,
-  //     status: student.status,
-  //   });
-  //   setShowModal(true);
-  // };
-
-  const updateStatus = async (studentId, status) => {
-    try {
-      await fetch(`/api/events/${id}/students/${studentId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
-      });
-      setStudents(students.map(student =>
-        student._id === studentId ? { ...student, status } : student
-      ));
-    } catch (error) {
-      setError("Failed to update status.");
+    if (student.status === "refund requested") {
+      setSelectedStudent(student);
+      setShowRefundModal(true); // Show the refund request modal
+    } else {
+      setError("Refund requests can only be processed for students with a 'refund requested' status.");
+      setTimeout(() => setError(null), 3000); // Clear the error after 3 seconds
     }
   };
+
+  // const updateStatus = async (studentId, status) => {
+  //   try {
+  //     await fetch(`/api/events/${id}/students/${studentId}`, {
+  //       method: "PUT",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ status }),
+  //     });
+  //     setStudents(students.map(student =>
+  //       student._id === studentId ? { ...student, status } : student
+  //     ));
+  //   } catch (error) {
+  //     setError("Failed to update status.");
+  //   }
+  // };
 
   const handleDelete = async () => {
     try {
@@ -127,9 +123,16 @@ export default function RegisteredStudentsPage() {
 
   const handleRefundRequest = async () => {
     try {
-      // Handle the refund request
-      console.log("Refund request confirmed for student:", selectedStudent);
-      setShowRefundModal(false); // Close the refund modal
+      await fetch(`/api/events/${id}/students/${selectedStudent._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "refunded" }),
+      });
+      setStudents(students.map(student =>
+        student._id === selectedStudent._id ? { ...student, status: "refunded" } : student
+      ));
+
+      setShowRefundModal(false);
     } catch (error) {
       setError("Failed to process refund request.");
     }
@@ -155,6 +158,14 @@ export default function RegisteredStudentsPage() {
     router.push(`/events/${id}/students`);
   };
 
+  const handleSearch = (e) => {
+    const value = e.target.value;
+    setSearchID(value);
+    setFilteredStudents(
+      students.filter((student) => student.sid.toLowerCase().includes(value.toLowerCase()))
+    );
+  };
+
   return (
     <Container fluid>
       <Row>
@@ -163,23 +174,36 @@ export default function RegisteredStudentsPage() {
         </Col>
         <Col xs={9} md={10} className="main-content">
           <Container className="my-5">
-            <h4>Registered Students for {eventName}</h4>
-            <Dropdown className="mb-4" style={{ textAlign: "right" }}>
-              <Dropdown.Toggle variant="secondary" id="dropdown-basic">
-                Select Event
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
-                {eventsList.length > 0 ? (
-                  eventsList.map((event) => (
-                    <Dropdown.Item key={event._id} onClick={() => handleEventChange(event._id)}>
-                      {event.eventName}
-                    </Dropdown.Item>
-                  ))
-                ) : (
-                  <Dropdown.Item disabled>No events found</Dropdown.Item>
-                )}
-              </Dropdown.Menu>
-            </Dropdown>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h4>Registered Students for {eventName}</h4>
+              <Dropdown className="mb-4" style={{ textAlign: "right" }}>
+                <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+                  Select Event
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  {eventsList.length > 0 ? (
+                    eventsList.map((event) => (
+                      <Dropdown.Item key={event._id} onClick={() => handleEventChange(event._id)}>
+                        {event.eventName}
+                      </Dropdown.Item>
+                    ))
+                  ) : (
+                    <Dropdown.Item disabled>No events found</Dropdown.Item>
+                  )}
+                </Dropdown.Menu>
+              </Dropdown>
+            </div>
+            <div className="d-flex justify-content-end align-items-center mb-3">
+              <div>
+                <Form.Control
+                  type="text"
+                  placeholder="Search by Student ID"
+                  value={searchID}
+                  onChange={handleSearch}
+                  style={{ maxWidth: "300px" }}
+                />
+              </div>
+            </div>
             {error ? (
               <Alert variant="danger">{error}</Alert>
             ) : (
@@ -196,8 +220,8 @@ export default function RegisteredStudentsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {students.length > 0 ? (
-                    students.map(student => (
+                  {filteredStudents.length > 0 ? (
+                    filteredStudents.map(student => (
                       <tr key={student._id} onClick={() => handleRowClick(student)} style={{ cursor: 'pointer' }}>
                         <td>{student.sid}</td>
                         <td>{student.name}</td>
@@ -249,8 +273,8 @@ export default function RegisteredStudentsPage() {
         </Col>
       </Row>
 
-       {/* Modal for student refund request */}
-       {selectedStudent && (
+      {/* Modal for student refund request */}
+      {selectedStudent && (
         <Modal show={showRefundModal} onHide={() => setShowRefundModal(false)}>
           <Modal.Header closeButton>
             <Modal.Title>Refund Request for {selectedStudent.name}</Modal.Title>
@@ -279,7 +303,7 @@ export default function RegisteredStudentsPage() {
           </Modal.Header>
           <Modal.Body>
             <Form>
-            <Form.Group controlId="sid">
+              <Form.Group controlId="sid">
                 <Form.Label>ID</Form.Label>
                 <Form.Control
                   type="text"
@@ -326,10 +350,12 @@ export default function RegisteredStudentsPage() {
                   value={updatedStudent.status}
                   onChange={(e) => setUpdatedStudent({ ...updatedStudent, status: e.target.value })}
                 >
-                  <option value="approved">Approved</option>
-                  <option value="denied">Denied</option>
+                  <option value="paid">Paid</option>
+                  <option value="refund requested">Refund Requested</option>
+                  <option value="refunded">Refunded</option>
                 </Form.Control>
               </Form.Group>
+
             </Form>
           </Modal.Body>
           <Modal.Footer>
