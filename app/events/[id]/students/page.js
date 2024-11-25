@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Container, Row, Col, Table, Button, Alert, Modal, Form, Dropdown } from "react-bootstrap";
-import { FaTrash, FaEdit } from "react-icons/fa";
+import { FaTrash, FaEdit,FaEyeSlash, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import Sidebar from "../../../components/Sidebar";
 import "../../../components/Sidebar.css";
 
@@ -17,7 +17,8 @@ export default function RegisteredStudentsPage() {
   const [searchID, setSearchID] = useState("");
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [showRefundModal, setShowRefundModal] = useState(false);
+  // const [showRefundModal, setShowRefundModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [updatedStudent, setUpdatedStudent] = useState({
@@ -86,30 +87,35 @@ export default function RegisteredStudentsPage() {
     fetchEventsList();
   }, []);
 
-  const handleRowClick = (student) => {
-    if (student.status === "refund requested") {
-      setSelectedStudent(student);
-      setShowRefundModal(true); // Show the refund request modal
-    } else {
-      setError("Refund requests can only be processed for students with a 'refund requested' status.");
-      setTimeout(() => setError(null), 3000); // Clear the error after 3 seconds
-    }
-  };
-
-  // const updateStatus = async (studentId, status) => {
-  //   try {
-  //     await fetch(`/api/events/${id}/students/${studentId}`, {
-  //       method: "PUT",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({ status }),
-  //     });
-  //     setStudents(students.map(student =>
-  //       student._id === studentId ? { ...student, status } : student
-  //     ));
-  //   } catch (error) {
-  //     setError("Failed to update status.");
+  // const handleRowClick = (student) => {
+  //   if (student.status === "refund requested") {
+  //     setSelectedStudent(student);
+  //     setShowRefundModal(true); // Show the refund request modal
+  //   } else {
+  //     setError("Refund requests can only be processed for students with a 'refund requested' status.");
+  //     setTimeout(() => setError(null), 3000); // Clear the error after 3 seconds
   //   }
   // };
+
+  const handleRowClick = (student) => {
+    setSelectedStudent(student);
+    setShowModal(true);
+  };
+
+  const updateStatus = async (studentId, status) => {
+    try {
+      await fetch(`/api/events/${id}/students/${studentId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      setStudents(students.map(student =>
+        student._id === studentId ? { ...student, status } : student
+      ));
+    } catch (error) {
+      setError("Failed to update status.");
+    }
+  };
 
   const handleDelete = async () => {
     try {
@@ -121,22 +127,22 @@ export default function RegisteredStudentsPage() {
     }
   };
 
-  const handleRefundRequest = async () => {
-    try {
-      await fetch(`/api/events/${id}/students/${selectedStudent._id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "refunded" }),
-      });
-      setStudents(students.map(student =>
-        student._id === selectedStudent._id ? { ...student, status: "refunded" } : student
-      ));
+  // const handleRefundRequest = async () => {
+  //   try {
+  //     await fetch(`/api/events/${id}/students/${selectedStudent._id}`, {
+  //       method: "PUT",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ status: "refunded" }),
+  //     });
+  //     setStudents(students.map(student =>
+  //       student._id === selectedStudent._id ? { ...student, status: "refunded" } : student
+  //     ));
 
-      setShowRefundModal(false);
-    } catch (error) {
-      setError("Failed to process refund request.");
-    }
-  };
+  //     setShowRefundModal(false);
+  //   } catch (error) {
+  //     setError("Failed to process refund request.");
+  //   }
+  // };
 
   const handleUpdateStudent = async () => {
     try {
@@ -148,7 +154,7 @@ export default function RegisteredStudentsPage() {
       setStudents(students.map(student =>
         student._id === selectedStudent._id ? { ...student, ...updatedStudent } : student
       ));
-      setShowModal(false);
+      setShowEditModal(false);
     } catch (error) {
       setError("Failed to update student.");
     }
@@ -244,7 +250,7 @@ export default function RegisteredStudentsPage() {
                                   phone: student.phone,
                                   status: student.status,
                                 });
-                                setShowModal(true); // Open edit modal
+                                setShowEditModal(true); // Open edit modal
                               }}
                             />
                             <FaTrash
@@ -273,7 +279,7 @@ export default function RegisteredStudentsPage() {
         </Col>
       </Row>
 
-      {/* Modal for student refund request */}
+      {/* Modal for student refund request
       {selectedStudent && (
         <Modal show={showRefundModal} onHide={() => setShowRefundModal(false)}>
           <Modal.Header closeButton>
@@ -293,11 +299,12 @@ export default function RegisteredStudentsPage() {
             </Button>
           </Modal.Footer>
         </Modal>
-      )}
+      )} */}
+
 
       {/* Modal for edit student */}
       {selectedStudent && (
-        <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
           <Modal.Header closeButton>
             <Modal.Title>Update Student Details</Modal.Title>
           </Modal.Header>
@@ -350,9 +357,9 @@ export default function RegisteredStudentsPage() {
                   value={updatedStudent.status}
                   onChange={(e) => setUpdatedStudent({ ...updatedStudent, status: e.target.value })}
                 >
-                  <option value="paid">Paid</option>
-                  <option value="refund requested">Refund Requested</option>
-                  <option value="refunded">Refunded</option>
+                  <option value="not viewed">Not viewed</option>
+                  <option value="paid">Refund Requested</option>
+                  <option value="rejected">Refunded</option>
                 </Form.Control>
               </Form.Group>
 
@@ -384,6 +391,49 @@ export default function RegisteredStudentsPage() {
             </Button>
             <Button variant="danger" onClick={handleDelete}>
               Confirm Delete
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      )}
+
+      {/* Modal for student details */}
+      {selectedStudent && (
+        <Modal show={showModal} onHide={() => setShowModal(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>Student Details</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p><strong>ID:</strong> {selectedStudent.sid}</p>
+            <p><strong>Name:</strong> {selectedStudent.name}</p>
+            <div>
+              <strong>Payment Screenshot:</strong>
+              <img
+                src={selectedStudent.paymentScreenshotUrl}
+                alt="Payment Screenshot"
+                style={{ width: "100%", marginTop: "10px" }}
+              />
+            </div>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant="success"
+              onClick={() => {
+                updateStatus(selectedStudent._id, "approved");
+                setShowModal(false);
+              }}
+              disabled={selectedStudent.status === "approved"}
+            >
+              Approve
+            </Button>
+            <Button
+              variant="danger"
+              onClick={() => {
+                updateStatus(selectedStudent._id, "denied");
+                setShowModal(false);
+              }}
+              disabled={selectedStudent.status === "denied"}
+            >
+              Deny
             </Button>
           </Modal.Footer>
         </Modal>
