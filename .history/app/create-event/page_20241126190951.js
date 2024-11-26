@@ -158,12 +158,14 @@ function EventForm() {
           method: 'PUT',
           body: formData,
         });
+        refreshEvents();
       } else {
          // Create a new event if not editing
         response = await fetch('/api/events', {
           method: 'POST',
           body: formData,
         });
+        refreshEvents();
       } 
 
       if (response.ok) {
@@ -180,7 +182,6 @@ function EventForm() {
           // Add the new event to the list
           setEvents((prevEvents) => [...prevEvents, eventData]);
         }
-        refreshEvents();
         resetForm();
         setShowModal(false);
       } else {
@@ -223,7 +224,6 @@ function EventForm() {
     } catch (err) {
       console.error('Error deleting event:', err);
     }
-    refreshEvents();
     setAnchorEl(null); // Close the menu
   };
 

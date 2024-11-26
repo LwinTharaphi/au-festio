@@ -43,7 +43,7 @@ function EventForm() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [eventToDeleteIndex, setEventToDeleteIndex] = useState(null);
 
-  const [refresh, setRefresh] = useState(false); // Trigger re-fetch
+  
 
   const handleFabClick = () => {
     resetForm();
@@ -84,9 +84,7 @@ function EventForm() {
       setEvents(sortedEvents);
     };
     fetchEvents();
-  },[refresh]);
-
-  const refreshEvents = () => setRefresh(!refresh);
+  },[]);
 
   // Function to group events by month, starting from the current month
   const groupEventsByMonth = (events) => {
@@ -167,6 +165,7 @@ function EventForm() {
       } 
 
       if (response.ok) {
+        await fetchEvents();
         const eventData = await response.json();
         console.log('Event successfully saved:', eventData);
   
@@ -180,7 +179,6 @@ function EventForm() {
           // Add the new event to the list
           setEvents((prevEvents) => [...prevEvents, eventData]);
         }
-        refreshEvents();
         resetForm();
         setShowModal(false);
       } else {
@@ -223,7 +221,6 @@ function EventForm() {
     } catch (err) {
       console.error('Error deleting event:', err);
     }
-    refreshEvents();
     setAnchorEl(null); // Close the menu
   };
 

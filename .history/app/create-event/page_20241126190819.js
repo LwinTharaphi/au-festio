@@ -86,8 +86,6 @@ function EventForm() {
     fetchEvents();
   },[refresh]);
 
-  const refreshEvents = () => setRefresh(!refresh);
-
   // Function to group events by month, starting from the current month
   const groupEventsByMonth = (events) => {
     const today = dayjs();
@@ -180,7 +178,6 @@ function EventForm() {
           // Add the new event to the list
           setEvents((prevEvents) => [...prevEvents, eventData]);
         }
-        refreshEvents();
         resetForm();
         setShowModal(false);
       } else {
@@ -223,7 +220,6 @@ function EventForm() {
     } catch (err) {
       console.error('Error deleting event:', err);
     }
-    refreshEvents();
     setAnchorEl(null); // Close the menu
   };
 

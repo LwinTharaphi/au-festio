@@ -180,7 +180,6 @@ function EventForm() {
           // Add the new event to the list
           setEvents((prevEvents) => [...prevEvents, eventData]);
         }
-        refreshEvents();
         resetForm();
         setShowModal(false);
       } else {
@@ -223,7 +222,6 @@ function EventForm() {
     } catch (err) {
       console.error('Error deleting event:', err);
     }
-    refreshEvents();
     setAnchorEl(null); // Close the menu
   };
 

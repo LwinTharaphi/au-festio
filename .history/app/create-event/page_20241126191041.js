@@ -223,7 +223,6 @@ function EventForm() {
     } catch (err) {
       console.error('Error deleting event:', err);
     }
-    refreshEvents();
     setAnchorEl(null); // Close the menu
   };
 
