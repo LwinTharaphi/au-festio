@@ -109,23 +109,41 @@ export default function RegisteredStudentsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
       });
-      setStudents(students.map(student =>
-        student._id === studentId ? { ...student, status } : student
-      ));
+  
+      // Update local state
+      setStudents(prevStudents =>
+        prevStudents.map(student =>
+          student._id === studentId ? { ...student, status } : student
+        )
+      );
+      setFilteredStudents(prevFiltered =>
+        prevFiltered.map(student =>
+          student._id === studentId ? { ...student, status } : student
+        )
+      );
     } catch (error) {
       setError("Failed to update status.");
     }
   };
+  
 
   const handleDelete = async () => {
     try {
       await fetch(`/api/events/${id}/students/${selectedStudent._id}`, { method: "DELETE" });
-      setStudents(students.filter(student => student._id !== selectedStudent._id));
+  
+      // Update local state
+      setStudents(prevStudents =>
+        prevStudents.filter(student => student._id !== selectedStudent._id)
+      );
+      setFilteredStudents(prevFiltered =>
+        prevFiltered.filter(student => student._id !== selectedStudent._id)
+      );
       setShowDeleteModal(false);
     } catch (error) {
       setError("Failed to delete student.");
     }
   };
+  
 
   // const handleRefundRequest = async () => {
   //   try {
@@ -151,14 +169,24 @@ export default function RegisteredStudentsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedStudent),
       });
-      setStudents(students.map(student =>
-        student._id === selectedStudent._id ? { ...student, ...updatedStudent } : student
-      ));
+  
+      // Update local state
+      setStudents(prevStudents =>
+        prevStudents.map(student =>
+          student._id === selectedStudent._id ? { ...student, ...updatedStudent } : student
+        )
+      );
+      setFilteredStudents(prevFiltered =>
+        prevFiltered.map(student =>
+          student._id === selectedStudent._id ? { ...student, ...updatedStudent } : student
+        )
+      );
       setShowEditModal(false);
     } catch (error) {
       setError("Failed to update student.");
     }
   };
+  
 
   const handleEventChange = (id) => {
     router.push(`/events/${id}/students`);
@@ -358,8 +386,8 @@ export default function RegisteredStudentsPage() {
                   onChange={(e) => setUpdatedStudent({ ...updatedStudent, status: e.target.value })}
                 >
                   <option value="not viewed">Not viewed</option>
-                  <option value="paid">Refund Requested</option>
-                  <option value="rejected">Refunded</option>
+                  <option value="paid">Paid</option>
+                  <option value="rejected">Rejected</option>
                 </Form.Control>
               </Form.Group>
 
@@ -418,20 +446,20 @@ export default function RegisteredStudentsPage() {
             <Button
               variant="success"
               onClick={() => {
-                updateStatus(selectedStudent._id, "approved");
+                updateStatus(selectedStudent._id, "paid");
                 setShowModal(false);
               }}
-              disabled={selectedStudent.status === "approved"}
+              disabled={selectedStudent.status === "paid"}
             >
               Approve
             </Button>
             <Button
               variant="danger"
               onClick={() => {
-                updateStatus(selectedStudent._id, "denied");
+                updateStatus(selectedStudent._id, "rejected");
                 setShowModal(false);
               }}
-              disabled={selectedStudent.status === "denied"}
+              disabled={selectedStudent.status === "rejected"}
             >
               Deny
             </Button>
