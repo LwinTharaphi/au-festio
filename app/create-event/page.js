@@ -39,6 +39,10 @@ function EventForm() {
   const [hasSeatLimitation, setHasSeatLimitation] = useState(false);
   const [seatAmount, setSeatAmount] = useState('');
   const [showModal, setShowModal] = useState(false);
+
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [eventToDeleteIndex, setEventToDeleteIndex] = useState(null);
+
   
 
   const handleFabClick = () => {
@@ -242,6 +246,12 @@ function EventForm() {
     setShowModal(true);
   };
 
+  const confirmDelete = (index) => {
+    setEventToDeleteIndex(index);
+    setDeleteModalOpen(true); // Open the delete confirmation modal
+    setAnchorEl(null); // Close the menu
+  };
+
   const handleMenuClick = (event, index) => {
     setAnchorEl(event.currentTarget);
     setSelectedEventIndex(index);
@@ -323,7 +333,7 @@ function EventForm() {
                       }}
                     >
                       <MenuItem onClick={() =>{
-                        handleDelete(selectedEventIndex)}
+                        confirmDelete(selectedEventIndex)}
                       }>Delete</MenuItem>
                       <MenuItem onClick={() =>{
                         handleEdit(selectedEventIndex)}}>Edit</MenuItem>
@@ -558,6 +568,52 @@ function EventForm() {
           </Box>
         </Box>
       </Modal>
+      <Modal
+        open={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        aria-labelledby="delete-confirmation-title"
+        aria-describedby="delete-confirmation-description"
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Box
+          sx={{
+            bgcolor: "background.paper",
+            borderRadius: 2,
+            boxShadow: 24,
+            p: 4,
+            width: "90%",
+            maxWidth: "400px",
+            textAlign: "center",
+          }}
+        >
+          <Typography id="delete-confirmation-title" variant="h6" gutterBottom>
+            Confirm Delete
+          </Typography>
+          <Typography id="delete-confirmation-description" variant="body1" gutterBottom>
+            Are you sure you want to delete this event? This action cannot be undone.
+          </Typography>
+          <Box sx={{ display: "flex", justifyContent: "space-around", marginTop: 3 }}>
+            <Button variant="outlined" color="primary" onClick={() => setDeleteModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => {
+                handleDelete(eventToDeleteIndex);
+                setDeleteModalOpen(false);
+              }}
+            >
+              Delete
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+
     </Paper>
   );
 }
