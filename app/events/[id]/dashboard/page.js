@@ -21,9 +21,10 @@ import {
   Spinner,
   Alert,
   Breadcrumb,
+  Button
 } from "react-bootstrap";
 import Sidebar from "@/app/components/Sidebar";
-import { BsPeopleFill, BsShop, BsCheckCircle } from "react-icons/bs";
+import { BsPeopleFill, BsShop, BsCheckCircle, BsStarFill } from "react-icons/bs";
 
 // Register Chart.js components
 ChartJS.register(
@@ -109,7 +110,10 @@ export default function Dashboard() {
             <h1 className="display-5 mb-4 text-primary">
               {event.eventName} Dashboard
             </h1>
-            <button className="btn btn-primary" onClick={()=> route.push(`/events/${id}/feedbacks`)}>AverageRating:{averageRating.toFixed(2)}</button>
+            <Button variant="primary"
+              className="ms-3"
+              onClick={()=> route.push(`/events/${id}/feedbacks`)}>
+                View FeedBacks</Button>
           </div>
 
           {/* Statistics Cards */}
@@ -244,6 +248,29 @@ export default function Dashboard() {
               </Card>
             </Col>
           </Row>
+          <Row>
+            <Col md={4}>
+              <Card className="text-center shadow-sm">
+                <Card.Body className="d-flex flex-column align-items-center justify-content-center">
+                  {/* Centered Big Star */}
+                  <div className="mb-3">
+                    <BsStarFill size={50} className="text-warning" />
+                  </div>
+                  
+                  {/* Card Title */}
+                  <Card.Title style={{ fontSize: "1.25rem", fontWeight: "bold" }}>
+                    Average Rating
+                  </Card.Title>
+                  
+                  {/* Rating Value */}
+                  <Card.Text style={{ fontSize: "1.5rem", fontWeight: "normal" }}>
+                    {averageRating.toFixed(1)}
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+
         </Col>
       </Row>
     </Container>
