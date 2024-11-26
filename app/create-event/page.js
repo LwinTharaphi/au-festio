@@ -3,11 +3,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Box, Button, Paper, Typography, TextField, 
   IconButton, Card, CardContent, CardActions, 
   CardActionArea, CardMedia,
-  Grid, Menu, MenuItem} from '@mui/material';
+  Grid, Menu, MenuItem,
+  Fab, Modal} from '@mui/material';
 import FormField from '../components/FormField';
 import CloseIcon from '@mui/icons-material/Close';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useRouter } from 'next/navigation';
+import AddIcon from '@mui/icons-material/Add';
 
 function EventForm() {
   const router = useRouter();
@@ -15,14 +17,18 @@ function EventForm() {
   const [isArEnabled, setIsArEnabled] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
   const [eventName, setEventName] = useState('');
+  const [registerationDate, setRegistrationDate] = useState('');
   const [location, setLocation] = useState('');
   const [venueName, setVenueName] = useState('');
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
   const [poster, setPoster] = useState(null);
   const [posterName, setPosterName] = useState('');
+  const [qr, setQr] = useState(null);
+  const [qrName, setQrName] = useState('');
   // Create refs for the file input elements
   const posterInputRef = useRef(null);
+  const qrInputRef = useRef(null);
 
   const [events, setEvents] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null); // For menu anchor
@@ -35,12 +41,23 @@ function EventForm() {
   const [foodBoothAmount, setFoodBoothAmount] = useState('');
   const [ticketAmount, setTicketAmount] = useState(''); // For paid events
 
+  const [showModal, setShowModal] = useState(false);
+
+  const handleFabClick = () => {
+    resetForm();
+    setIsEditing(false);
+    setShowModal(true);
+  };
+
   const handleFileChange = async (event, type) => {
     const file = event.target.files[0];
     if (file) {     
       if (type === 'poster') {
         setPoster(file);
         setPosterName(file.name);
+      } else if (type === 'qr') {
+        setQr(file);
+        setQrName(file.name);
       }
     }
   };
@@ -50,6 +67,9 @@ function EventForm() {
     if (type === 'poster') {
       setPoster(null);
       setPosterName('');
+    } else if (type === 'qr'){
+      setQr(null);
+      setQrName('');
     }
   };
 
@@ -69,9 +89,14 @@ function EventForm() {
     const formData = new FormData();
 
     formData.append('eventName',eventName || '');
+    formData.append('registerationDate',registerationDate || '');
     formData.append('location',location || '');
     formData.append('isPaid',isPaid);
     formData.append('posterName',posterName || '');
+
+    if (isPaid){
+      formData.append('qrName', qrName || '');
+    }
 
     // Add additional fields for AR
     if (isArEnabled) {
@@ -85,18 +110,12 @@ function EventForm() {
       formData.append('poster', poster); // Assuming 'poster' is the file data
     }
 
+    if (qr) {
+      formData.append('qr',qr);
+    }
     formData.append('hasSeatLimitation', hasSeatLimitation);
     if (hasSeatLimitation) {
       formData.append('seats', seatAmount || '');
-    }
-
-    formData.append('hasFoodBooth', hasFoodBooth);
-    if (hasFoodBooth) {
-      formData.append('booths', foodBoothAmount || '');
-    }
-
-    if (isPaid) {
-      formData.append('price', ticketAmount || '');
     }
 
     try {
@@ -133,6 +152,7 @@ function EventForm() {
           setEvents((prevEvents) => [...prevEvents, eventData]);
         }
         resetForm();
+        setShowModal(false);
       } else {
         console.error('Error saving event:', response.statusText);
       }
@@ -142,21 +162,21 @@ function EventForm() {
   };
   const resetForm = () => {
     setEventName('');
+    setRegistrationDate('');
     setLocation('');
     setVenueName('');
     setLatitude('');
     setLongitude('');
     setPoster(null);
     setPosterName('');
+    setQr(null);
+    setQrName('');
     setIsArEnabled(false);
     setIsPaid(false);
     setSelectedEventIndex(null);
     setIsEditing(false);
     setHasSeatLimitation(false);
     setSeatAmount('');
-    setHasFoodBooth(false);
-    setFoodBoothAmount('');
-    setTicketAmount('');
   };
 
   const handleDelete = async (index) => {
@@ -179,16 +199,19 @@ function EventForm() {
   const handleEdit = (index) => {
     const eventToEdit = events[index];
     setEventName(eventToEdit.eventName || '');
+    setRegistrationDate(eventToEdit.registerationDate || '');
     setLocation(eventToEdit.location || '');
     setVenueName(eventToEdit.venueName || '');
     setLatitude(eventToEdit.latitude || '');
     setLongitude(eventToEdit.longitude || '');
     setPosterName(eventToEdit.posterName || '');
+    setQrName(eventToEdit.qrName || '');
     setIsArEnabled(Boolean(eventToEdit.venueName));
     setIsPaid(eventToEdit.isPaid || false);
     setSelectedEventIndex(index); // Store the index for saving the updated event later
     setAnchorEl(null); // Close the menu after edit
     setIsEditing(true);
+    setShowModal(true);
   };
 
   const handleMenuClick = (event, index) => {
@@ -211,164 +234,8 @@ function EventForm() {
       }}
     >
       <Typography variant="h5" align="center" sx={{ marginBottom: 3 }}>
-        {isEditing ? 'Edit Event' : 'Add a New Event'}
+        Event List
       </Typography>
-
-      <Box sx={{ display: 'flex', gap: 4 }}>
-        {/* Left Side */}
-        <Box sx={{ flex: 1 }}>
-          <FormField
-            title="Event Name"
-            type="text"
-            placeholder="Enter event name"
-            value={eventName}
-            onChange={setEventName}
-          />
-          <FormField
-            title="Location"
-            type="text"
-            placeholder="Enter location"
-            value={location}
-            onChange={setLocation}
-          />
-          <FormField
-            title="AR Toggle"
-            type="switch"
-            value={isArEnabled}
-            onChange={setIsArEnabled}
-          />
-
-          {/* Conditional Venue and GPS Location Fields */}
-          {isArEnabled && (
-            <>
-              <FormField
-                title="Venue Name"
-                type="text"
-                placeholder="Enter main location"
-                value={venueName}
-                onChange={setVenueName}
-              />
-              <Box sx={{ display: 'flex', gap: 2 }}>
-                <FormField
-                  title="Latitude"
-                  type="text"
-                  placeholder="Enter latitude"
-                  value={latitude}
-                  onChange={setLatitude}
-                />
-                <FormField
-                  title="Longitude"
-                  type="text"
-                  placeholder="Enter longitude"
-                  value={longitude}
-                  onChange={setLongitude}
-                />
-              </Box>
-            </>
-          )}
-        </Box>
-
-        {/* Right Side */}
-        <Box sx={{ flex: 1 }}>
-          {/* poster upload for event */}
-          <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 2 }}>
-            <TextField
-              label="Poster Name"
-              value={posterName || ''}
-              placeholder="No file uploaded"
-              variant="outlined"
-              fullWidth
-              InputProps={{
-                readOnly: true,
-                style: { backgroundColor: '#f5f5f5' },
-              }}
-              sx={{ marginRight: 2 }}
-            />
-            <Button
-              variant="contained"
-              component="span"
-              onClick={() => posterInputRef.current.click()}
-            >
-              Upload
-            </Button>
-            {posterName && (
-              <IconButton
-                color="error"
-                onClick={() => handleDeleteFile('poster')}
-                sx={{ marginLeft: 1 }}
-              >
-                <CloseIcon />
-              </IconButton>
-            )}
-            <input
-              id="poster-upload"
-              type="file"
-              ref={posterInputRef}
-              key={isEditing ? 'editing' : 'new'}  // Reset the file input when editing
-              accept="image/*"
-              onChange={(e) => handleFileChange(e, 'poster')}
-              style={{ display: 'none' }}
-            />
-          </Box>
-
-          <FormField
-            title="Event Type"
-            type="radio"
-            value={isPaid ? 'paid' : 'free'}
-            onChange={(value) => setIsPaid(value === 'paid')}
-            options={[
-              { label: 'Free', value: 'free' },
-              { label: 'Paid', value: 'paid' },
-            ]}
-          />
-          {isPaid && (
-            <FormField
-              title="Ticket Amount"
-              type="number"
-              placeholder="Enter number of tickets"
-              value={ticketAmount}
-              onChange={setTicketAmount}
-            />
-          )}
-          <FormField
-            title="Seat Limitation"
-            type="switch"
-            value={hasSeatLimitation}
-            onChange={setHasSeatLimitation}
-          />
-          {hasSeatLimitation && (
-            <FormField
-              title="Seat Amount"
-              type="number"
-              placeholder="Enter number of seats"
-              value={seatAmount}
-              onChange={setSeatAmount}
-            />
-          )}
-          <FormField
-            title="Food Booth"
-            type="switch"
-            value={hasFoodBooth}
-            onChange={setHasFoodBooth}
-          />
-          {hasFoodBooth && (
-            <FormField
-              title="Food Booth Amount"
-              type="number"
-              placeholder="Enter number of food booths"
-              value={foodBoothAmount}
-              onChange={setFoodBoothAmount}
-            />
-          )}
-        </Box>
-      </Box>
-
-      {/* Add Event Button */}
-      <Box sx={{ textAlign: 'center', marginTop: 3 }}>
-        <Button variant="contained" color="primary" onClick={handleSubmit}>
-          {isEditing ? 'Update Event' : 'Add Event'}
-        </Button>
-      </Box>
 
       {/* Event List as Cards */}
       {events.length > 0 && (
@@ -432,10 +299,229 @@ function EventForm() {
                 </Card>
               </Grid>
             ))}
-          </Grid>
-          
+          </Grid>        
         </Box>
       )}
+      <Fab
+        color="primary"
+        aria-label="add"
+        sx={{
+          position: 'fixed',
+          bottom: 16,
+          right: 16,
+        }}
+        onClick={handleFabClick}
+      >
+        <AddIcon />
+      </Fab>
+
+      <Modal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        aria-labelledby="modal-title"
+        aria-describedby="modal-description"
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Box
+          sx={{
+            bgcolor: "background.paper",
+            borderRadius: 2,
+            boxShadow: 24,
+            width: "90%", // Adjusts the width
+            maxWidth: "600px", // Limits to max-width
+            maxHeight: "90vh", // Makes it scrollable
+            overflowY: "auto", // Adds scrolling
+            p: 4,
+          }}
+        >
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <h2 id="modal-title">{isEditing ? "Edit Event" : "Add a New Event"}</h2>
+            <IconButton color="error" onClick={() => setShowModal(false)}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+          <Box id="modal-description" sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            {/* Event Form Fields */}
+            <Box>
+              <FormField
+                title="Event Name"
+                type="text"
+                placeholder="Enter event name"
+                value={eventName}
+                onChange={setEventName}
+              />
+              <FormField
+                title="Registration Date"
+                type="date"
+                value={registerationDate}
+                onChange={setRegistrationDate}
+              />
+              <FormField
+                title="Location"
+                type="text"
+                placeholder="Enter location"
+                value={location}
+                onChange={setLocation}
+              />
+              <FormField
+                title="AR Toggle"
+                type="switch"
+                value={isArEnabled}
+                onChange={setIsArEnabled}
+              />
+
+              {/* Conditional Venue and GPS Location Fields */}
+              {isArEnabled && (
+                <>
+                  <FormField
+                    title="Venue Name"
+                    type="text"
+                    placeholder="Enter main location"
+                    value={venueName}
+                    onChange={setVenueName}
+                  />
+                  <Box sx={{ display: "flex", gap: 2 }}>
+                    <FormField
+                      title="Latitude"
+                      type="text"
+                      placeholder="Enter latitude"
+                      value={latitude}
+                      onChange={setLatitude}
+                    />
+                    <FormField
+                      title="Longitude"
+                      type="text"
+                      placeholder="Enter longitude"
+                      value={longitude}
+                      onChange={setLongitude}
+                    />
+                  </Box>
+                </>
+              )}
+            </Box>
+            {/* Poster Upload */}
+            <Box sx={{ display: "flex", alignItems: "center", marginBottom: 2 }}>
+              <TextField
+                label="Poster Name"
+                value={posterName || ""}
+                placeholder="No file uploaded"
+                variant="outlined"
+                fullWidth
+                InputProps={{
+                  readOnly: true,
+                  style: { backgroundColor: "#f5f5f5" },
+                }}
+                sx={{ marginRight: 2 }}
+              />
+              <Button
+                variant="contained"
+                component="span"
+                onClick={() => posterInputRef.current.click()}
+              >
+                Upload
+              </Button>
+              {posterName && (
+                <IconButton
+                  color="error"
+                  onClick={() => handleDeleteFile("poster")}
+                  sx={{ marginLeft: 1 }}
+                >
+                  <CloseIcon />
+                </IconButton>
+              )}
+              <input
+                id="poster-upload"
+                type="file"
+                ref={posterInputRef}
+                key={isEditing ? "editing" : "new"} // Reset the file input when editing
+                accept="image/*"
+                onChange={(e) => handleFileChange(e, "poster")}
+                style={{ display: "none" }}
+              />
+            </Box>
+
+            {/* Other Fields */}
+            <FormField
+              title="Event Type"
+              type="radio"
+              value={isPaid ? "paid" : "free"}
+              onChange={(value) => setIsPaid(value === "paid")}
+              options={[
+                { label: "Free", value: "free" },
+                { label: "Paid", value: "paid" },
+              ]}
+            />
+            {isPaid && (
+              <Box sx={{ display: "flex", alignItems: "center", marginBottom: 2 }}>
+                <TextField
+                  label="QR Name"
+                  value={qrName || ""}
+                  placeholder="No file uploaded"
+                  variant="outlined"
+                  fullWidth
+                  InputProps={{
+                    readOnly: true,
+                    style: { backgroundColor: "#f5f5f5" },
+                  }}
+                  sx={{ marginRight: 2 }}
+                />
+                <Button
+                  variant="contained"
+                  component="span"
+                  onClick={() => qrInputRef.current.click()}
+                >
+                  Upload
+                </Button>
+                {qrName && (
+                  <IconButton
+                    color="error"
+                    onClick={() => handleDeleteFile("qr")}
+                    sx={{ marginLeft: 1 }}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                )}
+                <input
+                  id="qr-upload"
+                  type="file"
+                  ref={qrInputRef}
+                  key={isEditing ? "editing" : "new"} // Reset the file input when editing
+                  accept="image/*"
+                  onChange={(e) => handleFileChange(e, "qr")}
+                  style={{ display: "none" }}
+                />
+            </Box>
+            )}
+            <FormField
+              title="Seat Limitation"
+              type="switch"
+              value={hasSeatLimitation}
+              onChange={setHasSeatLimitation}
+            />
+            {hasSeatLimitation && (
+              <FormField
+                title="Seat Amount"
+                type="number"
+                placeholder="Enter number of seats"
+                value={seatAmount}
+                onChange={setSeatAmount}
+              />
+            )}
+          </Box>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, marginTop: 3 }}>
+            <Button variant="secondary" onClick={() => setShowModal(false)}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={handleSubmit}>
+              {isEditing ? "Update Event" : "Add Event"}
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
     </Paper>
   );
 }

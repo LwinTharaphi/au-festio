@@ -52,6 +52,15 @@ function FormField({ title, type, placeholder, value, onChange, options, fileUpl
           <input type="file" hidden onChange={(e) => onChange(e.target.files[0])} />
         </Button>
       )}
+
+      {type === 'date' && (
+        <TextField
+          fullWidth
+          type="date"
+          value={value}
+          onChange={(e) => onChange(e.target.value)} // Pass the selected date
+        />
+      )}
     </div>
   );
 }
