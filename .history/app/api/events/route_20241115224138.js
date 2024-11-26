@@ -57,7 +57,6 @@ export async function POST(req) {
 
     // Extract form data fields
     const eventName = formData.get('eventName');
-    const registerationDate = formData.get('registerationDate');
     const location = formData.get('location');
     const isPaid = formData.get('isPaid') === 'true'; // Convert to boolean if needed
     const venueName = formData.get('venueName');
@@ -69,12 +68,15 @@ export async function POST(req) {
 
     // Handle file uploads (adjust to your specific storage strategy)
     const posterPath = poster ? await uploadFile(poster, 'posters') : null;
+
+    const price = formData.get('price')? Number(formData.get('price')): undefined;
     const seats = formData.get('seats')? Number(formData.get('seats')): undefined;
+    const booths = formData.get('booths')? Number(formData.get('booths')): undefined;
+    console.log(formData.get('price'))
 
     // Create event object
     const newEvent = {
       eventName,
-      registerationDate,
       location,
       isPaid,
       venueName,
@@ -82,7 +84,9 @@ export async function POST(req) {
       longitude,
       poster: posterPath,
       posterName: poster ? poster.name : null,
+      price,
       seats,
+      booths,
     };
 
     // Connect to your database and save the event

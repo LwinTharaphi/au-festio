@@ -10,7 +10,6 @@ import CloseIcon from '@mui/icons-material/Close';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useRouter } from 'next/navigation';
 import AddIcon from '@mui/icons-material/Add';
-import dayjs from 'dayjs';
 
 function EventForm() {
   const router = useRouter();
@@ -18,7 +17,7 @@ function EventForm() {
   const [isArEnabled, setIsArEnabled] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
   const [eventName, setEventName] = useState('');
-  const [registerationDate, setRegisterationDate] = useState('');
+  const [registerationDate, setRegistrationDate] = useState(new Date().toISOString().split('T')[0]);
   const [location, setLocation] = useState('');
   const [venueName, setVenueName] = useState('');
   const [latitude, setLatitude] = useState('');
@@ -75,35 +74,10 @@ function EventForm() {
     const fetchEvents = async()=>{
       const response = await fetch(`/api/events`);
       const data = await response.json();
-      const sortedEvents = data.sort((a,b)=>
-      new Date(a.registerationDate) - new Date(b.registerationDate));
-      setEvents(sortedEvents);
+      setEvents(data);
     };
     fetchEvents();
   },[]);
-
-  // Function to group events by month, starting from the current month
-  const groupEventsByMonth = (events) => {
-    const today = dayjs();
-    const grouped = {};
-
-    events.forEach((event) => {
-      const eventDate = dayjs(event.registerationDate);
-      const isFutureOrCurrent = eventDate.isSame(today, "month") || eventDate.isAfter(today);
-
-      if (isFutureOrCurrent) {
-        const monthName = eventDate.format("MMMM YYYY");
-        if (!grouped[monthName]) {
-          grouped[monthName] = [];
-        }
-        grouped[monthName].push(event);
-      }
-    });
-
-    return grouped;
-  };
-
-  const groupedEvents = groupEventsByMonth(events);
 
   const handleSubmit = async(event) => {
     event.preventDefault(); // Prevent the default form submission
@@ -185,7 +159,7 @@ function EventForm() {
   };
   const resetForm = () => {
     setEventName('');
-    setRegisterationDate('');
+    setRegistrationDate('');
     setLocation('');
     setVenueName('');
     setLatitude('');
@@ -221,13 +195,8 @@ function EventForm() {
 
   const handleEdit = (index) => {
     const eventToEdit = events[index];
-    // Format the date to YYYY-MM-DD (compatible with HTML date input)
-    const formattedDate = eventToEdit.registerationDate 
-      ? new Date(eventToEdit.registerationDate).toISOString().split('T')[0]
-      : '';
-    console.log(formattedDate);
     setEventName(eventToEdit.eventName || '');
-    setRegisterationDate(formattedDate || '');
+    setRegistrationDate(eventToEdit.registerationDate || '');
     setLocation(eventToEdit.location || '');
     setVenueName(eventToEdit.venueName || '');
     setLatitude(eventToEdit.latitude || '');
@@ -266,77 +235,69 @@ function EventForm() {
       </Typography>
 
       {/* Event List as Cards */}
-      {Object.keys(groupedEvents).length > 0 ? (
-        Object.entries(groupedEvents).map(([month,events],index)=> (
-          <Box key={index} sx={{ marginTop: 4 }}>
-            <Typography variant="h6" sx={{ marginBottom: 2 }}>
-              {month} Events
-            </Typography>
-            <Grid container spacing={4}>
-              {events.map((event, index) => (
-                <Grid item xs={12} sm={6} md={4} key={index}>
-                  <Card sx={{ position: 'relative', marginBottom: 2 }} key={index}>
-                    <CardActionArea onClick={()=> router.push(`/events/${event._id}/dashboard`)}>
-                      {event.posterName && (
-            
-                        <CardMedia 
-                          component="img"
-                          height="140"
-                          image={event.poster} 
-                          alt={event.posterName}
-                        />
-                      )}
-                    </CardActionArea>
-                    <CardContent>
-                      <Typography variant="h6" align='center'>{event.eventName}</Typography>
-                    </CardContent>
-                    {/* Delete Button */}
-                    <Box
-                      sx={{
-                        position: 'absolute',
-                        top: 8,
-                        right: 8
-                      }}
+      {events.length > 0 && (
+        <Box sx={{ marginTop: 4 }}>
+          <Grid container spacing={4}>
+            {events.map((event, index) => (
+              <Grid item xs={12} sm={6} md={4} key={index}>
+                <Card sx={{ position: 'relative', marginBottom: 2 }} key={index}>
+                  <CardActionArea onClick={()=> router.push(`/events/${event._id}/dashboard`)}>
+                    {event.posterName && (
+          
+                      <CardMedia 
+                        component="img"
+                        height="140"
+                        image={event.poster} 
+                        alt={event.posterName}
+                      />
+                    )}
+                  </CardActionArea>
+                  <CardContent>
+                    <Typography variant="h6" align='center'>{event.eventName}</Typography>
+                  </CardContent>
+                  {/* Delete Button */}
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: 8,
+                      right: 8
+                    }}
+                  >
+                    <IconButton 
+                      onClick={(e) =>{
+                        e.stopPropagation();
+                        handleMenuClick(e, index);}}
+                      sx={{ color: 'rgba(0, 0, 0, 0.54)' }}
                     >
-                      <IconButton 
-                        onClick={(e) =>{
-                          e.stopPropagation();
-                          handleMenuClick(e, index);}}
-                        sx={{ color: 'rgba(0, 0, 0, 0.54)' }}
-                      >
-                        <MoreVertIcon />
-                      </IconButton>
-                    </Box>
+                      <MoreVertIcon />
+                    </IconButton>
+                  </Box>
 
-                    {/* Menu with options for delete/edit */}
-                    <Menu
-                      anchorEl={anchorEl}
-                      open={Boolean(anchorEl)}
-                      onClose={handleCloseMenu}
-                      anchorOrigin={{
-                        vertical: 'top',
-                        horizontal: 'right',
-                      }}
-                      transformOrigin={{
-                        vertical: 'top',
-                        horizontal: 'right',
-                      }}
-                    >
-                      <MenuItem onClick={() =>{
-                        handleDelete(selectedEventIndex)}
-                      }>Delete</MenuItem>
-                      <MenuItem onClick={() =>{
-                        handleEdit(selectedEventIndex)}}>Edit</MenuItem>
-                    </Menu>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>        
-          </Box>
-      ))): (
-        <Typography variant="body1" align="center">
-          No events available.
-        </Typography>
+                  {/* Menu with options for delete/edit */}
+                  <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={handleCloseMenu}
+                    anchorOrigin={{
+                      vertical: 'top',
+                      horizontal: 'right',
+                    }}
+                    transformOrigin={{
+                      vertical: 'top',
+                      horizontal: 'right',
+                    }}
+                  >
+                    <MenuItem onClick={() =>{
+                      handleDelete(selectedEventIndex)}
+                    }>Delete</MenuItem>
+                    <MenuItem onClick={() =>{
+                      handleEdit(selectedEventIndex)}}>Edit</MenuItem>
+                  </Menu>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>        
+        </Box>
       )}
       <Fab
         color="primary"
@@ -394,7 +355,7 @@ function EventForm() {
                 title="Registration Date"
                 type="date"
                 value={registerationDate}
-                onChange={setRegisterationDate}
+                onChange={setRegistrationDate}
               />
               <FormField
                 title="Location"

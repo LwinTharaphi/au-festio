@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 
 const EventSchema = new mongoose.Schema({
   eventName: { type: String, required: true },
-  registerationDate: { type: Date, required: true},
+  registerationDate: { type: Date, default: Date.now },
   location : { type: String, required: true },
   isPaid: {type: Boolean},
   posterName: {type: String},

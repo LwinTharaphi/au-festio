@@ -268,10 +268,7 @@ function EventForm() {
       {/* Event List as Cards */}
       {Object.keys(groupedEvents).length > 0 ? (
         Object.entries(groupedEvents).map(([month,events],index)=> (
-          <Box key={index} sx={{ marginTop: 4 }}>
-            <Typography variant="h6" sx={{ marginBottom: 2 }}>
-              {month} Events
-            </Typography>
+          <Box sx={{ marginTop: 4 }}>
             <Grid container spacing={4}>
               {events.map((event, index) => (
                 <Grid item xs={12} sm={6} md={4} key={index}>

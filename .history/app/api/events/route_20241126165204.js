@@ -82,7 +82,9 @@ export async function POST(req) {
       longitude,
       poster: posterPath,
       posterName: poster ? poster.name : null,
+      price,
       seats,
+      booths,
     };
 
     // Connect to your database and save the event
