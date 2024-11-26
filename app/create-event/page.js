@@ -287,9 +287,9 @@ function EventForm() {
               {month} Events
             </Typography>
             <Grid container spacing={4}>
-              {events.map((event, index) => (
-                <Grid item xs={12} sm={6} md={4} key={index}>
-                  <Card sx={{ position: 'relative', marginBottom: 2 }} key={index}>
+              {events.map((event, idx) => (
+                <Grid item xs={12} sm={6} md={4} key={idx}>
+                  <Card sx={{ position: 'relative', marginBottom: 2 }} key={idx}>
                     <CardActionArea onClick={()=> router.push(`/events/${event._id}/dashboard`)}>
                       {event.posterName && (
             
