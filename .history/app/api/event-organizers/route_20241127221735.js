@@ -1,10 +1,10 @@
 import EventOrganizer from "@/models/EventOrganizer";
 import dbConnect from "@/lib/db";
-import bcrypt from 'bcryptjs';
 
 // GET: Fetch all performances for a specific event
-export async function GET() {
+export async function GET(request, { params }) {
   await dbConnect();
+  const { id } = await params; // Event ID from URL parameters
   const organizers = await EventOrganizer.find(); // Fetch performances by event ID
   return new Response(JSON.stringify(organizers), { status: 200 });
 }
@@ -12,8 +12,9 @@ export async function GET() {
 // POST: Create a new performance for a specific event
 export async function POST(request, { params }) {
   await dbConnect();
+  const { id } = await params; // Event ID from URL parameters
   const data = await request.json();
-  const newOrganizer = new EventOrganizer({ ...data}); // Associate performance with event ID
-  await newOrganizer.save();
-  return new Response(JSON.stringify(newOrganizer), { status: 201 });
+  const newPerformance = new Performance({ ...data, eventId: id }); // Associate performance with event ID
+  await newPerformance.save();
+  return new Response(JSON.stringify(newPerformance), { status: 201 });
 }

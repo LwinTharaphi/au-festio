@@ -20,27 +20,27 @@ export async function PUT(request, { params }) {
   const { organizerId } = await params; // Event ID and Performance ID from URL parameters
   const data = await request.json();
   
-  const updatedOrganizers = await EventOrganizer.findOneAndUpdate(
+  const updatedPerformance = await EventOrganizer.findOneAndUpdate(
     { _id: organizerId}, // Find organizers by ID and event ID
     data,
     { new: true } // Return the updated document
   );
   
-  if (!updatedOrganizers) {
-    return new Response("Organizers not found", { status: 404 });
+  if (!updatedPerformance) {
+    return new Response("Performance not found", { status: 404 });
   }
 
-  return new Response(JSON.stringify(updatedOrganizers), { status: 200 });
+  return new Response(JSON.stringify(updatedPerformance), { status: 200 });
 }
 
 // DELETE: Delete a specific organizers
 export async function DELETE(request, { params }) {
   await dbConnect();
-  const { organizerId } = await params; // Event ID and Performance ID from URL parameters
+  const { id, organizerId } = await params; // Event ID and Performance ID from URL parameters
   
-  const deletedOrganizers = await EventOrganizer.findOneAndDelete({ _id: organizerId});
+  const deletedPerformance = await Performance.findOneAndDelete({ _id: organizerId, eventId: id });
   
-  if (!deletedOrganizers) {
+  if (!deletedPerformance) {
     return new Response("Performance not found", { status: 404 });
   }
 

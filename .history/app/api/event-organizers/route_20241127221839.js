@@ -1,6 +1,5 @@
 import EventOrganizer from "@/models/EventOrganizer";
 import dbConnect from "@/lib/db";
-import bcrypt from 'bcryptjs';
 
 // GET: Fetch all performances for a specific event
 export async function GET() {
@@ -12,6 +11,7 @@ export async function GET() {
 // POST: Create a new performance for a specific event
 export async function POST(request, { params }) {
   await dbConnect();
+  const { id } = await params; // Event ID from URL parameters
   const data = await request.json();
   const newOrganizer = new EventOrganizer({ ...data}); // Associate performance with event ID
   await newOrganizer.save();

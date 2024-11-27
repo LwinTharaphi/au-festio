@@ -36,11 +36,11 @@ export async function PUT(request, { params }) {
 // DELETE: Delete a specific organizers
 export async function DELETE(request, { params }) {
   await dbConnect();
-  const { organizerId } = await params; // Event ID and Performance ID from URL parameters
+  const { id, organizerId } = await params; // Event ID and Performance ID from URL parameters
   
-  const deletedOrganizers = await EventOrganizer.findOneAndDelete({ _id: organizerId});
+  const deletedPerformance = await Performance.findOneAndDelete({ _id: organizerId, eventId: id });
   
-  if (!deletedOrganizers) {
+  if (!deletedPerformance) {
     return new Response("Performance not found", { status: 404 });
   }
 

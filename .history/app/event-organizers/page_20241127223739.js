@@ -101,7 +101,6 @@ export default function EventOrganizersPage() {
   // Handle edit organizer
   const handleEdit = (organizer) => {
     setName(organizer.name);
-    setEmail(organizer.email);
     setPassword(organizer.password);
     setPhone(organizer.phone);
     setEditOrganizerId(organizer._id);
@@ -185,7 +184,6 @@ export default function EventOrganizersPage() {
                     <tr key={organizer._id}>
                       <td>{index + 1}</td>
                       <td>{organizer.name}</td>
-                      <td>{organizer.email}</td>
                       <td>{organizer.password}</td>
                       <td>{organizer.phone}</td>
                       <td>

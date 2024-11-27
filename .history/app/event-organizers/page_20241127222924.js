@@ -13,7 +13,6 @@ export default function EventOrganizersPage() {
 
   // Form states
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [editOrganizerId, setEditOrganizerId] = useState(null);
@@ -38,12 +37,12 @@ export default function EventOrganizersPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!name || !emial || !password || !phone) {
+    if (!name || !password || !phone) {
       setError("Please fill in all fields.");
       return;
     }
 
-    const organizerData = { name, email, password, phone };
+    const organizerData = { name, password, phone };
 
     try {
       let response;
@@ -80,7 +79,6 @@ export default function EventOrganizersPage() {
 
       // Reset form fields
       setName("");
-      setEmail("");
       setPassword("");
       setPhone("");
     } catch (err) {
@@ -91,7 +89,7 @@ export default function EventOrganizersPage() {
   // Handle delete organizer
   const handleDelete = async (organizerId) => {
     try {
-      await fetch(`/api/event-organizers/${organizerId}`, { method: "DELETE" });
+      await fetch(`/api/organizers/${organizerId}`, { method: "DELETE" });
       setOrganizers(organizers.filter((org) => org._id !== organizerId));
     } catch (err) {
       setError("Failed to delete organizer.");
@@ -101,7 +99,6 @@ export default function EventOrganizersPage() {
   // Handle edit organizer
   const handleEdit = (organizer) => {
     setName(organizer.name);
-    setEmail(organizer.email);
     setPassword(organizer.password);
     setPhone(organizer.phone);
     setEditOrganizerId(organizer._id);
@@ -134,15 +131,6 @@ export default function EventOrganizersPage() {
                     value={name}
                     onChange={setName}
                   />
-                </Col>
-                <Col md={4}>
-                <FormField
-                    title="Email"
-                    type="text"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={setEmail}
-                />
                 </Col>
                 <Col md={4}>
                   <FormField
@@ -185,7 +173,6 @@ export default function EventOrganizersPage() {
                     <tr key={organizer._id}>
                       <td>{index + 1}</td>
                       <td>{organizer.name}</td>
-                      <td>{organizer.email}</td>
                       <td>{organizer.password}</td>
                       <td>{organizer.phone}</td>
                       <td>

@@ -185,7 +185,6 @@ export default function EventOrganizersPage() {
                     <tr key={organizer._id}>
                       <td>{index + 1}</td>
                       <td>{organizer.name}</td>
-                      <td>{organizer.email}</td>
                       <td>{organizer.password}</td>
                       <td>{organizer.phone}</td>
                       <td>

@@ -61,16 +61,6 @@ function FormField({ title, type, placeholder, value, onChange, options, fileUpl
           onChange={(e) => onChange(e.target.value)} // Pass the selected date
         />
       )}
-
-      {type === 'password' && (
-        <TextField
-          fullWidth
-          type="password"
-          placeholder={placeholder}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-        />
-      )}
     </div>
   );
 }
