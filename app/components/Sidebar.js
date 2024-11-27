@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { Nav, Navbar } from "react-bootstrap";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Sidebar.css';
-import { BsGrid, BsPeople, BsShop, BsPerson, BsQrCodeScan, BsBoxArrowRight } from "react-icons/bs"; // Add icons
+import { BsGrid, BsPeople, BsShop, BsPerson, BsQrCodeScan, BsBoxArrowRight ,BsBell, BsClock} from "react-icons/bs"; // Add icons
 
 export default function Sidebar({ event }) {
   const router = useRouter();
@@ -39,7 +39,7 @@ export default function Sidebar({ event }) {
           onClick={() => router.push(`/events/${event._id}/performance-schedule`)}
           className="sidebar-link my-2"
         >
-          <BsGrid className="me-2" /> Performance Schedule
+          <BsClock className="me-2" /> Performance Schedule
         </Nav.Link>
 
         {/* Registered Students */}
@@ -77,7 +77,7 @@ export default function Sidebar({ event }) {
           onClick={() => router.push(`/events/${event._id}/notification`)}
           className="sidebar-link my-2"
         >
-          <BsQrCodeScan className="me-2" />Notification
+          <BsBell className="me-2" />Notification
         </Nav.Link>
         {/* Logout */}
         <Nav.Link
