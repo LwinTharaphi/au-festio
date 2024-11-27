@@ -33,6 +33,9 @@ export async function PUT(request, { params }) {
     const longitude = formData.get("longitude");
 
     const poster = formData.get("poster");
+    const posterName = formData.get("posterName");
+    const qr = formData.get("qr");
+    const qrName = formData.get("qrName");
     const seats = formData.get('seats')? Number(formData.get('seats')): undefined;
 
     const updatedData = {
@@ -44,10 +47,16 @@ export async function PUT(request, { params }) {
       latitude,
       longitude,
       seats,
+      posterName,
+      qrName,
     };
 
     if (poster) {
       updatedData.poster = await uploadFile(poster, "posters");
+    }
+
+    if (qr){
+      updatedData.qr = await uploadFile(qr,"QR");
     }
 
     // Update the event with the new data

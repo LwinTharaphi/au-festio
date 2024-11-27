@@ -10,11 +10,6 @@ export const config = {
     bodyParser: false,
   },
 };
-// Decode binary base64 string to standard base64 string
-const decodeBase64Binary = (binaryData) => {
-  const base64String = binaryData.toString('base64');
-  return `data:image/jpg;base64,${base64String}`; // Assuming the image is a jpeg
-};
 
 export async function GET(request) {
   await dbConnect();
@@ -23,7 +18,7 @@ export async function GET(request) {
   // Map through events to process the poster field
   const eventsWithPoster = events.map(event => {
     // Log the entire event object to check its structure
-    console.log('Event:', event);
+    // console.log('Event:', event);
 
      // Check if 'poster' exists in the event
      const posterPath = event.poster; // The relative path stored in the database
@@ -32,15 +27,25 @@ export async function GET(request) {
      } else {
        console.log('Poster Path:', posterPath);
      }
+
+     const qrPath = event.qr;
+     if(!qrPath){
+      console.log('No qr found for event:',event._id);
+     } else {
+      console.log('QR Path:', qrPath);
+     }
  
      // Construct the full URL based on the relative path stored in the database
      const posterUrl = `http://localhost:3000/${posterPath}`; // Use your server URL here
  
      console.log('Poster URL:', posterUrl);
+
+     const qrUrl = `http://localhost:3000/${qrPath}`;
  
      return {
        ...event.toObject(),
        poster: posterUrl, // Attach the URL to the poster field
+       qr: qrUrl,
      };
   });
 
@@ -66,9 +71,11 @@ export async function POST(req) {
 
     // Extract files from the form data
     const poster = formData.get('poster');
+    const qr = formData.get('qr');
 
     // Handle file uploads (adjust to your specific storage strategy)
     const posterPath = poster ? await uploadFile(poster, 'posters') : null;
+    const qrPath = qr ? await uploadFile(qr,'QR') : null;
     const seats = formData.get('seats')? Number(formData.get('seats')): undefined;
 
     // Create event object
@@ -82,6 +89,8 @@ export async function POST(req) {
       longitude,
       poster: posterPath,
       posterName: poster ? poster.name : null,
+      qr: qrPath,
+      qrName: qr ? qr.name : null,
       seats,
     };
 
