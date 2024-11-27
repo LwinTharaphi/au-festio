@@ -12,7 +12,7 @@ export default function AdminDashboard() {
     return (
         <div style={styles.container}>
             {/* Sidebar */}
-            <div>
+            <div style={styles.sidebar}>
                 <Sidebar />
             </div>
 
@@ -32,6 +32,12 @@ const styles = {
         display: 'flex',
         height: '100vh',
         backgroundColor: '#f4f4f9',
+    },
+    sidebar: {
+        width: '250px', // Fixed width for the sidebar
+        backgroundColor: '#ffffff',
+        boxShadow: '2px 0 5px rgba(0,0,0,0.1)',
+        padding: '20px',
     },
     mainContent: {
         flex: 1, // Main content takes the remaining space

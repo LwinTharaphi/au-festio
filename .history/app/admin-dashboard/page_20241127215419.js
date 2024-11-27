@@ -12,7 +12,7 @@ export default function AdminDashboard() {
     return (
         <div style={styles.container}>
             {/* Sidebar */}
-            <div>
+            <div style={styles.sidebar}>
                 <Sidebar />
             </div>
 

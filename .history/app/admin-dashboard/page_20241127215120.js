@@ -11,18 +11,11 @@ export default function AdminDashboard() {
 
     return (
         <div style={styles.container}>
-            {/* Sidebar */}
-            <div>
-                <Sidebar />
-            </div>
+            <h1 style={styles.heading}>Admin Dashboard</h1>
 
-            {/* Main Content */}
-            <div style={styles.mainContent}>
-                <h1 style={styles.heading}>Admin Dashboard</h1>
-                <button style={styles.button} onClick={handleLogout}>
-                    Logout
-                </button>
-            </div>
+            <button style={styles.button} onClick={handleLogout}>
+                Logout
+            </button>
         </div>
     );
 }
@@ -30,16 +23,11 @@ export default function AdminDashboard() {
 const styles = {
     container: {
         display: 'flex',
-        height: '100vh',
-        backgroundColor: '#f4f4f9',
-    },
-    mainContent: {
-        flex: 1, // Main content takes the remaining space
-        padding: '20px',
-        display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
+        height: '100vh',
+        backgroundColor: '#f4f4f9',
     },
     heading: {
         marginBottom: '20px',
