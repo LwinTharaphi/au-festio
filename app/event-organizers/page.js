@@ -17,6 +17,7 @@ export default function EventOrganizersPage() {
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [editOrganizerId, setEditOrganizerId] = useState(null);
+  const [refresh, setRefresh] = useState(false); // Trigger re-fetch
 
   // Fetch organizers data
   useEffect(() => {
@@ -32,13 +33,15 @@ export default function EventOrganizersPage() {
       }
     };
     fetchOrganizers();
-  }, []);
+  }, [refresh]);
+
+  const refreshEvents = () => setRefresh(!refresh);
 
   // Handle form submission to add or update organizer
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!name || !emial || !password || !phone) {
+    if (!name || !email || !password || !phone) {
       setError("Please fill in all fields.");
       return;
     }
@@ -64,6 +67,7 @@ export default function EventOrganizersPage() {
           )
         );
         setEditOrganizerId(null);
+        refreshEvents();
       } else {
         // Add new organizer
         response = await fetch(`/api/event-organizers`, {
@@ -76,6 +80,7 @@ export default function EventOrganizersPage() {
         if (!response.ok) throw new Error("Failed to add organizer.");
         const newOrganizer = await response.json();
         setOrganizers((prev) => [...prev, newOrganizer]);
+        refreshEvents();
       }
 
       // Reset form fields
@@ -93,6 +98,7 @@ export default function EventOrganizersPage() {
     try {
       await fetch(`/api/event-organizers/${organizerId}`, { method: "DELETE" });
       setOrganizers(organizers.filter((org) => org._id !== organizerId));
+      refreshEvents();
     } catch (err) {
       setError("Failed to delete organizer.");
     }
@@ -100,10 +106,10 @@ export default function EventOrganizersPage() {
 
   // Handle edit organizer
   const handleEdit = (organizer) => {
-    setName(organizer.name);
-    setEmail(organizer.email);
-    setPassword(organizer.password);
-    setPhone(organizer.phone);
+    setName(organizer.name || "");
+    setEmail(organizer.email || "");
+    setPassword(organizer.password || "");
+    setPhone(organizer.phone || "");
     setEditOrganizerId(organizer._id);
   };
 
@@ -174,6 +180,7 @@ export default function EventOrganizersPage() {
                 <tr>
                   <th>No.</th>
                   <th>Organizer Name</th>
+                  <th>Email</th>
                   <th>Password</th>
                   <th>Phone Number</th>
                   <th>Actions</th>
@@ -182,7 +189,7 @@ export default function EventOrganizersPage() {
               <tbody>
                 {organizers.length > 0 ? (
                   organizers.map((organizer, index) => (
-                    <tr key={organizer._id}>
+                    <tr key={index}>
                       <td>{index + 1}</td>
                       <td>{organizer.name}</td>
                       <td>{organizer.email}</td>

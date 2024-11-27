@@ -1,11 +1,11 @@
 import EventOrganizer from "@/models/EventOrganizer";
 import dbConnect from "@/lib/db";
 
-// GET: Fetch a specific organizers by organizerId and event ID
+// GET: Fetch a specific organizers by id and event ID
 export async function GET(request, { params }) {
   await dbConnect();
-  const { organizerId } = params; // Event ID and Performance ID from URL parameters
-  const organizers = await EventOrganizer.findOne({ _id: organizerId});
+  const { id } = await params; // Event ID and Performance ID from URL parameters
+  const organizers = await EventOrganizer.findOne({ _id: id});
   
   if (!organizers) {
     return new Response("Organizers not found", { status: 404 });
@@ -15,30 +15,67 @@ export async function GET(request, { params }) {
 }
 
 // PUT: Update an existing organizers
-export async function PUT(request, { params }) {
-  await dbConnect();
-  const { organizerId } = await params; // Event ID and Performance ID from URL parameters
-  const data = await request.json();
-  
-  const updatedOrganizers = await EventOrganizer.findOneAndUpdate(
-    { _id: organizerId}, // Find organizers by ID and event ID
-    data,
-    { new: true } // Return the updated document
-  );
-  
-  if (!updatedOrganizers) {
-    return new Response("Organizers not found", { status: 404 });
-  }
+import bcrypt from 'bcryptjs';
 
-  return new Response(JSON.stringify(updatedOrganizers), { status: 200 });
+export async function PUT(request, { params }) {
+  try {
+    // Ensure database connection
+    await dbConnect();
+
+    // Extract ID from URL parameters
+    const { id } = params;
+    if (!id) {
+      return new Response(
+        JSON.stringify({ error: "Organizer ID is required" }),
+        { status: 400 }
+      );
+    }
+
+    // Parse the request body
+    const data = await request.json();
+
+    // If the password field exists, hash it
+    if (data.password) {
+      data.password = await bcrypt.hash(data.password, 10);
+    }
+
+    // Update the organizer document
+    const updatedOrganizer = await EventOrganizer.findByIdAndUpdate(
+      id,           // Match the document by ID
+      data,         // Update fields with the provided data
+      { new: true } // Return the updated document
+    );
+
+    // Handle case where organizer is not found
+    if (!updatedOrganizer) {
+      return new Response(
+        JSON.stringify({ error: "Organizer not found" }),
+        { status: 404 }
+      );
+    }
+
+    // Return the updated document
+    return new Response(JSON.stringify(updatedOrganizer), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    console.error("Error in PUT API:", error); // Log the error for debugging
+    return new Response(
+      JSON.stringify({ error: `Internal Server Error: ${error.message}` }),
+      { status: 500 }
+    );
+  }
 }
+
 
 // DELETE: Delete a specific organizers
 export async function DELETE(request, { params }) {
   await dbConnect();
-  const { organizerId } = await params; // Event ID and Performance ID from URL parameters
+  const { id } = await params; // Event ID and Performance ID from URL parameters
+  console.log(id)
   
-  const deletedOrganizers = await EventOrganizer.findOneAndDelete({ _id: organizerId});
+  const deletedOrganizers = await EventOrganizer.findByIdAndDelete(id);
   
   if (!deletedOrganizers) {
     return new Response("Performance not found", { status: 404 });
