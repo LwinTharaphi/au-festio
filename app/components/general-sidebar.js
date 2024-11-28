@@ -1,13 +1,17 @@
 import React from "react";
-import { useRouter } from "next/navigation"; // Fix: use correct Next.js router import
+import { useRouter, useParams } from "next/navigation"; // Fix: use correct Next.js router import
 import { Nav, Navbar } from "react-bootstrap";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Sidebar.css';
-import { BsPeople, BsPerson, BsBoxArrowRight, BsBell, BsLock } from "react-icons/bs"; // Add icons
+import { BsGrid, BsPeople, BsPerson, BsBoxArrowRight, BsBell, BsLock } from "react-icons/bs"; // Add icons
 
 
 export default function Sidebar() {
   const router = useRouter();
+  const { id } = useParams();
+  if (!id) {
+    return <p>Loading...</p>; // Show a loading state if the ID is not available
+  }
 
   return (
     <Navbar expand="lg" className="flex-column sidebar">
@@ -24,9 +28,16 @@ export default function Sidebar() {
       </Navbar.Brand>
 
       <Nav className="flex-column">
+      <Nav.Link
+          onClick={() => id && router.push(`/organizers/${id}/general-dashboard`)}
+          className="sidebar-link my-2"
+        >
+          <BsGrid className="me-2" /> Dashboard
+        </Nav.Link>
+
         {/* Profile */}
         <Nav.Link
-          onClick={() => router.push(`/profile`)}
+          onClick={() => id && router.push(`/organizers/${id}/profile`)}
           className="sidebar-link my-2"
         >
           <BsPerson className="me-2" /> Profile
@@ -34,7 +45,7 @@ export default function Sidebar() {
 
         {/* Change Password */}
         <Nav.Link
-          onClick={() => router.push(`/change-password`)}
+          onClick={() => router.push(`/organizers/${id}/change-password`)}
           className="sidebar-link my-2"
         >
           <BsLock className="me-2" /> Password

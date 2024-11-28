@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import Sidebar from "../components/general-sidebar"; // Sidebar import
+import Sidebar from "../../../components/general-sidebar"; // Sidebar import
 import { Container, Row, Col, Card, Button, Form } from "react-bootstrap"; // React Bootstrap components
 
 export default function ChangePassword() {
