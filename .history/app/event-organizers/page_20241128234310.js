@@ -181,9 +181,9 @@ export default function EventOrganizersPage() {
                     <div
                       style={{
                         position: "absolute",
-                        right: "30px",
+                        right: "20px",
                         top: "50%",
-                        transform: "translateY(0%)",
+                        transform: "translateY(-50%)",
                         cursor: "pointer",
                       }}
                       onClick={togglePasswordVisibility}

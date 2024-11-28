@@ -1,6 +1,5 @@
 import EventOrganizer from "@/models/EventOrganizer";
 import dbConnect from "@/lib/db";
-import { encrypt, decrypt } from "../route";
 
 // GET: Fetch a specific organizers by id and event ID
 export async function GET(request, { params }) {
@@ -12,17 +11,11 @@ export async function GET(request, { params }) {
     return new Response("Organizers not found", { status: 404 });
   }
 
-  // Decrypt password before returning
-  const decryptedPassword = decrypt(`${organizers.iv}:${organizers.password}`);
-  const responseData = {
-    ...organizers.toObject(),
-    password: decryptedPassword, // Replace encrypted password with decrypted one
-  };
-
-  return new Response(JSON.stringify(responseData), { status: 200 });
+  return new Response(JSON.stringify(organizers), { status: 200 });
 }
 
 // PUT: Update an existing organizers
+import bcrypt from 'bcryptjs';
 
 export async function PUT(request, { params }) {
   try {
@@ -30,7 +23,7 @@ export async function PUT(request, { params }) {
     await dbConnect();
 
     // Extract ID from URL parameters
-    const { id } = await params;
+    const { id } = params;
     if (!id) {
       return new Response(
         JSON.stringify({ error: "Organizer ID is required" }),
@@ -43,10 +36,7 @@ export async function PUT(request, { params }) {
 
     // If the password field exists, hash it
     if (data.password) {
-      // data.password = await bcrypt.hash(data.password, 10);
-      const encrypted = encrypt(data.password);
-      data.password = encrypted.split(":")[1];
-      data.iv = encrypted.split(":")[0];
+      data.password = await bcrypt.hash(data.password, 10);
     }
 
     // Update the organizer document

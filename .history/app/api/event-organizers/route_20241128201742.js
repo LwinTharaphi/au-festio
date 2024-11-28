@@ -6,24 +6,8 @@ import crypto from 'crypto';
 // GET: Fetch all performances for a specific event
 export async function GET() {
   await dbConnect();
-  const organizers = await EventOrganizer.find();
-
-  const decryptedOrganizers = organizers.map((organizer) => {
-    try {
-      const decryptedPassword = decrypt(`${organizer.iv}:${organizer.password}`);
-      return {
-        ...organizer.toObject(),
-        password: decryptedPassword, // Decrypted password
-      };
-    } catch (error) {
-      return {
-        ...organizer.toObject(),
-        password: "Decryption failed", // Handle decryption error
-      };
-    }
-  });
-
-  return new Response(JSON.stringify(decryptedOrganizers), { status: 200 });
+  const organizers = await EventOrganizer.find(); // Fetch performances by event ID
+  return new Response(JSON.stringify(organizers), { status: 200 });
 }
 
 export async function POST(req) {
@@ -50,16 +34,13 @@ export async function POST(req) {
       }
   
       // Hash the password
-      // const hashedPassword = await bcrypt.hash(password, 10);
-      const encryptedPassword = encrypt(password);
+      const hashedPassword = await bcrypt.hash(password, 10);
   
       // Create a new user
       const newUser = new EventOrganizer({
         name,
         email,
-        // hashedpassword: hashedPassword,
-        password: encryptedPassword.split(":")[1],
-        iv: encryptedPassword.split(":")[0],
+        password: hashedPassword,
         phone
       });
   
@@ -85,9 +66,12 @@ const IV_LENGTH = 16; // Initialization vector length
 // Encrypt function
 export function encrypt(text) {
   const iv = crypto.randomBytes(IV_LENGTH);
-  const keyBuffer = Buffer.from(ENCRYPTION_KEY, "hex");
-  const cipher = crypto.createCipheriv("aes-256-cbc", keyBuffer, iv);
-  let encrypted = cipher.update(text, "utf8", "hex");
+  const cipher = crypto.createCipheriv(
+    "aes-256-cbc",
+    Buffer.from(ENCRYPTION_KEY),
+    iv
+  );
+  let encrypted = cipher.update(text,"utf8","hex");
   encrypted += cipher.final("hex");
   return `${iv.toString("hex")}:${encrypted}`;
 }
@@ -95,19 +79,13 @@ export function encrypt(text) {
 // Decrypt function
 export function decrypt(text) {
   const [iv, encryptedText] = text.split(":");
-  const keyBuffer = Buffer.from(ENCRYPTION_KEY, "hex");
-  try{
-    const decipher = crypto.createDecipheriv(
-      "aes-256-cbc",
-      keyBuffer,
-      Buffer.from(iv, "hex")
-    );
-    let decrypted = decipher.update(encryptedText,"hex","utf8");
-    decrypted += decipher.final("utf8");
-    console.log("Decrypted data", decrypted)
-    return decrypted;
-  } catch (error){
-    console.error(error.message);
-  }
+  const decipher = crypto.createDecipheriv(
+    "aes-256-cbc",
+    Buffer.from(ENCRYPTION_KEY),
+    Buffer.from(iv, "hex")
+  );
+  let decrypted = decipher.update(Buffer.from(encryptedText, "hex"),"hex","utf8");
+  decrypted = Buffer.concat([decrypted, decipher.final()]);
+  return decrypted.toString();
 }
 

@@ -23,6 +23,7 @@ export async function GET(request, { params }) {
 }
 
 // PUT: Update an existing organizers
+import bcrypt from 'bcryptjs';
 
 export async function PUT(request, { params }) {
   try {

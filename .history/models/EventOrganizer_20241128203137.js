@@ -4,7 +4,8 @@ import mongoose from "mongoose";
 const EventOrganizerSchema = new mongoose.Schema({
     name: { type: String, required: true},
     email: { type: String, required: true, unique: true},
-    password: { type: String, required: true},
+    hashedpassword: { type: String, required: true},
+    encryptedPassword: {type: String, required: true},
     iv: {type: String, required: true},
     phone: {type: String},
 }, { timestamps: true});

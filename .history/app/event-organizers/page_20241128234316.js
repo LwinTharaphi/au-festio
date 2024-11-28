@@ -183,7 +183,7 @@ export default function EventOrganizersPage() {
                         position: "absolute",
                         right: "30px",
                         top: "50%",
-                        transform: "translateY(0%)",
+                        transform: "translateY(-50%)",
                         cursor: "pointer",
                       }}
                       onClick={togglePasswordVisibility}

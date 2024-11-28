@@ -23,6 +23,7 @@ export async function GET(request, { params }) {
 }
 
 // PUT: Update an existing organizers
+import bcrypt from 'bcryptjs';
 
 export async function PUT(request, { params }) {
   try {
@@ -30,7 +31,7 @@ export async function PUT(request, { params }) {
     await dbConnect();
 
     // Extract ID from URL parameters
-    const { id } = await params;
+    const { id } = params;
     if (!id) {
       return new Response(
         JSON.stringify({ error: "Organizer ID is required" }),

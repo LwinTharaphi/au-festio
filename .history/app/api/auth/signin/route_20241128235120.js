@@ -19,7 +19,7 @@ export async function POST(req) {
     }
 
     // Check the password
-    const decryptedPassword = decrypt(`${organizer.iv}:${organizer.password}`);
+    const decryptedPassword = decrypt(organizer.password,organizer.iv);
 
     if (password !== decryptedPassword){
       return new Response(

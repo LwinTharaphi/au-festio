@@ -19,14 +19,15 @@ export async function POST(req) {
     }
 
     // Check the password
-    const decryptedPassword = decrypt(`${organizer.iv}:${organizer.password}`);
-
-    if (password !== decryptedPassword){
+    const decryptedPassword = decrypt(organizer.password,organizer.iv);
+    const isMatch = await bcrypt.compare(password, organizer.password);
+    if (!isMatch) {
       return new Response(
-        JSON.stringify({ error: 'Wrong Password'}),
-        { status: 401}
+        JSON.stringify({ error: 'Invalid email or password' }),
+        { status: 401 }
       );
     }
+
     // Return success with only the required fields
     const responseOrganizer = {
       id: organizer._id.toString(),

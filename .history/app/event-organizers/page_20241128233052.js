@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Container, Row, Col, Table, Button, Alert, Form } from "react-bootstrap";
-import { FaTrash, FaEdit, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaTrash, FaEdit } from "react-icons/fa";
 import Sidebar from "../components/admin_sidebar";
 import FormField from "../components/FormField";
 
@@ -98,7 +98,6 @@ export default function EventOrganizersPage() {
       setPassword("");
       setPhone("");
       setShowPassword(false);
-      setEditingPassword(false); // Ensure the eye button reappears after update
     } catch (err) {
       setError(err.message);
     }
@@ -125,12 +124,6 @@ export default function EventOrganizersPage() {
     setEditingPassword(true); // Set flag to indicate we're editing
   };
 
-  // Handle password visibility toggle
-  const togglePasswordVisibility = () => {
-    if (!editingPassword) {
-      setShowPassword((prev) => !prev); // Toggle password visibility
-    }
-  };
   return (
     <Container fluid>
       <Row>
@@ -168,7 +161,7 @@ export default function EventOrganizersPage() {
                     onChange={setEmail}
                 />
                 </Col>
-                <Col md={4} style={{ position: "relative" }}> {/* Add relative positioning */}
+                <Col md={4}>
                   <FormField
                     title="Password"
                     type={showPassword ? "text" : "password"} // Toggle based on state
@@ -176,21 +169,6 @@ export default function EventOrganizersPage() {
                     value={password}
                     onChange={setPassword}
                   />
-                  {/* Eye icon to toggle password visibility */}
-                  {!editingPassword && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        right: "30px",
-                        top: "50%",
-                        transform: "translateY(0%)",
-                        cursor: "pointer",
-                      }}
-                      onClick={togglePasswordVisibility}
-                    >
-                      {showPassword ? <FaEyeSlash /> : <FaEye />}
-                    </div>
-                  )}
                 </Col>
                 <Col md={4}>
                   <FormField

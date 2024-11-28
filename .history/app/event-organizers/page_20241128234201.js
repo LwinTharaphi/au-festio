@@ -168,7 +168,7 @@ export default function EventOrganizersPage() {
                     onChange={setEmail}
                 />
                 </Col>
-                <Col md={4} style={{ position: "relative" }}> {/* Add relative positioning */}
+                <Col md={4}>
                   <FormField
                     title="Password"
                     type={showPassword ? "text" : "password"} // Toggle based on state
@@ -181,9 +181,8 @@ export default function EventOrganizersPage() {
                     <div
                       style={{
                         position: "absolute",
-                        right: "30px",
-                        top: "50%",
-                        transform: "translateY(0%)",
+                        right: "20px",
+                        top: "40px",
                         cursor: "pointer",
                       }}
                       onClick={togglePasswordVisibility}
