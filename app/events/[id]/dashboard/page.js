@@ -103,6 +103,7 @@ export default function Dashboard() {
         {/* Main Content */}
         <Col xs={10} className="main-content p-4">
           <Breadcrumb>
+            <Breadcrumb.Item href="/create-event">Create Events</Breadcrumb.Item>
             <Breadcrumb.Item href="/events">Events</Breadcrumb.Item>
             <Breadcrumb.Item active>{event.eventName}</Breadcrumb.Item>
           </Breadcrumb>
