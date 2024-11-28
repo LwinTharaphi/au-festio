@@ -53,7 +53,7 @@ export default function Sidebar() {
 
         {/* Events */}
         <Nav.Link
-          onClick={() => router.push(`/create-event`)}
+          onClick={() => router.push(`/organizers/${id}/create-event`)}
           className="sidebar-link my-2"
         >
           <BsPeople className="me-2" /> Events

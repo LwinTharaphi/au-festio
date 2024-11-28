@@ -5,13 +5,13 @@ import { Box, Button, Paper, Typography, TextField,
   CardActionArea, CardMedia,
   Grid, Menu, MenuItem,
   Fab, Modal} from '@mui/material';
-import FormField from '../components/FormField';
+import FormField from '../../../components/FormField';
 import CloseIcon from '@mui/icons-material/Close';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useRouter } from 'next/navigation';
 import AddIcon from '@mui/icons-material/Add';
 import dayjs from 'dayjs';
-import Sidebar from '../components/general-sidebar';
+import Sidebar from '../../../components/general-sidebar';
 
 function EventForm() {
   const router = useRouter();

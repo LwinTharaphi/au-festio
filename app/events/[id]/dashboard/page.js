@@ -108,18 +108,19 @@ export default function Dashboard() {
             <Breadcrumb.Item active>{event.eventName}</Breadcrumb.Item>
           </Breadcrumb>
           <div className="d-flex aligh-items-center justify-content-between">
-            <h1 className="display-5 mb-4 text-primary">
+            <h3 className="display-5 mb-4 text-primary">
               {event.eventName} Dashboard
-            </h1>
+            </h3>
             <Button variant="primary"
-              className="ms-3"
+              className="ms-2"         
               onClick={()=> route.push(`/events/${id}/feedbacks`)}>
                 View FeedBacks</Button>
           </div>
+          <p></p>
 
           {/* Statistics Cards */}
           <Row className="mb-4 g-4">
-            <Col md={4}>
+            <Col md={3}>
               <Card className="text-center shadow-sm">
                 <Card.Body>
                   <BsPeopleFill size={30} className="mb-2 text-primary" />
@@ -132,7 +133,7 @@ export default function Dashboard() {
                 </Card.Body>
               </Card>
             </Col>
-            <Col md={4}>
+            <Col md={3}>
               <Card className="text-center shadow-sm">
                 <Card.Body>
                   <BsShop size={30} className="mb-2 text-success" />
@@ -145,7 +146,7 @@ export default function Dashboard() {
                 </Card.Body>
               </Card>
             </Col>
-            <Col md={4}>
+            <Col md={3}>
               <Card className="text-center shadow-sm">
                 <Card.Body>
                   <BsCheckCircle size={30} className="mb-2 text-info" />
@@ -154,6 +155,23 @@ export default function Dashboard() {
                   </Card.Title>
                   <Card.Text style={{ fontSize: "1.5rem" }}>
                     {stats.checkIns}
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={3}>
+              <Card className="text-center shadow-sm">
+                <Card.Body>
+                  {/* Centered Big Star */}
+                    <BsStarFill size={30} className="mb-2 text-warning" />
+                  {/* Card Title */}
+                  <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
+                    Average Rating
+                  </Card.Title>
+                  
+                  {/* Rating Value */}
+                  <Card.Text style={{ fontSize: "1.5rem" }}>
+                    {averageRating.toFixed(1)}
                   </Card.Text>
                 </Card.Body>
               </Card>
@@ -250,26 +268,7 @@ export default function Dashboard() {
             </Col>
           </Row>
           <Row>
-            <Col md={4}>
-              <Card className="text-center shadow-sm">
-                <Card.Body className="d-flex flex-column align-items-center justify-content-center">
-                  {/* Centered Big Star */}
-                  <div className="mb-3">
-                    <BsStarFill size={50} className="text-warning" />
-                  </div>
-                  
-                  {/* Card Title */}
-                  <Card.Title style={{ fontSize: "1.25rem", fontWeight: "bold" }}>
-                    Average Rating
-                  </Card.Title>
-                  
-                  {/* Rating Value */}
-                  <Card.Text style={{ fontSize: "1.5rem", fontWeight: "normal" }}>
-                    {averageRating.toFixed(1)}
-                  </Card.Text>
-                </Card.Body>
-              </Card>
-            </Col>
+            
           </Row>
 
         </Col>
