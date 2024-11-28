@@ -79,7 +79,7 @@ export default function FeedbackPage() {
         setError(err.message);
       }
     };
-  
+
     fetchEventsList();
   }, []);
 
@@ -90,25 +90,40 @@ export default function FeedbackPage() {
   return (
     <div style={{ padding: "20px" }}>
       {error && <p style={{ color: "red" }}>{error}</p>}
+      <button
+        onClick={() => router.back()}
+        style={{
+          marginBottom: "20px",
+          padding: "10px 20px",
+          fontSize: "1rem",
+          backgroundColor: "#007bff",
+          color: "white",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+        }}
+      >
+        Back To the {eventName}
+      </button>
       <h4 style={{ marginBottom: "20px", fontSize: "2rem" }}>
         Feedbacks for {eventName}
       </h4>
       <Dropdown className="mb-4" style={{ textAlign: "right" }}>
-              <Dropdown.Toggle variant="secondary" id="dropdown-basic">
-                Select Event
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
-                {eventsList.length > 0 ? (
-                  eventsList.map((event) => (
-                    <Dropdown.Item key={event._id} onClick={() => handleEventChange(event._id)}>
-                      {event.eventName}
-                    </Dropdown.Item>
-                  ))
-                ) : (
-                  <Dropdown.Item disabled>No events found</Dropdown.Item>
-                )}
-              </Dropdown.Menu>
-            </Dropdown>
+        <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+          Select Event
+        </Dropdown.Toggle>
+        <Dropdown.Menu>
+          {eventsList.length > 0 ? (
+            eventsList.map((event) => (
+              <Dropdown.Item key={event._id} onClick={() => handleEventChange(event._id)}>
+                {event.eventName}
+              </Dropdown.Item>
+            ))
+          ) : (
+            <Dropdown.Item disabled>No events found</Dropdown.Item>
+          )}
+        </Dropdown.Menu>
+      </Dropdown>
       {feedbacks.length > 0 ? (
         feedbacks.map((feedback) => (
           <div
