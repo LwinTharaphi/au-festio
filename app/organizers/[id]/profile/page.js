@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams,useRouter } from "next/navigation"; // Import useRouter to get the dynamic id from the URL
 import { Container, Row, Col, Card, Image, Alert } from "react-bootstrap";
-import Sidebar from "../components/general-sidebar"; // Sidebar import
+import Sidebar from "../../../components/general-sidebar"; // Sidebar import
 
 export default function Profile() {
   const [organizer, setOrganizer] = useState(null);

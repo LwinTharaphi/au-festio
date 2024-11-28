@@ -34,9 +34,13 @@ export default function OrganizerLogin() {
         setMessage(data.message || 'Success!');
         setError('');
         if (!isSignUp) {
+          const { user } = data;
+          if (user && user.id){
+            console.log('User signed in:', data.user);
+            router.push(`/organizers/${user.id}/general-dashboard`);
+          }
           // Handle successful sign-in (e.g., redirect to dashboard)
-          console.log('User signed in:', data.user);
-          router.push('/general-dashboard');
+          
         }
       }
     } catch (err) {
