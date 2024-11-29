@@ -30,7 +30,6 @@ export default function BoothPage() {
     boothNumber: "",
     boothName: "",
     vendorName: "",
-    status: "Available", // Default status
   }); // State for new/edit booth data
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
 
@@ -106,7 +105,7 @@ export default function BoothPage() {
       }
 
       setShowModal(false);
-      setFormBooth({ boothNumber: "", boothName: "", vendorName: "", status: "Available" });
+      setFormBooth({ boothNumber: "", boothName: "", vendorName: ""});
       setEditMode(false);
     } catch (err) {
       setError(err.message);
@@ -162,7 +161,6 @@ export default function BoothPage() {
       boothNumber: booth.boothNumber,
       boothName: booth.boothName,
       vendorName: booth.vendorName,
-      status: booth.status,
     });
     setShowModal(true);
   };
@@ -241,24 +239,7 @@ export default function BoothPage() {
                       >
                         <Card.Body>
                           <Card.Title>Booth {booth.boothNumber}</Card.Title>
-                          <Card.Text>Status: {booth.status}</Card.Text>
                           <Card.Text>Vendor: {booth.vendorName}</Card.Text>
-                          <Dropdown>
-                            <Dropdown.Toggle variant="info" size="sm">
-                              Change Status
-                            </Dropdown.Toggle>
-                            <Dropdown.Menu>
-                              <Dropdown.Item onClick={() => handleUpdateStatus(booth.boothId, "Occupied")}>
-                                Occupied
-                              </Dropdown.Item>
-                              <Dropdown.Item onClick={() => handleUpdateStatus(booth.boothId, "Available")}>
-                                Available
-                              </Dropdown.Item>
-                              <Dropdown.Item onClick={() => handleUpdateStatus(booth.boothId, "Not Checked")}>
-                                Not Checked
-                              </Dropdown.Item>
-                            </Dropdown.Menu>
-                          </Dropdown>
                           <Button
                             variant="primary"
                             size="sm"
@@ -292,7 +273,6 @@ export default function BoothPage() {
                           boothNumber: "",
                           boothName: "",
                           vendorName: "",
-                          status: "Available",
                         });
                         setShowModal(true);
                       }}
@@ -324,8 +304,6 @@ export default function BoothPage() {
                         <strong>Booth Name:</strong> {selectedBooth.boothName || "N/A"}
                         <br />
                         <strong>Vendor Name:</strong> {selectedBooth.vendorName}
-                        <br />
-                        <strong>Status:</strong> {selectedBooth.status}
                         <br />
                         <strong>Registered On:</strong>{" "}
                         {new Date(selectedBooth.registerationTime).toLocaleString()}
@@ -377,19 +355,6 @@ export default function BoothPage() {
                 value={formBooth.vendorName}
                 onChange={handleInputChange}
               />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Status</Form.Label>
-              <Form.Control
-                as="select"
-                name="status"
-                value={formBooth.status}
-                onChange={handleInputChange}
-              >
-                <option value="Available">Available</option>
-                <option value="Occupied">Occupied</option>
-                <option value="Not Checked">Not Checked</option>
-              </Form.Control>
             </Form.Group>
           </Form>
         </Modal.Body>
