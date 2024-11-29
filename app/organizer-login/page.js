@@ -50,8 +50,8 @@ export default function OrganizerLogin() {
 
   return (
     <div className="container">
-      <h1>Welcome to Event Organizer</h1>
-      <h2>{isSignUp ? 'Sign Up' : 'Sign In'}</h2>
+      <h3>Welcome to Event Organizer</h3>
+      <h4>{isSignUp ? 'Sign Up' : 'Sign In'}</h4>
 
       <form onSubmit={handleSubmit}>
         {isSignUp && (

@@ -43,7 +43,10 @@ export default function EventOrganizersPage() {
 
   // Mask password function
   const maskPassword = (password) => {
-    return "•".repeat(password.length); // Mask password with dots
+    if (!password) {
+      return ""; // Return empty string if no password
+    }
+    return "•".repeat(password.length); // Mask the password
   };
 
   // Handle form submission to add or update organizer

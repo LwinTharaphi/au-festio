@@ -79,13 +79,6 @@ export default function Sidebar({ event }) {
         >
           <BsBell className="me-2" />Notification
         </Nav.Link>
-        {/* Logout */}
-        <Nav.Link
-          onClick={() => router.push(`/`)}
-          className="sidebar-link my-2 text-danger"
-        >
-          <BsBoxArrowRight className="me-2" /> Logout
-        </Nav.Link>
       </Nav>
     </Navbar>
   );

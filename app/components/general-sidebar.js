@@ -43,28 +43,12 @@ export default function Sidebar() {
           <BsPerson className="me-2" /> Profile
         </Nav.Link>
 
-        {/* Change Password */}
-        <Nav.Link
-          onClick={() => router.push(`/organizers/${id}/change-password`)}
-          className="sidebar-link my-2"
-        >
-          <BsLock className="me-2" /> Password
-        </Nav.Link>
-
         {/* Events */}
         <Nav.Link
           onClick={() => router.push(`/organizers/${id}/create-event`)}
           className="sidebar-link my-2"
         >
           <BsPeople className="me-2" /> Events
-        </Nav.Link>
-
-        {/* Notifications */}
-        <Nav.Link
-          onClick={() => router.push(`/notifications`)} // If you have a notifications page
-          className="sidebar-link my-2"
-        >
-          <BsBell className="me-2" /> Notifications
         </Nav.Link>
 
         {/* Logout */}
