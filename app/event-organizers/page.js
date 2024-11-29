@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Container, Row, Col, Table, Button, Alert, Form } from "react-bootstrap";
+import { Container, Row, Col, Table, Button, Alert, Form, Modal} from "react-bootstrap";
 import { FaTrash, FaEdit, FaEye, FaEyeSlash } from "react-icons/fa";
 import Sidebar from "../components/admin_sidebar";
 import FormField from "../components/FormField";
@@ -18,6 +18,9 @@ export default function EventOrganizersPage() {
   const [phone, setPhone] = useState("");
   const [editOrganizerId, setEditOrganizerId] = useState(null);
   const [refresh, setRefresh] = useState(false); // Trigger re-fetch
+  // Modal state for delete confirmation
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [organizerToDelete, setOrganizerToDelete] = useState(null);
 
   // Show password toggle state for create form
   const [showPassword, setShowPassword] = useState(false); // State to control show/hide password
@@ -108,14 +111,25 @@ export default function EventOrganizersPage() {
   };
 
   // Handle delete organizer
-  const handleDelete = async (organizerId) => {
-    try {
-      await fetch(`/api/event-organizers/${organizerId}`, { method: "DELETE" });
-      setOrganizers(organizers.filter((org) => org._id !== organizerId));
-      refreshEvents();
-    } catch (err) {
-      setError("Failed to delete organizer.");
+  const handleDelete = async () => {
+    if (organizerToDelete){
+      try {
+        await fetch(`/api/event-organizers/${organizerToDelete}`, { method: "DELETE" });
+        setOrganizers(organizers.filter((org) => org._id !== organizerToDelete));
+        refreshEvents();
+      } catch (err) {
+        setError("Failed to delete organizer.");
+      } finally {
+        setShowDeleteModal(false);
+        setOrganizerToDelete(null);
+      }
     }
+    
+  };
+
+  const handleShowDeleteModal = (organizerId) => {
+    setOrganizerToDelete(organizerId);
+    setShowDeleteModal(true);
   };
 
   // Handle edit organizer
@@ -243,7 +257,7 @@ export default function EventOrganizersPage() {
                           />
                           <FaTrash
                             style={{ cursor: "pointer", color: "red" }}
-                            onClick={() => handleDelete(organizer._id)}
+                            onClick={() => handleShowDeleteModal(organizer._id)}
                           />
                         </div>
                       </td>
@@ -259,6 +273,24 @@ export default function EventOrganizersPage() {
           </Container>
         </Col>
       </Row>
+
+      {/* Delete Confirmation Modal */}
+      <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Delete</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Are you sure you want to delete this organizer? This action cannot be undone.
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={handleDelete}>
+            Delete
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 }
