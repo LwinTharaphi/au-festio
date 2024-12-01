@@ -1,8 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Container, Row, Col, Table, Button, Alert, Form, Modal} from "react-bootstrap";
-import { FaTrash, FaEdit, FaEye, FaEyeSlash } from "react-icons/fa";
+import { Container, Row, Col, Table, Button, Alert, Form, Modal } from "react-bootstrap";
+import { FaTrash, FaEdit, FaEye, FaEyeSlash, FaPlus } from "react-icons/fa";
 import Sidebar from "../components/admin_sidebar";
 import FormField from "../components/FormField";
 
@@ -18,13 +18,12 @@ export default function EventOrganizersPage() {
   const [phone, setPhone] = useState("");
   const [editOrganizerId, setEditOrganizerId] = useState(null);
   const [refresh, setRefresh] = useState(false); // Trigger re-fetch
-  // Modal state for delete confirmation
+  const [showFormModal, setShowFormModal] = useState(false);
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [organizerToDelete, setOrganizerToDelete] = useState(null);
 
-  // Show password toggle state for create form
-  const [showPassword, setShowPassword] = useState(false); // State to control show/hide password
-  const [editingPassword, setEditingPassword] = useState(false); // State to check if we're editing an organizer
+  const [showPassword, setShowPassword] = useState(false);
 
   // Fetch organizers data
   useEffect(() => {
@@ -44,15 +43,8 @@ export default function EventOrganizersPage() {
 
   const refreshEvents = () => setRefresh(!refresh);
 
-  // Mask password function
-  const maskPassword = (password) => {
-    if (!password) {
-      return ""; // Return empty string if no password
-    }
-    return "•".repeat(password.length); // Mask the password
-  };
+  const maskPassword = (password) => (password ? "•".repeat(password.length) : "");
 
-  // Handle form submission to add or update organizer
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -66,56 +58,35 @@ export default function EventOrganizersPage() {
     try {
       let response;
       if (editOrganizerId) {
-        // Update existing organizer
         response = await fetch(`/api/event-organizers/${editOrganizerId}`, {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(organizerData),
         });
         if (!response.ok) throw new Error("Failed to update organizer.");
-        const updatedOrganizer = await response.json();
-        setOrganizers((prev) =>
-          prev.map((org) =>
-            org._id === updatedOrganizer._id ? updatedOrganizer : org
-          )
-        );
-        setEditOrganizerId(null);
         refreshEvents();
       } else {
-        // Add new organizer
         response = await fetch(`/api/event-organizers`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(organizerData),
         });
         if (!response.ok) throw new Error("Failed to add organizer.");
-        const newOrganizer = await response.json();
-        setOrganizers((prev) => [...prev, newOrganizer]);
         refreshEvents();
       }
 
-      // Reset form fields
-      setName("");
-      setEmail("");
-      setPassword("");
-      setPhone("");
-      setShowPassword(false);
-      setEditingPassword(false); // Ensure the eye button reappears after update
+      // Reset form and close modal
+      resetForm();
+      setShowFormModal(false);
     } catch (err) {
       setError(err.message);
     }
   };
 
-  // Handle delete organizer
   const handleDelete = async () => {
-    if (organizerToDelete){
+    if (organizerToDelete) {
       try {
         await fetch(`/api/event-organizers/${organizerToDelete}`, { method: "DELETE" });
-        setOrganizers(organizers.filter((org) => org._id !== organizerToDelete));
         refreshEvents();
       } catch (err) {
         setError("Failed to delete organizer.");
@@ -124,7 +95,6 @@ export default function EventOrganizersPage() {
         setOrganizerToDelete(null);
       }
     }
-    
   };
 
   const handleShowDeleteModal = (organizerId) => {
@@ -132,99 +102,46 @@ export default function EventOrganizersPage() {
     setShowDeleteModal(true);
   };
 
-  // Handle edit organizer
   const handleEdit = (organizer) => {
-    setName(organizer.name || "");
-    setEmail(organizer.email || "");
-    setPassword(organizer.password || "");
-    setPhone(organizer.phone || "");
+    setName(organizer.name);
+    setEmail(organizer.email);
+    setPassword(organizer.password);
+    setPhone(organizer.phone);
     setEditOrganizerId(organizer._id);
-    setEditingPassword(true); // Set flag to indicate we're editing
+    setShowFormModal(true);
   };
 
-  // Handle password visibility toggle
-  const togglePasswordVisibility = () => {
-    if (!editingPassword) {
-      setShowPassword((prev) => !prev); // Toggle password visibility
-    }
+  const resetForm = () => {
+    setName("");
+    setEmail("");
+    setPassword("");
+    setPhone("");
+    setEditOrganizerId(null);
+    setShowPassword(false);
   };
+
+  const handleShowFormModal = () => {
+    setName("");
+    setEmail("");
+    setPassword("");
+    setPhone("");
+    setEditOrganizerId(null); // Ensure no organizer is being edited
+    setShowFormModal(true);
+  };
+  
+
+  const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
+
   return (
     <Container fluid>
       <Row>
-        {/* Sidebar */}
         <Col xs={3} md={2} className="sidebar">
           <Sidebar />
         </Col>
-
-        {/* Main Content */}
         <Col xs={9} md={10} className="main-content">
           <Container className="my-5">
             <h4>Event Organizers</h4>
-
-            {/* Error Display */}
             {error && <Alert variant="danger">{error}</Alert>}
-
-            {/* Form for Adding or Editing Organizer */}
-            <Form onSubmit={handleSubmit} className="mb-4">
-              <Row>
-                <Col md={4}>
-                  <FormField
-                    title="Organizer Name"
-                    type="text"
-                    placeholder="Enter name"
-                    value={name}
-                    onChange={setName}
-                  />
-                </Col>
-                <Col md={4}>
-                <FormField
-                    title="Email"
-                    type="text"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={setEmail}
-                />
-                </Col>
-                <Col md={4} style={{ position: "relative" }}> {/* Add relative positioning */}
-                  <FormField
-                    title="Password"
-                    type={showPassword ? "text" : "password"} // Toggle based on state
-                    placeholder="Enter password"
-                    value={password}
-                    onChange={setPassword}
-                  />
-                  {/* Eye icon to toggle password visibility */}
-                  {!editingPassword && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        right: "30px",
-                        top: "50%",
-                        transform: "translateY(0%)",
-                        cursor: "pointer",
-                      }}
-                      onClick={togglePasswordVisibility}
-                    >
-                      {showPassword ? <FaEyeSlash /> : <FaEye />}
-                    </div>
-                  )}
-                </Col>
-                <Col md={4}>
-                  <FormField
-                    title="Phone Number"
-                    type="text"
-                    placeholder="Enter phone number"
-                    value={phone}
-                    onChange={setPhone}
-                  />
-                </Col>
-              </Row>
-              <Button variant="primary" type="submit">
-                {editOrganizerId ? "Update Organizer" : "Add Organizer"}
-              </Button>
-            </Form>
-
-            {/* Table for Organizers List */}
             <Table striped bordered hover>
               <thead>
                 <tr>
@@ -248,11 +165,7 @@ export default function EventOrganizersPage() {
                       <td>
                         <div style={{ display: "flex", alignItems: "center" }}>
                           <FaEdit
-                            style={{
-                              cursor: "pointer",
-                              color: "blue",
-                              marginRight: "10px",
-                            }}
+                            style={{ cursor: "pointer", color: "blue", marginRight: "10px" }}
                             onClick={() => handleEdit(organizer)}
                           />
                           <FaTrash
@@ -265,14 +178,77 @@ export default function EventOrganizersPage() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="5">No organizers found.</td>
+                    <td colSpan="6">No organizers found.</td>
                   </tr>
                 )}
               </tbody>
             </Table>
+
+            {/* FAB Button */}
+            <Button
+              variant="primary"
+              className="fab"
+              onClick={handleShowFormModal}
+              style={{
+                position: "fixed",
+                bottom: "20px",
+                right: "20px",
+                borderRadius: "50%",
+                width: "60px",
+                height: "60px",
+                fontSize: "24px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <FaPlus />
+            </Button>
           </Container>
         </Col>
       </Row>
+
+      {/* Form Modal */}
+      <Modal show={showFormModal} onHide={() => setShowFormModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>{editOrganizerId ? "Edit Organizer" : "Add Organizer"}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={handleSubmit}>
+            <FormField
+              title="Organizer Name"
+              type="text"
+              placeholder="Enter name"
+              value={name}
+              onChange={setName}
+            />
+            <FormField
+              title="Email"
+              type="text"
+              placeholder="Enter email"
+              value={email}
+              onChange={setEmail}
+            />
+            <FormField
+              title="Password"
+              type={showPassword ? "text" : "password"}
+              placeholder="Enter password"
+              value={password}
+              onChange={setPassword}
+            />
+            <FormField
+              title="Phone Number"
+              type="text"
+              placeholder="Enter phone number"
+              value={phone}
+              onChange={setPhone}
+            />
+            <Button variant="primary" type="submit">
+              {editOrganizerId ? "Update Organizer" : "Add Organizer"}
+            </Button>
+          </Form>
+        </Modal.Body>
+      </Modal>
 
       {/* Delete Confirmation Modal */}
       <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
