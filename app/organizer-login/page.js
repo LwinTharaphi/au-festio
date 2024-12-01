@@ -18,7 +18,7 @@ export default function OrganizerLogin() {
     e.preventDefault();
 
     try {
-      const endpoint = isSignUp ? '/api/auth/signup' : '/api/auth/signin';
+      const endpoint = '/api/auth/signin';
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -33,14 +33,11 @@ export default function OrganizerLogin() {
       } else {
         setMessage(data.message || 'Success!');
         setError('');
-        if (!isSignUp) {
-          const { user } = data;
-          if (user && user.id){
-            console.log('User signed in:', data.user);
-            router.push(`/organizers/${user.id}/general-dashboard`);
-          }
-          // Handle successful sign-in (e.g., redirect to dashboard)
-          
+        
+        const { user } = data;
+        if (user && user.id){
+          console.log('User signed in:', data.user);
+          router.push(`/organizers/${user.id}/general-dashboard`);
         }
       }
     } catch (err) {
@@ -51,18 +48,9 @@ export default function OrganizerLogin() {
   return (
     <div className="container">
       <h3>Welcome to Event Organizer</h3>
-      <h4>{isSignUp ? 'Sign Up' : 'Sign In'}</h4>
+      <h4>Sign In</h4>
 
       <form onSubmit={handleSubmit}>
-        {isSignUp && (
-          <input
-            type="text"
-            placeholder="Name"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            required
-          />
-        )}
         <input
           type="email"
           placeholder="Email"
@@ -77,18 +65,11 @@ export default function OrganizerLogin() {
           onChange={(e) => setFormData({ ...formData, password: e.target.value })}
           required
         />
-        <button type="submit">{isSignUp ? 'Sign Up' : 'Sign In'}</button>
+        <button type="submit">Sign In</button>
       </form>
 
       {message && <p className="message success">{message}</p>}
       {error && <p className="message error">{error}</p>}
-
-      <p>
-        {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
-        <button type="button" onClick={() => setIsSignUp(!isSignUp)}>
-          {isSignUp ? 'Sign In' : 'Sign Up'}
-        </button>
-      </p>
 
       <style jsx>{`
         .container {
