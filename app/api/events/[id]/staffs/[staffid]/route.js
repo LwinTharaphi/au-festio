@@ -6,24 +6,16 @@ import dbConnect from "@/lib/db";  // Database connection utility
 // GET: Fetch a specific staff by staffid and event ID
 export async function GET(request, { params }) {
   await dbConnect();
-  
-  const { id, staffid } =await params; // Event ID and Staff ID from URL parameters
-  
-  try {
-    // Fetch the staff member by event ID and staff ID
-    const staff = await Staff.findOne({ _id: staffid, event: id }).populate("role"); // Optionally populate role field
-    
-    if (!staff) {
-      return new Response("Staff not found", { status: 404 });
-    }
-    
-    // Return the staff member as response
-    return new Response(JSON.stringify(staff), { status: 200 });
-  } catch (error) {
-    console.error(error);
-    return new Response("Error fetching staff", { status: 500 });
+  const { id, staffid } = params; // Event ID and Staff ID from URL parameters
+  const staff = await Staff.findOne({ _id: staffid, eventId: id });
+
+  if (!staff) {
+    return new Response("Staff not found", { status: 404 });
   }
+
+  return new Response(JSON.stringify(staff), { status: 200 });
 }
+
 
 // PUT: Update an existing staff member's details
 export async function PUT(request, { params }) {

@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Container, Row, Col, Alert, Card, Button, Modal, Form, Table,Dropdown } from "react-bootstrap";
+import { Container, Row, Col, Alert, Card, Button, Modal, Form, Table, Dropdown } from "react-bootstrap";
 import { FaTrash, FaEdit } from "react-icons/fa";
 import Sidebar from "../../../components/Sidebar";
 import "../../../components/Sidebar.css";
@@ -18,17 +18,20 @@ export default function StaffPage() {
   const [newRole, setNewRole] = useState({ name: "", count: "" }); // State to hold new role data
   const [isEditing, setIsEditing] = useState(false); // State to check if we are editing
   const [editRoleId, setEditRoleId] = useState(null); // State to hold the role ID being edited
-
+  const [approvalStatus, setApprovalStatus] = useState(""); // To store the approval status (approved/denied)
+  const [showApprovalModal, setShowApprovalModal] = useState(false); // To control modal visibility
+  const [currentStaff, setCurrentStaff] = useState(null); // To hold the current staff being approved/denied
   const [showStaffModal, setShowStaffModal] = useState(false);
   const [isEditingStaff, setIsEditingStaff] = useState(false);
   const [editStaffId, setEditStaffId] = useState(null);
   const [newStaff, setNewStaff] = useState({
-    name: "",
     id: "",
+    name: "",
     email: "",
     faculty: "",
     phone: "",
     role: "",
+    status: "",
   });
 
   // Fetch event name, roles, and staff based on eventId
@@ -79,7 +82,7 @@ export default function StaffPage() {
         setError(err.message);
       }
     };
-  
+
     fetchEventsList();
   }, []);
 
@@ -89,24 +92,60 @@ export default function StaffPage() {
       setIsEditingStaff(true);
       setEditStaffId(staffMember._id);
       setNewStaff({
-        name: staffMember.name,
         id: staffMember.id,
+        name: staffMember.name,
         email: staffMember.email,
         faculty: staffMember.faculty,
         phone: staffMember.phone,
+        status: staffMember.status,
         role: staffMember.role._id, // Assuming role is an object with an _id
       });
     } else {
       setIsEditingStaff(false);
-      setNewStaff({ name: "", id: "", email: "", faculty: "", phone: "", role: "" });
+      setNewStaff({ id: "", name: "", email: "", faculty: "", phone: "", role: "", status: "" });
     }
     setShowStaffModal(true);
   };
 
   const handleCloseStaffModal = () => {
     setShowStaffModal(false);
-    setNewStaff({ name: "", id: "", email: "", faculty: "", phone: "", role: "" });
+    setNewStaff({ id: "", name: "", email: "", faculty: "", phone: "", role: "", status: "" });
   };
+
+  const handleShowApprovalModal = (staffMember) => {
+    setCurrentStaff(staffMember); // Store the current staff to approve/deny
+    setApprovalStatus(staffMember.status); // Set the current approval status (approved/denied)
+    setShowApprovalModal(true); // Show the modal
+  };
+
+  const handleCloseApprovalModal = () => {
+    setShowApprovalModal(false); // Hide the modal
+  };
+
+  const handleSaveApproval = async (status) => {
+    if (!currentStaff) return; // If no staff is selected, return
+
+    try {
+      const updatedStaff = { ...currentStaff, status }; // Update the status of the staff
+      const response = await fetch(`/api/events/${id}/staffs/${currentStaff._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedStaff),
+      });
+
+      if (!response.ok) throw new Error("Failed to update staff status.");
+
+      const updatedData = await response.json();
+      setStaff(staff.map((staffMember) => (staffMember._id === currentStaff._id ? updatedData : staffMember))); // Update staff in the state
+      setShowApprovalModal(false); // Close the modal after saving
+    } catch (err) {
+      setError(err.message); // Show any errors if occurred
+    }
+  };
+
+
 
   const handleSaveStaff = async () => {
     try {
@@ -271,36 +310,46 @@ export default function StaffPage() {
             <Table striped bordered hover>
               <thead>
                 <tr>
-                  <th>Name</th>
                   <th>ID</th>
+                  <th>Name</th>
                   <th>Email</th>
                   <th>Faculty</th>
                   <th>Phone No</th>
                   <th>Assigned Role</th>
+                  <th>Status</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {staff.map((staffMember) => (
                   <tr key={staffMember._id}>
-                    <td>{staffMember.name}</td>
                     <td>{staffMember.id}</td>
+                    <td>{staffMember.name}</td>
                     <td>{staffMember.email}</td>
                     <td>{staffMember.faculty}</td>
                     <td>{staffMember.phone}</td>
                     <td>{staffMember.role.name}</td>
                     <td>
-                        <div style={{ display: "flex", alignItems: "center" }}>
-                          <FaEdit
-                            style={{ cursor: "pointer", color: "blue", marginRight: "10px" }}
-                            onClick={() => handleShowStaffModal(staffMember)}
-                          />
-                          <FaTrash
-                            style={{ cursor: "pointer", color: "red" }}
-                            onClick={() => handleDeleteStaff(staffMember._id)}
-                          />
-                        </div>
-                      </td>
+                      <a
+                        href="#"
+                        onClick={() => handleShowApprovalModal(staffMember)}
+                        style={{ textDecoration: 'underline', color: 'inherit' }}
+                      >
+                        {staffMember.status}
+                      </a>
+                    </td>
+                    <td>
+                      <div style={{ display: "flex", alignItems: "center" }}>
+                        <FaEdit
+                          style={{ cursor: "pointer", color: "blue", marginRight: "10px" }}
+                          onClick={() => handleShowStaffModal(staffMember)}
+                        />
+                        <FaTrash
+                          style={{ cursor: "pointer", color: "red" }}
+                          onClick={() => handleDeleteStaff(staffMember._id)}
+                        />
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -313,6 +362,15 @@ export default function StaffPage() {
               </Modal.Header>
               <Modal.Body>
                 <Form>
+                  <Form.Group controlId="formStaffName">
+                    <Form.Label>ID</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter ID"
+                      value={newStaff.id}
+                      onChange={(e) => setNewStaff({ ...newStaff, id: e.target.value })}
+                    />
+                  </Form.Group>
                   <Form.Group controlId="formStaffName">
                     <Form.Label>Name</Form.Label>
                     <Form.Control
@@ -412,6 +470,33 @@ export default function StaffPage() {
                 </Button>
               </Modal.Footer>
             </Modal>
+
+            <Modal show={showApprovalModal} onHide={handleCloseApprovalModal}>
+              <Modal.Header closeButton>
+                <Modal.Title>Approve or Deny Staff</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <p>Are you sure you want to {approvalStatus === "approved" ? "deny" : "approve"} this staff member?</p>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="secondary" onClick={handleCloseApprovalModal}>
+                  Close
+                </Button>
+                <Button
+                  variant="success"
+                  onClick={() => handleSaveApproval("approved")}
+                >
+                  Approve
+                </Button>
+                <Button
+                  variant="danger"
+                  onClick={() => handleSaveApproval("denied")}
+                >
+                  Deny
+                </Button>
+              </Modal.Footer>
+            </Modal>
+
           </Container>
         </Col>
       </Row>
