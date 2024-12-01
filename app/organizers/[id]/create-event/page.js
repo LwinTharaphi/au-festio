@@ -336,7 +336,7 @@ function EventForm() {
                           <IconButton 
                             onClick={(e) =>{
                               e.stopPropagation();
-                              handleMenuClick(e, index);}}
+                              handleMenuClick(e, idx);}}
                             sx={{ color: 'rgba(0, 0, 0, 0.54)' }}
                           >
                             <MoreVertIcon />
