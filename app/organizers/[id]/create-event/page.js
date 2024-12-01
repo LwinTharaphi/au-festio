@@ -21,6 +21,8 @@ function EventForm() {
   const [eventName, setEventName] = useState('');
   const [registerationDate, setRegisterationDate] = useState('');
   const [eventDate, setEventDate] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
   const [location, setLocation] = useState('');
   const [venueName, setVenueName] = useState('');
   const [latitude, setLatitude] = useState('');
@@ -46,6 +48,10 @@ function EventForm() {
   const [eventToDeleteIndex, setEventToDeleteIndex] = useState(null);
 
   const [refresh, setRefresh] = useState(false); // Trigger re-fetch
+
+
+  const [startTimeDisplay, setStartTimeDisplay] = useState(""); // Holds 12-hour format
+  const [endTimeDisplay, setEndTimeDisplay] = useState("");
 
   const handleFabClick = () => {
     resetForm();
@@ -76,6 +82,17 @@ function EventForm() {
       setQrName('');
     }
   };
+
+  const handleStartTimeChange = (newTime) => {
+    setStartTime(newTime); // Store in 24-hour format
+    setStartTimeDisplay(formatTimeTo12Hour(newTime)); // Update the display format
+  };
+  
+  const handleEndTimeChange = (newTime) => {
+    setEndTime(newTime);
+    setEndTimeDisplay(formatTimeTo12Hour(newTime));
+  };
+  
 
   useEffect(()=>{
     const fetchEvents = async()=>{
@@ -122,7 +139,9 @@ function EventForm() {
     formData.append('eventName',eventName || '');
     formData.append('registerationDate',registerationDate || '');
     formData.append('eventDate',eventDate || '');
-    console.log(eventDate)
+    // console.log(eventDate)
+    formData.append('startTime',startTime || '');
+    formData.append('endTime',endTime || '');
     formData.append('location',location || '');
     formData.append('isPaid',isPaid);
     formData.append('posterName',posterName || '');
@@ -198,6 +217,8 @@ function EventForm() {
     setEventName('');
     setRegisterationDate('');
     setEventDate('');
+    setStartTime('');
+    setEndTime('');
     setLocation('');
     setVenueName('');
     setLatitude('');
@@ -245,6 +266,11 @@ function EventForm() {
     setEventName(eventToEdit.eventName || '');
     setRegisterationDate(formattedDate || '');
     setEventDate(eventDateFormatted || '');
+    console.log(eventToEdit.startTime)
+    setStartTime(eventToEdit.startTime);
+    setEndTime(eventToEdit.endTime)
+    setStartTimeDisplay(eventToEdit.startTime ? formatTimeTo12Hour(eventToEdit.startTime) : '')
+    setEndTimeDisplay(eventToEdit.endTime ? formatTimeTo12Hour(eventToEdit.endTime) : '')
     setLocation(eventToEdit.location || '');
     setVenueName(eventToEdit.venueName || '');
     setLatitude(eventToEdit.latitude || '');
@@ -273,6 +299,17 @@ function EventForm() {
   const handleCloseMenu = () => {
     setAnchorEl(null); // Close the menu
   };
+
+  // Convert 24-hour time format to 12-hour AM/PM format
+  const formatTimeTo12Hour = (time24) => {
+    const [hour, minute] = time24.split(":").map(Number);
+    const isPM = hour >= 12;
+    const hour12 = hour % 12 || 12; // Convert to 12-hour format
+    const suffix = isPM ? "PM" : "AM";
+  
+    return `${hour12}:${minute.toString().padStart(2, "0")} ${suffix}`;
+  };
+  
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#f9f9f9' }}>
@@ -445,6 +482,24 @@ function EventForm() {
                     value={eventDate}
                     onChange={setEventDate}
                   />
+                  <Typography variant="subtitle1" style={{ marginBottom: '8px' }}>
+                    Event Time:
+                  </Typography>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <FormField
+                      title=""
+                      type="time"
+                      value={startTime}
+                      onChange={handleStartTimeChange}
+                    />
+                    <Typography variant="body1">TO</Typography>
+                    <FormField
+                      title=""
+                      type="time"
+                      value={endTime || ""}
+                      onChange={handleEndTimeChange}
+                    />
+                  </div>
                   <FormField
                     title="Location"
                     type="text"

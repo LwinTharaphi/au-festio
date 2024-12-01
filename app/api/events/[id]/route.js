@@ -27,6 +27,8 @@ export async function PUT(request, { params }) {
     const eventName = formData.get("eventName");
     const registerationDate = formData.get("registerationDate");
     const eventDate = formData.get("eventDate");
+    const startTime = formData.get("startTime");
+    const endTime = formData.get("endTime");
     const location = formData.get("location");
     const isPaid = formData.get("isPaid") === "true";
     const venueName = formData.get("venueName");
@@ -43,6 +45,8 @@ export async function PUT(request, { params }) {
       eventName,
       registerationDate,
       eventDate,
+      startTime,
+      endTime,
       location,
       isPaid,
       venueName,

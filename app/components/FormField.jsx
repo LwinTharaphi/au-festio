@@ -71,6 +71,18 @@ function FormField({ title, type, placeholder, value, onChange, options, fileUpl
           onChange={(e) => onChange(e.target.value)}
         />
       )}
+      {type === 'time' && (
+        <TextField
+          fullWidth
+          type="time"
+          value={value || ""} // Default to an empty string if value is undefined
+          onChange={(e) => {
+            if (e?.target?.value) {
+              onChange(e.target.value); // Safely pass the value up
+            }
+          }}
+        />
+      )}
     </div>
   );
 }
