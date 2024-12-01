@@ -36,11 +36,11 @@ export async function GET(request) {
      }
  
      // Construct the full URL based on the relative path stored in the database
-     const posterUrl = `http://localhost:3000/${posterPath}`; // Use your server URL here
+     const posterUrl = `/${posterPath}`; // Use your server URL here
  
      console.log('Poster URL:', posterUrl);
 
-     const qrUrl = `http://localhost:3000/${qrPath}`;
+     const qrUrl = `/${qrPath}`;
  
      return {
        ...event.toObject(),
@@ -63,6 +63,7 @@ export async function POST(req) {
     // Extract form data fields
     const eventName = formData.get('eventName');
     const registerationDate = formData.get('registerationDate');
+    const eventDate = formData.get('eventDate');
     const location = formData.get('location');
     const isPaid = formData.get('isPaid') === 'true'; // Convert to boolean if needed
     const venueName = formData.get('venueName');
@@ -82,6 +83,7 @@ export async function POST(req) {
     const newEvent = {
       eventName,
       registerationDate,
+      eventDate,
       location,
       isPaid,
       venueName,

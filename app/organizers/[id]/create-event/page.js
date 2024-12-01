@@ -20,6 +20,7 @@ function EventForm() {
   const [isPaid, setIsPaid] = useState(false);
   const [eventName, setEventName] = useState('');
   const [registerationDate, setRegisterationDate] = useState('');
+  const [eventDate, setEventDate] = useState('');
   const [location, setLocation] = useState('');
   const [venueName, setVenueName] = useState('');
   const [latitude, setLatitude] = useState('');
@@ -95,11 +96,11 @@ function EventForm() {
     const grouped = {};
 
     events.forEach((event) => {
-      const eventDate = dayjs(event.registerationDate);
-      const isFutureOrCurrent = eventDate.isSame(today, "month") || eventDate.isAfter(today);
+      const date = dayjs(event.registerationDate);
+      const isFutureOrCurrent = date.isSame(today, "month") || date.isAfter(today);
 
       if (isFutureOrCurrent) {
-        const monthName = eventDate.format("MMMM YYYY");
+        const monthName = date.format("MMMM YYYY");
         if (!grouped[monthName]) {
           grouped[monthName] = [];
         }
@@ -120,6 +121,8 @@ function EventForm() {
 
     formData.append('eventName',eventName || '');
     formData.append('registerationDate',registerationDate || '');
+    formData.append('eventDate',eventDate || '');
+    console.log(eventDate)
     formData.append('location',location || '');
     formData.append('isPaid',isPaid);
     formData.append('posterName',posterName || '');
@@ -194,6 +197,7 @@ function EventForm() {
   const resetForm = () => {
     setEventName('');
     setRegisterationDate('');
+    setEventDate('');
     setLocation('');
     setVenueName('');
     setLatitude('');
@@ -234,9 +238,13 @@ function EventForm() {
     const formattedDate = eventToEdit.registerationDate 
       ? new Date(eventToEdit.registerationDate).toISOString().split('T')[0]
       : '';
-    console.log(formattedDate);
+    const eventDateFormatted = eventToEdit.eventDate
+      ? new Date(eventToEdit.eventDate).toISOString().split('T')[0]
+      : '';
+    console.log(eventDateFormatted);
     setEventName(eventToEdit.eventName || '');
     setRegisterationDate(formattedDate || '');
+    setEventDate(eventDateFormatted || '');
     setLocation(eventToEdit.location || '');
     setVenueName(eventToEdit.venueName || '');
     setLatitude(eventToEdit.latitude || '');
@@ -430,6 +438,12 @@ function EventForm() {
                     type="date"
                     value={registerationDate}
                     onChange={setRegisterationDate}
+                  />
+                  <FormField 
+                    title="Event Date"
+                    type="date"
+                    value={eventDate}
+                    onChange={setEventDate}
                   />
                   <FormField
                     title="Location"

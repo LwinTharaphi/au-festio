@@ -26,6 +26,7 @@ export async function PUT(request, { params }) {
     const formData = await request.formData();
     const eventName = formData.get("eventName");
     const registerationDate = formData.get("registerationDate");
+    const eventDate = formData.get("eventDate");
     const location = formData.get("location");
     const isPaid = formData.get("isPaid") === "true";
     const venueName = formData.get("venueName");
@@ -41,6 +42,7 @@ export async function PUT(request, { params }) {
     const updatedData = {
       eventName,
       registerationDate,
+      eventDate,
       location,
       isPaid,
       venueName,
