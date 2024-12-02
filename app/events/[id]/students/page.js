@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Container, Row, Col, Table, Button, Alert, Modal, Form, Dropdown } from "react-bootstrap";
-import { FaTrash, FaEdit,FaEyeSlash, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { FaTrash, FaEdit, FaEyeSlash, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import Sidebar from "../../../components/Sidebar";
 import "../../../components/Sidebar.css";
 
@@ -109,7 +109,7 @@ export default function RegisteredStudentsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
       });
-  
+
       // Update local state
       setStudents(prevStudents =>
         prevStudents.map(student =>
@@ -125,12 +125,12 @@ export default function RegisteredStudentsPage() {
       setError("Failed to update status.");
     }
   };
-  
+
 
   const handleDelete = async () => {
     try {
       await fetch(`/api/events/${id}/students/${selectedStudent._id}`, { method: "DELETE" });
-  
+
       // Update local state
       setStudents(prevStudents =>
         prevStudents.filter(student => student._id !== selectedStudent._id)
@@ -143,7 +143,7 @@ export default function RegisteredStudentsPage() {
       setError("Failed to delete student.");
     }
   };
-  
+
 
   // const handleRefundRequest = async () => {
   //   try {
@@ -169,7 +169,7 @@ export default function RegisteredStudentsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedStudent),
       });
-  
+
       // Update local state
       setStudents(prevStudents =>
         prevStudents.map(student =>
@@ -186,17 +186,23 @@ export default function RegisteredStudentsPage() {
       setError("Failed to update student.");
     }
   };
-  
+
 
   const handleEventChange = (id) => {
     router.push(`/events/${id}/students`);
   };
 
   const handleSearch = (e) => {
-    const value = e.target.value;
+    const value = e.target.value.toLowerCase();
     setSearchID(value);
+
+    // Filter by either sid or name
     setFilteredStudents(
-      students.filter((student) => student.sid.toLowerCase().includes(value.toLowerCase()))
+      students.filter(
+        (student) =>
+          student.sid.toLowerCase().includes(value) ||
+          student.name.toLowerCase().includes(value)
+      )
     );
   };
 
@@ -231,7 +237,7 @@ export default function RegisteredStudentsPage() {
               <div>
                 <Form.Control
                   type="text"
-                  placeholder="Search by Student ID"
+                  placeholder="Search by ID or Name"
                   value={searchID}
                   onChange={handleSearch}
                   style={{ maxWidth: "300px" }}

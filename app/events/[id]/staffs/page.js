@@ -16,6 +16,8 @@ export default function StaffPage() {
   const [error, setError] = useState(null); // State to handle any error
   const [roles, setRoles] = useState([]); // State to hold the list of roles
   const [staff, setStaff] = useState([]); // State to hold the list of staff
+  const [filteredStaffs, setFilteredStaffs] = useState([]);
+  const [searchID, setSearchID] = useState("");
   const [showModal, setShowModal] = useState(false); // State to control modal visibility
   const [newRole, setNewRole] = useState({ name: "", count: "" }); // State to hold new role data
   const [isEditing, setIsEditing] = useState(false); // State to check if we are editing
@@ -66,6 +68,7 @@ export default function StaffPage() {
         }
         const staffData = await staffResponse.json();
         setStaff(staffData);
+        setFilteredStaffs(staffData);
       } catch (err) {
         setError(err.message);
       }
@@ -91,6 +94,26 @@ export default function StaffPage() {
 
     fetchEventsList();
   }, []);
+
+  useEffect(() => {
+    // Filter the staff by ID or name when the searchID is updated
+    if (searchID.trim() !== "") {
+      const filtered = staff.filter(
+        (staffMember) =>
+          staffMember.id.toLowerCase().includes(searchID.toLowerCase()) ||
+          staffMember.name.toLowerCase().includes(searchID.toLowerCase())
+      );
+      setFilteredStaffs(filtered);
+    } else {
+      setFilteredStaffs(staff); // Reset the filter when searchID is empty
+    }
+  }, [searchID, staff]);
+  
+  // Handle the search input change
+  const handleSearchIDChange = (event) => {
+    setSearchID(event.target.value); // Update the searchID state
+  };
+  
 
   // Function to handle showing the staff modal
   const handleShowStaffModal = (staffMember = null) => {
@@ -347,7 +370,17 @@ export default function StaffPage() {
             </div>
 
             {/* Staff Table */}
-            <h5 className="my-4">Registered Staff</h5>
+            <div className="d-flex justify-content-between align-items-center my-4">
+              <h5 className="mb-0">Registered Staff</h5>
+              <Form.Control
+                type="text"
+                placeholder="Search by ID or Name"
+                value={searchID}
+                onChange={handleSearchIDChange}
+                style={{ maxWidth: "300px" }}
+              />
+            </div>
+
             <Table striped bordered hover>
               <thead>
                 <tr>
@@ -362,7 +395,7 @@ export default function StaffPage() {
                 </tr>
               </thead>
               <tbody>
-                {staff.map((staffMember) => (
+                {filteredStaffs.map((staffMember) => (
                   <tr key={staffMember._id}>
                     <td>{staffMember.id}</td>
                     <td>{staffMember.name}</td>
