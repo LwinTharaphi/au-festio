@@ -10,7 +10,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useRouter } from 'next/navigation';
 import AddIcon from '@mui/icons-material/Add';
-import dayjs from 'dayjs';
+// import dayjs from 'dayjs';
+import moment from "moment";
 import Sidebar from '../../../components/general-sidebar';
 
 function EventForm() {
@@ -107,28 +108,48 @@ function EventForm() {
 
   const refreshEvents = () => setRefresh(!refresh);
 
-  // Function to group events by month, starting from the current month
-  const groupEventsByMonth = (events) => {
-    const today = dayjs();
-    const grouped = {};
-
-    events.forEach((event) => {
-      const date = dayjs(event.registerationDate);
-      const isFutureOrCurrent = date.isSame(today, "month") || date.isAfter(today);
-
-      if (isFutureOrCurrent) {
-        const monthName = date.format("MMMM YYYY");
-        if (!grouped[monthName]) {
-          grouped[monthName] = [];
+  const categorizeEvents = (events) => {
+    const today = moment();
+    const groupedEvents = { ongoing: {}, upcoming: {}, completed: {} };
+  
+    events.forEach((event, index) => {
+      const registrationDate = moment(event.registerationDate);
+      const eventDate = moment(event.eventDate);
+      console.log(`Event: ${event.eventName}`);
+      console.log("Registration Date:", registrationDate.format("DD/MM/YYYY"));
+      console.log("Event Date:", eventDate.format("DD/MM/YYYY"));
+  
+      let status = "";
+      if (today.isBetween(registrationDate, eventDate, "day", "[]")) {
+        status = "ongoing";
+        console.log("Status: Ongoing");
+      } else if (today.isBefore(registrationDate, "day")) {
+        status = "upcoming";
+        console.log("Status: Upcoming");
+      } else if (today.isAfter(eventDate, "day")) {
+        status = "completed";
+        console.log("Status: Completed");
+      }
+  
+      if (status) {
+        const month = eventDate.format("MMMM YYYY");
+        if (!groupedEvents[status][month]) {
+          groupedEvents[status][month] = [];
         }
-        grouped[monthName].push(event);
+  
+        // Add the index to the event so we can access it later during edit
+        const eventWithIndex = { ...event, _index: index };
+        groupedEvents[status][month].push(eventWithIndex);
       }
     });
-
-    return grouped;
+  
+    return groupedEvents;
   };
-
-  const groupedEvents = groupEventsByMonth(events);
+  
+  
+  
+  const groupedEvents = categorizeEvents(events);
+  console.log("Grouped events",groupedEvents)
 
   const handleSubmit = async(event) => {
     event.preventDefault(); // Prevent the default form submission
@@ -176,7 +197,7 @@ function EventForm() {
       if (isEditing) {
         // Update the existing event only if editing
         const eventId = events[selectedEventIndex]._id;
-        console.log(eventId)
+        // console.log(eventId)
         response = await fetch(`/api/events/${eventId}`,{
           method: 'PUT',
           body: formData,
@@ -236,6 +257,7 @@ function EventForm() {
   };
 
   const handleDelete = async (index) => {
+    // console.log("deleted index",index)
     const eventId = events[index]._id;  // Get event id for deletion
     try {
       const response = await fetch(`/api/events/${eventId}`, {
@@ -253,8 +275,10 @@ function EventForm() {
     setAnchorEl(null); // Close the menu
   };
 
-  const handleEdit = (index) => {
-    const eventToEdit = events[index];
+  const handleEdit = () => {
+    // console.log('Editing event with index:', eventIndex);
+    const eventToEdit = events[selectedEventIndex]
+    console.log(eventToEdit)
     // Format the date to YYYY-MM-DD (compatible with HTML date input)
     const formattedDate = eventToEdit.registerationDate 
       ? new Date(eventToEdit.registerationDate).toISOString().split('T')[0]
@@ -262,11 +286,11 @@ function EventForm() {
     const eventDateFormatted = eventToEdit.eventDate
       ? new Date(eventToEdit.eventDate).toISOString().split('T')[0]
       : '';
-    console.log(eventDateFormatted);
+    // console.log(eventDateFormatted);
     setEventName(eventToEdit.eventName || '');
     setRegisterationDate(formattedDate || '');
     setEventDate(eventDateFormatted || '');
-    console.log(eventToEdit.startTime)
+    // console.log(eventToEdit.startTime)
     setStartTime(eventToEdit.startTime);
     setEndTime(eventToEdit.endTime)
     setStartTimeDisplay(eventToEdit.startTime ? formatTimeTo12Hour(eventToEdit.startTime) : '')
@@ -279,25 +303,30 @@ function EventForm() {
     setQrName(eventToEdit.qrName || '');
     setIsArEnabled(Boolean(eventToEdit.venueName));
     setIsPaid(eventToEdit.isPaid || false);
-    setSelectedEventIndex(index); // Store the index for saving the updated event later
+    // setSelectedEventIndex(); // Store the index for saving the updated event later
     setAnchorEl(null); // Close the menu after edit
     setIsEditing(true);
     setShowModal(true);
   };
 
-  const confirmDelete = (index) => {
-    setEventToDeleteIndex(index);
+  const confirmDelete = () => {
+    console.log("deleted index",eventToDeleteIndex)
+    // setEventToDeleteIndex(index);
     setDeleteModalOpen(true); // Open the delete confirmation modal
     setAnchorEl(null); // Close the menu
   };
 
   const handleMenuClick = (event, index) => {
+    console.log(index)
     setAnchorEl(event.currentTarget);
     setSelectedEventIndex(index);
+    setEventToDeleteIndex(index)
+    console.log("events",events)
   };
 
   const handleCloseMenu = () => {
     setAnchorEl(null); // Close the menu
+    setEventToDeleteIndex('');
   };
 
   // Convert 24-hour time format to 12-hour AM/PM format
@@ -309,6 +338,14 @@ function EventForm() {
   
     return `${hour12}:${minute.toString().padStart(2, "0")} ${suffix}`;
   };
+
+  // Update the useEffect hook to log the selected event after the state change
+  useEffect(() => {
+    if (selectedEventIndex !== null) {
+      console.log('Selected event index updated:', selectedEventIndex);
+      console.log('Event at selected index:', events[selectedEventIndex]);  // Access the selected event
+    }
+  }, [selectedEventIndex, events]);
   
 
   return (
@@ -345,79 +382,115 @@ function EventForm() {
             Event List
           </Typography>
 
-          {/* Event List as Cards */}
+          {/* Event List by Status */}
           {Object.keys(groupedEvents).length > 0 ? (
-            Object.entries(groupedEvents).map(([month,events],index)=> (
-              <Box key={index} sx={{ marginTop: 4 }}>
-                <Typography variant="h6" sx={{ marginBottom: 2 }}>
-                  {month} Events
-                </Typography>
-                <Grid container spacing={4}>
-                  {events.map((event, idx) => (
-                    <Grid item xs={12} sm={6} md={4} key={idx}>
-                      <Card sx={{ position: 'relative', marginBottom: 2 }} key={idx}>
-                        <CardActionArea onClick={()=> router.push(`/events/${event._id}/dashboard`)}>
-                          {event.posterName && (
-                
-                            <CardMedia 
-                              component="img"
-                              height="140"
-                              image={event.poster} 
-                              alt={event.posterName}
-                            />
-                          )}
-                        </CardActionArea>
-                        <CardContent>
-                          <Typography variant="h6" align='center'>{event.eventName}</Typography>
-                        </CardContent>
-                        {/* Delete Button */}
-                        <Box
-                          sx={{
-                            position: 'absolute',
-                            top: 8,
-                            right: 8
-                          }}
-                        >
-                          <IconButton 
-                            onClick={(e) =>{
-                              e.stopPropagation();
-                              handleMenuClick(e, idx);}}
-                            sx={{ color: 'rgba(0, 0, 0, 0.54)' }}
-                          >
-                            <MoreVertIcon />
-                          </IconButton>
-                        </Box>
+            ["ongoing", "upcoming", "completed"].map((status) => (
+              Object.keys(groupedEvents[status] || {}).length > 0 ? (
+                <Box key={status} sx={{ marginTop: 4 }}>
+                  <Typography variant="h5" sx={{ marginBottom: 3 }}>
+                    {status.charAt(0).toUpperCase() + status.slice(1)} Events
+                  </Typography>
+                  {Object.entries(groupedEvents[status]).map(([month, events], monthIndex) => (
+                    <Box key={monthIndex} sx={{ marginTop: 2 }}>
+                      <Typography variant="h6" sx={{ marginBottom: 2 }}>
+                        {month} Events
+                      </Typography>
+                      <Grid container spacing={4}>
+                        {events.map((event, eventIndex) => (
+                          <Grid item xs={12} sm={6} md={4} key={event._index}>
+                            <Card sx={{ position: "relative", marginBottom: 2 }}>
+                              <CardActionArea onClick={() => router.push(`/events/${event._id}/dashboard`)}>
+                                {event.posterName && (
+                                  <CardMedia
+                                    component="img"
+                                    height="140"
+                                    image={event.poster} // Ensure the correct URL is set for images
+                                    alt={event.posterName}
+                                  />
+                                )}
+                              </CardActionArea>
+                              <CardContent>
+                                <Typography variant="h6" align="center">
+                                  {event.eventName}
+                                </Typography>
+                              </CardContent>
+                              {/* Delete Button */}
+                              <Box
+                                sx={{
+                                  position: "absolute",
+                                  top: 8,
+                                  right: 8,
+                                }}
+                              >
+                                <IconButton
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    console.log("menu click",event._index)
+                                    handleMenuClick(e, event._index);
+                                  }}
+                                  sx={{ color: "rgba(0, 0, 0, 0.54)" }}
+                                >
+                                  <MoreVertIcon />
+                                </IconButton>
+                              </Box>
 
-                        {/* Menu with options for delete/edit */}
-                        <Menu
-                          anchorEl={anchorEl}
-                          open={Boolean(anchorEl)}
-                          onClose={handleCloseMenu}
-                          anchorOrigin={{
-                            vertical: 'top',
-                            horizontal: 'right',
-                          }}
-                          transformOrigin={{
-                            vertical: 'top',
-                            horizontal: 'right',
-                          }}
-                        >
-                          <MenuItem onClick={() =>{
-                            confirmDelete(selectedEventIndex)}
-                          }>Delete</MenuItem>
-                          <MenuItem onClick={() =>{
-                            handleEdit(selectedEventIndex)}}>Edit</MenuItem>
-                        </Menu>
-                      </Card>
-                    </Grid>
+                              {/* Menu with options for delete/edit */}
+                              <Menu
+                                anchorEl={anchorEl}
+                                open={Boolean(anchorEl)}
+                                onClose={handleCloseMenu}
+                                anchorOrigin={{
+                                  vertical: "top",
+                                  horizontal: "right",
+                                }}
+                                transformOrigin={{
+                                  vertical: "top",
+                                  horizontal: "right",
+                                }}
+                              >
+                                <MenuItem
+                                  onClick={() => {
+                                    console.log("delete confirm",eventIndex)
+                                    confirmDelete();
+                                  }}
+                                >
+                                  Delete
+                                </MenuItem>
+                                <MenuItem
+                                  onClick={(e) => {
+                                    console.log("clicked edit",event._index)
+                                    handleEdit();
+                                  }}
+                                >
+                                  Edit
+                                </MenuItem>
+                              </Menu>
+                            </Card>
+                            <Typography variant="h6" align="center">
+                              Registeration Date: {new Date(event.registerationDate).toISOString().split('T')[0]}
+                            </Typography>
+                            <Typography variant="h6" align="center">
+                              Evnent Date: {new Date(event.eventDate).toISOString().split('T')[0]}
+                            </Typography>
+
+                          </Grid>
+                        ))}
+                      </Grid>
+                    </Box>
                   ))}
-                </Grid>        
-              </Box>
-          ))): (
+                </Box>
+              ) : (
+                <Typography key={status} variant="body1" align="center" sx={{ marginTop: 3 }}>
+                  No {status} events available.
+                </Typography>
+              )
+            ))
+          ) : (
             <Typography variant="body1" align="center">
               No events available.
             </Typography>
           )}
+
           <Fab
             color="primary"
             aria-label="add"
@@ -664,7 +737,9 @@ function EventForm() {
           </Modal>
           <Modal
             open={deleteModalOpen}
-            onClose={() => setDeleteModalOpen(false)}
+            onClose={() =>{
+              setEventToDeleteIndex('')
+              setDeleteModalOpen(false)}}
             aria-labelledby="delete-confirmation-title"
             aria-describedby="delete-confirmation-description"
             sx={{
@@ -691,7 +766,7 @@ function EventForm() {
                 Are you sure you want to delete this event? This action cannot be undone.
               </Typography>
               <Box sx={{ display: "flex", justifyContent: "space-around", marginTop: 3 }}>
-                <Button variant="outlined" color="primary" onClick={() => setDeleteModalOpen(false)}>
+                <Button variant="outlined" color="primary" onClick={() => {setEventToDeleteIndex('');setDeleteModalOpen(false)}}>
                   Cancel
                 </Button>
                 <Button
