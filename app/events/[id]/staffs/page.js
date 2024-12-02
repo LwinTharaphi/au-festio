@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Container, Row, Col, Alert, Card, Button, Modal, Form, Table, Dropdown } from "react-bootstrap";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FaTrash, FaEdit } from "react-icons/fa";
 import Sidebar from "../../../components/Sidebar";
 import "../../../components/Sidebar.css";
@@ -20,6 +22,10 @@ export default function StaffPage() {
   const [editRoleId, setEditRoleId] = useState(null); // State to hold the role ID being edited
   const [approvalStatus, setApprovalStatus] = useState(""); // To store the approval status (approved/denied)
   const [showApprovalModal, setShowApprovalModal] = useState(false); // To control modal visibility
+  const [showRoleDeleteModal, setShowRoleDeleteModal] = useState(false);
+  const [roleToDelete, setRoleToDelete] = useState(null);
+  const [showStaffDeleteModal, setShowStaffDeleteModal] = useState(false);
+  const [StaffToDelete, setStaffToDelete] = useState(null);
   const [currentStaff, setCurrentStaff] = useState(null); // To hold the current staff being approved/denied
   const [showStaffModal, setShowStaffModal] = useState(false);
   const [isEditingStaff, setIsEditingStaff] = useState(false);
@@ -145,8 +151,6 @@ export default function StaffPage() {
     }
   };
 
-
-
   const handleSaveStaff = async () => {
     try {
       if (isEditingStaff) {
@@ -227,9 +231,21 @@ export default function StaffPage() {
         throw new Error("Failed to delete role.");
       }
       setRoles(roles.filter((role) => role._id !== roleId));
+      setShowRoleDeleteModal(false);
     } catch (err) {
       setError(err.message);
     }
+  };
+
+  // Handle Delete Modal Show/Hide
+  const handleShowDeleteModal = (role) => {
+    setRoleToDelete(role);
+    setShowRoleDeleteModal(true);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setShowRoleDeleteModal(false);
+    setRoleToDelete(null);
   };
 
   // Handle deleting a staff member
@@ -242,15 +258,25 @@ export default function StaffPage() {
         throw new Error("Failed to delete staff.");
       }
       setStaff(staff.filter((staffMember) => staffMember._id !== staffId));
+      setShowStaffDeleteModal(false);
     } catch (err) {
       setError(err.message);
     }
+  };
+  // Handle Delete Modal Show/Hide
+  const handleShowStaffDeleteModal = (staffMember) => {
+    setStaffToDelete(staffMember);
+    setShowStaffDeleteModal(true);
+  };
+
+  const handleCloseStaffDeleteModal = (staffMember) => {
+    setShowStaffDeleteModal(false);
+    setStaffToDelete(null);
   };
 
   const handleEventChange = (id) => {
     router.push(`/events/${id}/staffs`);
   };
-
   return (
     <Container fluid>
       <Row>
@@ -285,14 +311,29 @@ export default function StaffPage() {
               {roles.map((role) => (
                 <Card key={role._id} className="m-2" style={{ width: "18rem" }}>
                   <Card.Body>
-                    <Card.Title>{role.name}</Card.Title>
-                    <Card.Text>Required: {role.count}</Card.Text>
-                    <Button variant="secondary" onClick={() => handleShowModal(role)}>
-                      Edit
-                    </Button>{" "}
-                    <Button variant="danger" onClick={() => handleDeleteRole(role._id)}>
-                      Delete
-                    </Button>
+                    <div className="d-flex justify-content-between align-items-start">
+                      <div>
+                        <Card.Title>{role.name}</Card.Title>
+                        <Card.Text>Required: {role.count}</Card.Text>
+                      </div>
+                      <div>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="me-2"
+                          onClick={() => handleShowModal(role)}
+                        >
+                          <FontAwesomeIcon icon={faEdit} /> {/* Edit Icon */}
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => handleShowDeleteModal(role)}
+                        >
+                          <FontAwesomeIcon icon={faTrash} />
+                        </Button>
+                      </div>
+                    </div>
                   </Card.Body>
                 </Card>
               ))}
@@ -346,7 +387,7 @@ export default function StaffPage() {
                         />
                         <FaTrash
                           style={{ cursor: "pointer", color: "red" }}
-                          onClick={() => handleDeleteStaff(staffMember._id)}
+                          onClick={() => handleShowStaffDeleteModal(staffMember)}
                         />
                       </div>
                     </td>
@@ -497,9 +538,56 @@ export default function StaffPage() {
               </Modal.Footer>
             </Modal>
 
+            {/* Delete Confirmation Modal */}
+            {roleToDelete && (
+              <Modal show={showRoleDeleteModal} onHide={handleCloseDeleteModal} centered>
+                <Modal.Header closeButton>
+                  <Modal.Title>Confirm Delete</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  Are you sure you want to delete the role <strong>{roleToDelete.name}</strong>?
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button variant="secondary" onClick={handleCloseDeleteModal}>
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="danger"
+                    onClick={() => handleDeleteRole(roleToDelete._id)}
+                  >
+                    Delete
+                  </Button>
+                </Modal.Footer>
+              </Modal>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {StaffToDelete && (
+              <Modal show={showStaffDeleteModal} onHide={handleCloseStaffDeleteModal} centered>
+                <Modal.Header closeButton>
+                  <Modal.Title>Confirm Delete</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  Are you sure you want to delete the staff <strong>{StaffToDelete.name}</strong>?
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button variant="secondary" onClick={handleCloseStaffDeleteModal}>
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="danger"
+                    onClick={() => handleDeleteStaff(StaffToDelete._id)}
+                  >
+                    Delete
+                  </Button>
+                </Modal.Footer>
+              </Modal>
+            )}
           </Container>
         </Col>
       </Row>
     </Container>
   );
 }
+
+
