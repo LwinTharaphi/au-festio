@@ -10,6 +10,7 @@ import {
   Modal,
   Form,
   Dropdown,
+  Spinner
 } from "react-bootstrap";
 import { useParams, useRouter } from "next/navigation";
 import Sidebar from "../../../components/Sidebar";
@@ -22,6 +23,7 @@ export default function BoothPage() {
   const [eventsList, setEventsList] = useState([]);
   const [booths, setBooths] = useState([]); // State to hold booth data
   const [error, setError] = useState(null); // State to handle any error
+  const [loading, setLoading] = useState(false);
   const [selectedBooth, setSelectedBooth] = useState(null); // State for the selected booth
   const [showModal, setShowModal] = useState(false); // Modal state for adding/updating booth
   const [editMode, setEditMode] = useState(false); // State to toggle between add and edit modes
@@ -37,6 +39,7 @@ export default function BoothPage() {
   useEffect(() => {
     const fetchEventAndBooths = async () => {
       try {
+        setLoading(true);
         const eventResponse = await fetch(`/api/events/${id}`);
         if (!eventResponse.ok) {
           throw new Error("Failed to fetch event data.");
@@ -52,6 +55,8 @@ export default function BoothPage() {
         setBooths(boothsData);
       } catch (err) {
         setError(err.message);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -201,6 +206,25 @@ export default function BoothPage() {
           <Container className="my-5">
             {error && <Alert variant="danger">{error}</Alert>}
             {!error && eventName && <h4>{eventName}: Booths</h4>}
+            {loading ? (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "100vh",
+                flexDirection: "column",
+              }}
+            >
+              <Spinner animation="border" variant="primary" role="status" style={{ width: "2rem", height: "2rem" }}>
+                <span className="visually-hidden">Loading...</span>
+              </Spinner>
+              <p style={{ marginTop: "1rem", fontSize: "1.2rem", fontWeight: "500", color: "#007bff" }}>
+                Loading...
+              </p>
+            </div>
+          ) : (
+            <>
             <Dropdown className="mb-4" style={{ textAlign: "right" }}>
               <Dropdown.Toggle variant="secondary" id="dropdown-basic">
                 Select Event
@@ -315,6 +339,8 @@ export default function BoothPage() {
                 )}
               </Col>
             </Row>
+            </>
+            )}
           </Container>
         </Col>
       </Row>

@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Dropdown } from "react-bootstrap";
+import { Dropdown, Spinner } from "react-bootstrap";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 // Function to render stars
@@ -29,12 +29,14 @@ export default function FeedbackPage() {
   const [eventsList, setEventsList] = useState([]);
   const [feedbacks, setFeedbacks] = useState([]);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
   const { id } = useParams(); // Event ID from URL parameters
 
   useEffect(() => {
     const fetchEventData = async () => {
       setError(null); // Clear previous errors before fetching data
       try {
+        setLoading(true);
         const response = await fetch(`/api/events/${id}`);
         if (!response.ok) {
           throw new Error("Failed to fetch event data.");
@@ -43,6 +45,8 @@ export default function FeedbackPage() {
         setEventName(event.eventName); // Set the event name
       } catch (err) {
         setError(err.message);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -108,6 +112,25 @@ export default function FeedbackPage() {
       <h4 style={{ marginBottom: "20px", fontSize: "2rem" }}>
         Feedbacks for {eventName}
       </h4>
+      {loading ? (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "100vh",
+                flexDirection: "column",
+              }}
+            >
+              <Spinner animation="border" variant="primary" role="status" style={{ width: "2rem", height: "2rem" }}>
+                <span className="visually-hidden">Loading...</span>
+              </Spinner>
+              <p style={{ marginTop: "1rem", fontSize: "1.2rem", fontWeight: "500", color: "#007bff" }}>
+                Loading...
+              </p>
+            </div>
+          ) : (
+            <>
       <Dropdown className="mb-4" style={{ textAlign: "right" }}>
         <Dropdown.Toggle variant="secondary" id="dropdown-basic">
           Select Event
@@ -153,6 +176,8 @@ export default function FeedbackPage() {
       ) : (
         <p>No feedbacks available for this event.</p>
       )}
+      </>
+     )}
     </div>
   );
 }

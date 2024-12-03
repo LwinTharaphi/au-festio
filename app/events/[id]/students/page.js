@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Container, Row, Col, Table, Button, Alert, Modal, Form, Dropdown } from "react-bootstrap";
+import { Container, Row, Col, Table, Button, Alert, Modal, Form, Dropdown, Spinner } from "react-bootstrap";
 import { FaTrash, FaEdit, FaEyeSlash, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import Sidebar from "../../../components/Sidebar";
 import "../../../components/Sidebar.css";
@@ -16,6 +16,7 @@ export default function RegisteredStudentsPage() {
   const [filteredStudents, setFilteredStudents] = useState([]);
   const [searchID, setSearchID] = useState("");
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   // const [showRefundModal, setShowRefundModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -34,6 +35,7 @@ export default function RegisteredStudentsPage() {
     const fetchEventData = async () => {
       setError(null); // Clear previous errors before fetching data
       try {
+        setLoading(true);
         const response = await fetch(`/api/events/${id}`);
         if (!response.ok) {
           throw new Error("Failed to fetch event data.");
@@ -44,6 +46,8 @@ export default function RegisteredStudentsPage() {
         setEventData(event); // Store event data in the state
       } catch (err) {
         setError(err.message);
+      }finally {
+        setLoading(false);
       }
     };
 
@@ -216,6 +220,7 @@ export default function RegisteredStudentsPage() {
           <Container className="my-5">
             <div className="d-flex justify-content-between align-items-center mb-4">
               <h4>Registered Students for {eventName}</h4>
+              
               <Dropdown className="mb-4" style={{ textAlign: "right" }}>
                 <Dropdown.Toggle variant="secondary" id="dropdown-basic">
                   Select Event
@@ -244,9 +249,26 @@ export default function RegisteredStudentsPage() {
                 />
               </div>
             </div>
-            {error ? (
-              <Alert variant="danger">{error}</Alert>
-            ) : (
+            {error && <Alert variant="danger">{error}</Alert>} {/* Show error if any */}
+            {loading ? (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "100vh",
+                flexDirection: "column",
+              }}
+            >
+              <Spinner animation="border" variant="primary" role="status" style={{ width: "2rem", height: "2rem" }}>
+                <span className="visually-hidden">Loading...</span>
+              </Spinner>
+              <p style={{ marginTop: "1rem", fontSize: "1.2rem", fontWeight: "500", color: "#007bff" }}>
+                Loading...
+              </p>
+            </div>
+          ) : (
+            <>
               <Table striped bordered hover>
                 <thead>
                   <tr>
@@ -308,6 +330,7 @@ export default function RegisteredStudentsPage() {
                   )}
                 </tbody>
               </Table>
+            </>
             )}
           </Container>
         </Col>

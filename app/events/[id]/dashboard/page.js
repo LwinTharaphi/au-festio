@@ -65,8 +65,21 @@ export default function Dashboard() {
 
   if (loading)
     return (
-      <div className="loading d-flex justify-content-center align-items-center">
-        <Spinner animation="border" variant="primary" /> Loading...
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          flexDirection: "column",
+        }}
+      >
+        <Spinner animation="border" variant="primary" role="status" style={{ width: "2rem", height: "2rem" }}>
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+        <p style={{ marginTop: "1rem", fontSize: "1.2rem", fontWeight: "500", color: "#007bff" }}>
+          Loading...
+        </p>
       </div>
     );
   if (error) return <Alert variant="danger">Error: {error}</Alert>;
@@ -86,7 +99,6 @@ export default function Dashboard() {
     (month) => `Month ${+month + 1}`
   );
   const monthCounts = Object.values(monthData);
-  
 
   return (
     <Container fluid>
@@ -112,9 +124,9 @@ export default function Dashboard() {
               {event.eventName} Dashboard
             </h3>
             <Button variant="primary"
-              className="ms-2"         
-              onClick={()=> route.push(`/events/${id}/feedbacks`)}>
-                View FeedBacks</Button>
+              className="ms-2"
+              onClick={() => route.push(`/events/${id}/feedbacks`)}>
+              View FeedBacks</Button>
           </div>
           <p></p>
 
@@ -163,12 +175,12 @@ export default function Dashboard() {
               <Card className="text-center shadow-sm">
                 <Card.Body>
                   {/* Centered Big Star */}
-                    <BsStarFill size={30} className="mb-2 text-warning" />
+                  <BsStarFill size={30} className="mb-2 text-warning" />
                   {/* Card Title */}
                   <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
                     Average Rating
                   </Card.Title>
-                  
+
                   {/* Rating Value */}
                   <Card.Text style={{ fontSize: "1.5rem" }}>
                     {averageRating.toFixed(1)}
@@ -268,7 +280,7 @@ export default function Dashboard() {
             </Col>
           </Row>
           <Row>
-            
+
           </Row>
 
         </Col>

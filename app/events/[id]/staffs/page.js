@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Container, Row, Col, Alert, Card, Button, Modal, Form, Table, Dropdown } from "react-bootstrap";
+import { Container, Row, Col, Alert, Card, Button, Modal, Form, Table, Dropdown, Spinner } from "react-bootstrap";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FaTrash, FaEdit } from "react-icons/fa";
@@ -14,6 +14,7 @@ export default function StaffPage() {
   const [eventName, setEventName] = useState(""); // State to hold the event name
   const [eventsList, setEventsList] = useState([]);
   const [error, setError] = useState(null); // State to handle any error
+  const [loading, setLoading] = useState(false);
   const [roles, setRoles] = useState([]); // State to hold the list of roles
   const [staff, setStaff] = useState([]); // State to hold the list of staff
   const [filteredStaffs, setFilteredStaffs] = useState([]);
@@ -46,6 +47,7 @@ export default function StaffPage() {
   useEffect(() => {
     const fetchEventData = async () => {
       try {
+        setLoading(true);
         const eventResponse = await fetch(`/api/events/${id}`);
         if (!eventResponse.ok) {
           throw new Error("Failed to fetch event data.");
@@ -71,6 +73,8 @@ export default function StaffPage() {
         setFilteredStaffs(staffData);
       } catch (err) {
         setError(err.message);
+      }finally {
+        setLoading(false);
       }
     };
 
@@ -309,9 +313,27 @@ export default function StaffPage() {
         <Col xs={9} md={10} className="main-content">
           <Container className="my-5">
             {error && <Alert variant="danger">{error}</Alert>} {/* Show error if any */}
-            {!error && eventName && <h4>Staff List for Event: {eventName}</h4>}
-            {!error && !eventName && <p>Loading event name...</p>} {/* Show loading state */}
-
+            {!error && eventName && <h4>Staff List for {eventName}</h4>}
+            {/* {!error && !eventName && <p>Loading event name...</p>} Show loading state */}
+            {loading ? (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "100vh",
+                flexDirection: "column",
+              }}
+            >
+              <Spinner animation="border" variant="primary" role="status" style={{ width: "2rem", height: "2rem" }}>
+                <span className="visually-hidden">Loading...</span>
+              </Spinner>
+              <p style={{ marginTop: "1rem", fontSize: "1.2rem", fontWeight: "500", color: "#007bff" }}>
+                Loading...
+              </p>
+            </div>
+          ) : (
+            <>
             <Dropdown className="mb-4" style={{ textAlign: "right" }}>
               <Dropdown.Toggle variant="secondary" id="dropdown-basic">
                 Select Event
@@ -616,9 +638,11 @@ export default function StaffPage() {
                 </Modal.Footer>
               </Modal>
             )}
+            </>
+            )}
           </Container>
         </Col>
-      </Row>
+      </Row>        
     </Container>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Container, Row, Col, Table, Button, Alert, Form, Modal } from "react-bootstrap";
+import { Container, Row, Col, Table, Button, Alert, Form, Modal, Spinner } from "react-bootstrap";
 import { FaTrash, FaEdit, FaEye, FaEyeSlash, FaPlus } from "react-icons/fa";
 import Sidebar from "../components/admin_sidebar";
 import FormField from "../components/FormField";
@@ -19,23 +19,25 @@ export default function EventOrganizersPage() {
   const [editOrganizerId, setEditOrganizerId] = useState(null);
   const [refresh, setRefresh] = useState(false); // Trigger re-fetch
   const [showFormModal, setShowFormModal] = useState(false);
-
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [organizerToDelete, setOrganizerToDelete] = useState(null);
-
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Fetch organizers data
   useEffect(() => {
     const fetchOrganizers = async () => {
       setError(null); // Clear previous errors
       try {
+        setLoading(true);
         const response = await fetch(`/api/event-organizers`);
         if (!response.ok) throw new Error("Failed to fetch organizers.");
         const data = await response.json();
         setOrganizers(data);
       } catch (err) {
         setError(err.message);
+      } finally {
+        setLoading(false);
       }
     };
     fetchOrganizers();
@@ -142,6 +144,25 @@ export default function EventOrganizersPage() {
           <Container className="my-5">
             <h4>Event Organizers</h4>
             {error && <Alert variant="danger">{error}</Alert>}
+            {loading ? (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "100vh",
+                flexDirection: "column",
+              }}
+            >
+              <Spinner animation="border" variant="primary" role="status" style={{ width: "2rem", height: "2rem" }}>
+                <span className="visually-hidden">Loading...</span>
+              </Spinner>
+              <p style={{ marginTop: "1rem", fontSize: "1.2rem", fontWeight: "500", color: "#007bff" }}>
+                Loading...
+              </p>
+            </div>
+          ) : (
+            <>
             <Table striped bordered hover>
               <thead>
                 <tr>
@@ -204,6 +225,8 @@ export default function EventOrganizersPage() {
             >
               <FaPlus />
             </Button>
+            </>
+            )}
           </Container>
         </Col>
       </Row>

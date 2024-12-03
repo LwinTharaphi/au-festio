@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { Container, Row, Col, Table, Button, Form } from "react-bootstrap";
+import { Container, Row, Col, Table, Button, Form, Spinner } from "react-bootstrap";
 import Sidebar from "../../../components/Sidebar";
 import "../../../components/Sidebar.css";
 
@@ -13,11 +13,13 @@ export default function NotificationPage() {
     const [notificationBody, setNotificationBody] = useState("");
     const [selectAll, setSelectAll] = useState(false);
     const [eventName, setEventName] = useState("");
+    const [loading, setLoading] = useState(false);
 
     // Fetch event and student data
     useEffect(() => {
         const fetchEventData = async () => {
             try {
+                setLoading(true);
                 const response = await fetch(`/api/events/${id}`);
                 if (!response.ok) {
                     throw new Error("Failed to fetch event data.");
@@ -26,6 +28,8 @@ export default function NotificationPage() {
                 setEventName(event.eventName || "Event");
             } catch (error) {
                 console.error("Error fetching event data:", error);
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -109,6 +113,25 @@ export default function NotificationPage() {
                 {/* Main Content */}
                 <Col xs={9} md={10}>
                     <h3 className="mb-4 mt-5">Send Notifications for {eventName}</h3>
+                    {loading ? (
+                        <div
+                            style={{
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                height: "100vh",
+                                flexDirection: "column",
+                            }}
+                        >
+                            <Spinner animation="border" variant="primary" role="status" style={{ width: "2rem", height: "2rem" }}>
+                                <span className="visually-hidden">Loading...</span>
+                            </Spinner>
+                            <p style={{ marginTop: "1rem", fontSize: "1.2rem", fontWeight: "500", color: "#007bff" }}>
+                                Loading...
+                            </p>
+                        </div>
+                    ) : (
+            <>
                     <div className="notification-form mb-4">
                         <Form.Group controlId="notificationTitle">
                             <Form.Label>Notification Title</Form.Label>
@@ -185,8 +208,10 @@ export default function NotificationPage() {
                     >
                         Send All
                     </Button>
-                </Col>
-            </Row>
+                    </>
+     )}
+                </Col>             
+            </Row>          
         </Container>
-    );
+    ); 
 }
