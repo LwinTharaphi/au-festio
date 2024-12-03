@@ -182,8 +182,29 @@ export default function EventPerformancesPage() {
 
         {/* Main Content */}
         <Col xs={9} md={10} className="main-content">
-          <Container className="my-5">
-            <h4>Performances for {eventName}</h4>
+          <Container>
+          <div className="d-flex justify-content-between align-items-center mb-3 sticky-header">
+            <h4>Performances for {eventName}</h4>         
+            <Dropdown className="mb-4" style={{ textAlign: "right" }}>
+              <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+                Select Event
+              </Dropdown.Toggle>
+              <Dropdown.Menu>
+                {eventsList.length > 0 ? (
+                  eventsList.map((event) => (
+                    <Dropdown.Item key={event._id} onClick={() => handleEventChange(event._id)}>
+                      {event.eventName}
+                    </Dropdown.Item>
+                  ))
+                ) : (
+                  <Dropdown.Item disabled>No events found</Dropdown.Item>
+                )}
+              </Dropdown.Menu>
+            </Dropdown>
+            </div>
+            {/* Error Display */}
+            {error && <Alert variant="danger">{error}</Alert>}
+
             {loading ? (
             <div
               style={{
@@ -203,25 +224,6 @@ export default function EventPerformancesPage() {
             </div>
           ) : (
             <>
-            <Dropdown className="mb-4" style={{ textAlign: "right" }}>
-              <Dropdown.Toggle variant="secondary" id="dropdown-basic">
-                Select Event
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
-                {eventsList.length > 0 ? (
-                  eventsList.map((event) => (
-                    <Dropdown.Item key={event._id} onClick={() => handleEventChange(event._id)}>
-                      {event.eventName}
-                    </Dropdown.Item>
-                  ))
-                ) : (
-                  <Dropdown.Item disabled>No events found</Dropdown.Item>
-                )}
-              </Dropdown.Menu>
-            </Dropdown>
-
-            {/* Error Display */}
-            {error && <Alert variant="danger">{error}</Alert>}
 
             {/* Form for Adding or Editing Performance */}
             <Form onSubmit={handleSubmit} className="mb-4">

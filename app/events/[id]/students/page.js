@@ -217,8 +217,8 @@ export default function RegisteredStudentsPage() {
           <Sidebar event={{ _id: id }} />
         </Col>
         <Col xs={9} md={10} className="main-content">
-          <Container className="my-5">
-            <div className="d-flex justify-content-between align-items-center mb-4">
+          <Container>
+            <div className="d-flex justify-content-between align-items-center mb-4 sticky-header">
               <h4>Registered Students for {eventName}</h4>
               
               <Dropdown className="mb-4" style={{ textAlign: "right" }}>
@@ -238,7 +238,7 @@ export default function RegisteredStudentsPage() {
                 </Dropdown.Menu>
               </Dropdown>
             </div>
-            <div className="d-flex justify-content-end align-items-center mb-3">
+            <div className="d-flex justify-content-end align-items-center sticky-header">
               <div>
                 <Form.Control
                   type="text"

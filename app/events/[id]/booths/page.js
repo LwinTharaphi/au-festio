@@ -203,9 +203,28 @@ export default function BoothPage() {
         </Col>
 
         <Col xs={9} md={10} className="main-content">
-          <Container className="my-5">
+          <Container className>
             {error && <Alert variant="danger">{error}</Alert>}
-            {!error && eventName && <h4>{eventName}: Booths</h4>}
+            {/* {!error && eventName && <h4>{eventName}: Booths</h4>} */}
+            <div className="d-flex justify-content-between align-items-center mb-4 sticky-header">
+            <h4>{eventName}: Booths</h4>
+            <Dropdown className="mb-4" style={{ textAlign: "right" }}>
+              <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+                Select Event
+              </Dropdown.Toggle>
+              <Dropdown.Menu>
+                {eventsList.length > 0 ? (
+                  eventsList.map((event) => (
+                    <Dropdown.Item key={event._id} onClick={() => handleEventChange(event._id)}>
+                      {event.eventName}
+                    </Dropdown.Item>
+                  ))
+                ) : (
+                  <Dropdown.Item disabled>No events found</Dropdown.Item>
+                )}
+              </Dropdown.Menu>
+            </Dropdown>
+            </div>
             {loading ? (
             <div
               style={{
@@ -225,30 +244,14 @@ export default function BoothPage() {
             </div>
           ) : (
             <>
-            <Dropdown className="mb-4" style={{ textAlign: "right" }}>
-              <Dropdown.Toggle variant="secondary" id="dropdown-basic">
-                Select Event
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
-                {eventsList.length > 0 ? (
-                  eventsList.map((event) => (
-                    <Dropdown.Item key={event._id} onClick={() => handleEventChange(event._id)}>
-                      {event.eventName}
-                    </Dropdown.Item>
-                  ))
-                ) : (
-                  <Dropdown.Item disabled>No events found</Dropdown.Item>
-                )}
-              </Dropdown.Menu>
-            </Dropdown>
-
             {/* Search Input */}
             <Form.Control
               type="text"
-              placeholder="Search Booths by Name or Vendor"
+              placeholder=" Search Booths by Name or Vendor"
               value={searchQuery}
               onChange={handleSearchChange}
-              className="mb-3"
+              className="mb-3 sticky-header"
+              style={{ maxWidth: "300px" }}
             />
 
             <Row>

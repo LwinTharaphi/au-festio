@@ -112,7 +112,7 @@ export default function NotificationPage() {
 
                 {/* Main Content */}
                 <Col xs={9} md={10}>
-                    <h3 className="mb-4 mt-5">Send Notifications for {eventName}</h3>
+                    <h3 className="mb-4 mt-1 sticky-header">Send Notifications for {eventName}</h3>
                     {loading ? (
                         <div
                             style={{

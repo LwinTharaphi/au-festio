@@ -311,10 +311,29 @@ export default function StaffPage() {
           <Sidebar event={{ _id: id }} /> {/* Sidebar component */}
         </Col>
         <Col xs={9} md={10} className="main-content">
-          <Container className="my-5">
+          <Container>
             {error && <Alert variant="danger">{error}</Alert>} {/* Show error if any */}
-            {!error && eventName && <h4>Staff List for {eventName}</h4>}
+            {/* {!error && eventName && <h4>Staff List for {eventName}</h4>} */}
             {/* {!error && !eventName && <p>Loading event name...</p>} Show loading state */}
+            <div className="d-flex justify-content-between align-items-center mb-4 sticky-header">
+            <h4>Staff List for {eventName}</h4>
+            <Dropdown className="mb-4" style={{ textAlign: "right" }}>
+              <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+                Select Event
+              </Dropdown.Toggle>
+              <Dropdown.Menu>
+                {eventsList.length > 0 ? (
+                  eventsList.map((event) => (
+                    <Dropdown.Item key={event._id} onClick={() => handleEventChange(event._id)}>
+                      {event.eventName}
+                    </Dropdown.Item>
+                  ))
+                ) : (
+                  <Dropdown.Item disabled>No events found</Dropdown.Item>
+                )}
+              </Dropdown.Menu>
+            </Dropdown>
+            </div>
             {loading ? (
             <div
               style={{
@@ -334,23 +353,6 @@ export default function StaffPage() {
             </div>
           ) : (
             <>
-            <Dropdown className="mb-4" style={{ textAlign: "right" }}>
-              <Dropdown.Toggle variant="secondary" id="dropdown-basic">
-                Select Event
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
-                {eventsList.length > 0 ? (
-                  eventsList.map((event) => (
-                    <Dropdown.Item key={event._id} onClick={() => handleEventChange(event._id)}>
-                      {event.eventName}
-                    </Dropdown.Item>
-                  ))
-                ) : (
-                  <Dropdown.Item disabled>No events found</Dropdown.Item>
-                )}
-              </Dropdown.Menu>
-            </Dropdown>
-
             {/* Role Cards */}
             <div className="d-flex flex-wrap">
               {roles.map((role) => (

@@ -77,3 +77,13 @@
     font-size: 0.9rem; /* Slightly smaller links */
   }
 }
+
+.sticky-header {
+  position: sticky;
+  top: 0;
+  background-color: #fff; /* Optional: to avoid transparency issues */
+  z-index: 1000; /* Ensures it stays above other content */
+  padding: 10px 0; /* Optional: adjust spacing as needed */
+  border-bottom: 1px solid #ddd; /* Optional: adds a subtle border */
+}
+
