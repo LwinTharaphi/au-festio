@@ -478,7 +478,7 @@ function EventForm() {
                                 Registeration Date: {new Date(event.registerationDate).toISOString().split('T')[0]}
                               </Typography>
                               <Typography variant="h6" align="center">
-                                Evnent Date: {new Date(event.eventDate).toISOString().split('T')[0]}
+                                Event Date: {new Date(event.eventDate).toISOString().split('T')[0]}
                               </Typography>
                             </Grid>
                           ))}
