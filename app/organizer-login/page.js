@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react'
 
 export default function OrganizerLogin() {
   const router = useRouter();
-  const [isSignUp, setIsSignUp] = useState(false); // Toggle between Sign Up and Sign In
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -16,29 +16,30 @@ export default function OrganizerLogin() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage('');
+    setError('');
 
     try {
-      const endpoint = '/api/auth/signin';
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+      const result = await signIn('credentials',{
+        email: formData.email,
+        password: formData.password,
+        redirect: false,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || 'Something went wrong');
+      if (result.error) {
+        setError(result.error || 'Something went wrong');
         setMessage('');
+        return;
       } else {
-        setMessage(data.message || 'Success!');
-        setError('');
-        
-        const { user } = data;
-        if (user && user.id){
-          console.log('User signed in:', data.user);
-          router.push(`/organizers/${user.id}/general-dashboard`);
+        const response = await fetch('/api/auth/session');
+        const session = await response.json();
+
+        if(!session?.user?.id){
+          setError('Unable to retrieve user information');
+          return;
         }
+        setMessage("Login successful! Redirecting...");
+        router.push(`/organizers/${session.user.id}/general-dashboard`);
       }
     } catch (err) {
       setError('An unexpected error occurred');

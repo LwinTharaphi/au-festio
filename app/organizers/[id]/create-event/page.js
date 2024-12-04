@@ -472,7 +472,6 @@ function EventForm() {
                             <Typography variant="h6" align="center">
                               Evnent Date: {new Date(event.eventDate).toISOString().split('T')[0]}
                             </Typography>
-
                           </Grid>
                         ))}
                       </Grid>

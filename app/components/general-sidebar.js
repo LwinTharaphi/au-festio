@@ -1,3 +1,4 @@
+"use client"
 import React from "react";
 import { useRouter, useParams } from "next/navigation"; // Fix: use correct Next.js router import
 import { Nav, Navbar } from "react-bootstrap";
@@ -5,13 +6,18 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './Sidebar.css';
 import { BsGrid, BsPeople, BsPerson, BsBoxArrowRight, BsBell, BsLock } from "react-icons/bs"; // Add icons
 
-
+import { signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 export default function Sidebar() {
+  const {data: session} = useSession();
+
   const router = useRouter();
-  const { id } = useParams();
-  if (!id) {
+  // const { id } = useParams();
+  if (!session) {
     return <p>Loading...</p>; // Show a loading state if the ID is not available
   }
+
+  const userId = session.user?.id || session.user?._id
 
   return (
     <Navbar expand="lg" className="flex-column sidebar">
@@ -29,7 +35,7 @@ export default function Sidebar() {
 
       <Nav className="flex-column">
       <Nav.Link
-          onClick={() => id && router.push(`/organizers/${id}/general-dashboard`)}
+          onClick={() => id && router.push(`/organizers/${userId}/general-dashboard`)}
           className="sidebar-link my-2"
         >
           <BsGrid className="me-2" /> Dashboard
@@ -37,7 +43,7 @@ export default function Sidebar() {
 
         {/* Profile */}
         <Nav.Link
-          onClick={() => id && router.push(`/organizers/${id}/profile`)}
+          onClick={() => id && router.push(`/organizers/${userId}/profile`)}
           className="sidebar-link my-2"
         >
           <BsPerson className="me-2" /> Profile
@@ -45,7 +51,7 @@ export default function Sidebar() {
 
         {/* Events */}
         <Nav.Link
-          onClick={() => router.push(`/organizers/${id}/create-event`)}
+          onClick={() => router.push(`/organizers/${userId}/create-event`)}
           className="sidebar-link my-2"
         >
           <BsPeople className="me-2" /> Events
@@ -53,7 +59,7 @@ export default function Sidebar() {
 
         {/* Logout */}
         <Nav.Link
-          onClick={() => router.push(`/`)} // Log out user
+          onClick={() => signOut()} // Log out user
           className="sidebar-link my-2 text-danger"
         >
           <BsBoxArrowRight className="me-2" /> Logout
