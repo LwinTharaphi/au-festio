@@ -4,16 +4,17 @@ import { Nav, Navbar } from "react-bootstrap";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Sidebar.css';
 import { BsPeople, BsPerson, BsBoxArrowRight, BsBell, BsLock } from "react-icons/bs"; // Add icons
-
+import { signOut } from "next-auth/react";
 
 export default function Sidebar() {
+
   const router = useRouter();
 
   return (
     <Navbar expand="lg" className="flex-column sidebar">
       <Navbar.Brand
         className="mb-4 logo"
-        onClick={() => router.push('/dashboard')} // Direct to dashboard
+        onClick={() => router.push('/admin-dashboard')} // Direct to dashboard
         style={{ cursor: "pointer" }}
       >
         <img
@@ -41,7 +42,7 @@ export default function Sidebar() {
 
         {/* Logout */}
         <Nav.Link
-          onClick={() => router.push(`/`)} // Log out user
+          onClick={() => signOut()}// Log out user
           className="sidebar-link my-2 text-danger"
         >
           <BsBoxArrowRight className="me-2" /> Logout

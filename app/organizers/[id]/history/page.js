@@ -12,14 +12,18 @@ export default function OrganizerHistoryPage () {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!session) {
+      // If no session, redirect to login page
+      router.push("/"); // or another appropriate route
+    }
     // Fetch completed events for the organizer
     const fetchCompletedEvents = async () => {
       // console.log(session)
     if (status === 'unauthenticated'){
-      router.push('/organizer-login')
+      router.push('/')
     }
 
-    if (status === "authenticated" && session?.user) {
+    if (status === "authenticated" && session?.user && session.user.role === "organizer") {
       const userId = session.user.id
       if (userId) {
         try {
@@ -69,7 +73,7 @@ export default function OrganizerHistoryPage () {
     );
   }
 
-  if(status === "authenticated"){
+  if(status === "authenticated" && session.user.role === "organizer"){
     return (
       <div className="container mt-5">
         <h1 className="mb-4">Completed Events</h1>

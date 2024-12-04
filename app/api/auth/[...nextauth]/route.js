@@ -30,30 +30,40 @@ const authOptions = {
         // email: {label: }
       },
       async authorize(credentials){
-        const {email, password } = credentials;
-
+        const {email, password, role } = credentials;
         try{
-          await dbConnect();
-          const organizer = await EventOrganizer.findOne({email});
-
-          if(!organizer){
-            throw new Error('Invalid email or password');
+          if(role === 'admin'){
+            if(password === 'admin'){
+              return {id: 1, name: 'Admin', email: 'admin@example.com', role: 'admin'};
+            } else{
+              throw new Error("Invalid admin username or password");
+            } 
           }
-
-          const decryptedPassword = decrypt(`${organizer.iv}:${organizer.password}`);
-
-          if (password !== decryptedPassword){
-            throw new Error('Wrong Password');
+          if(role === 'organizer'){
+            await dbConnect();
+            const organizer = await EventOrganizer.findOne({email});
+            if(!organizer){
+              throw new Error('Invalid email or password');
+            }
+  
+            const decryptedPassword = decrypt(`${organizer.iv}:${organizer.password}`);
+  
+            if (password !== decryptedPassword){
+              throw new Error('Wrong Password');
+            }
+  
+            const responseOrganizer = {
+              id: organizer._id.toString(),
+              name: organizer.name,
+              email: organizer.email,
+              role: 'organizer'
+              };
+            return responseOrganizer;
           }
-
-          const responseOrganizer = {
-            id: organizer._id.toString(),
-            name: organizer.name,
-            email: organizer.email,
-            };
-          return responseOrganizer;
-        }catch(error){
-          console.error("Sign in authentication Error",error);
+          throw new Error("Invalid role");
+        } catch(error){
+          console.error("Authentication error:",error.message);
+          throw new Error("Authentication failed;")
         }
       }
     })
@@ -67,6 +77,7 @@ const authOptions = {
         token.id = user.id;
         token.name = user.name;
         token.email = user.email;
+        token.role = user.role;
       }
       return token;
     },
@@ -75,13 +86,14 @@ const authOptions = {
         session.user.id = token.id;
         session.user.name = token.name;
         session.user.email = token.email;
+        session.user.role = token.role;
       }
       return session;
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
   pages:{
-    signIn: "/organizer-login",
+    signIn: "/",
   },
 };
 

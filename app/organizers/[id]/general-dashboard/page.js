@@ -13,10 +13,14 @@ export default function Dashboard()  {
   console.log(session)
 
   useEffect(()=>{
-    if (status === 'unauthenticated'){
-      router.push('/organizer-login')
+    if (!session) {
+      // If no session, redirect to login page
+      router.push("/"); // or another appropriate route
     }
-  },[status,router]);
+    if (status === 'unauthenticated'){
+      router.push('/')
+    }
+  },[status,router,session]);
   
   if (status === 'loading'){
     return (
@@ -39,7 +43,7 @@ export default function Dashboard()  {
     );
   }
 
-  if(status === 'authenticated'){
+  if(status === 'authenticated' && session.user.role === "organizer"){
     return (
       <div style={{ display: 'flex' }}>
       {/* Sidebar */}

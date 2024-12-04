@@ -35,10 +35,14 @@ export default function FeedbackPage() {
   const { id } = useParams(); // Event ID from URL parameters
 
   useEffect(() => {
-    if (status === 'unauthenticated'){
-      router.push('/organizer-login')
+    if (!session) {
+      // If no session, redirect to login page
+      router.push("/"); // or another appropriate route
     }
-    if (status === 'authenticated' && session?.user){
+    if (status === 'unauthenticated'){
+      router.push('/')
+    }
+    if (status === 'authenticated' && session?.user && session.user.role === "organizer"){
       const userId = session.user.id
       if(userId){
         const fetchEventData = async () => {
@@ -118,7 +122,7 @@ export default function FeedbackPage() {
     );
   }
 
-  if (status === 'authenticated'){
+  if (status === 'authenticated' && session.user.role === "organizer"){
     return (
       <div style={{ padding: "20px" }}>
         {error && <p style={{ color: "red" }}>{error}</p>}

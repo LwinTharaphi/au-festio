@@ -48,10 +48,14 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (status === 'unauthenticated'){
-      route.push('/organizer-login')
+    if (!session) {
+      // If no session, redirect to login page
+      router.push("/"); // or another appropriate route
     }
-    if (status === 'authenticated' && session?.user){
+    if (status === 'unauthenticated'){
+      route.push('/')
+    }
+    if (status === 'authenticated' && session?.user && session.user.role === "organizer"){
       const userId = session.user.id
       if(userId){
         async function fetchData() {
@@ -111,7 +115,7 @@ export default function Dashboard() {
   );
   const monthCounts = Object.values(monthData);
 
-  if (status === 'authenticated'){
+  if (status === 'authenticated' && session.user.role === "organizer"){
     return (
       <Container fluid>
         <Row>

@@ -1,6 +1,7 @@
 "use client";
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { signIn } from "next-auth/react";
 
 export default function AdminLogin() {
     const [username, setUsername] = useState('');
@@ -8,14 +9,20 @@ export default function AdminLogin() {
     const [error, setError] = useState('');
     const router = useRouter();
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
 
-        // Validate credentials
-        if (username === 'admin' && password === 'admin') {
-            router.push('/admin-dashboard'); // Redirect to Admin Dashboard
-        } else {
-            setError('Invalid username or password. Please try again.');
+        const result = await signIn("credentials",{
+            redirect: false,
+            username,
+            password,
+            role: "admin",
+        });
+
+        if (result.error){
+            setError(result.error);
+        }else{
+            router.push("/admin-dashboard");
         }
     };
 

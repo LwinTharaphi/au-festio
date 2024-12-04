@@ -1,30 +1,70 @@
 "use client";
 import { useRouter } from 'next/navigation';
 import Sidebar from '../components/admin_sidebar';
+import { signOut } from "next-auth/react";
+import { useEffect } from 'react';
+import { useSession } from 'next-auth/react'
+import { Spinner } from 'react-bootstrap';
 
 export default function AdminDashboard() {
+    const {data: session, status} = useSession();
     const router = useRouter();
 
+    useEffect(() => {
+        if (!session) {
+            // If no session, redirect to login page
+            router.push("/"); // or another appropriate route
+          }
+        if (status === 'unauthenticated'){
+          router.push('/')
+        }
+    });
+
     const handleLogout = () => {
-        router.push('/'); // Redirect to the main page
+        signOut() // Redirect to the main page
     };
 
-    return (
-        <div style={styles.container}>
-            {/* Sidebar */}
-            <div>
-                <Sidebar />
+    if (status === 'loading'){
+        return (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100vh",
+              flexDirection: "column",
+            }}
+          >
+            <Spinner animation="border" variant="primary" role="status" style={{ width: "2rem", height: "2rem" }}>
+              <span className="visually-hidden">Loading...</span>
+            </Spinner>
+            <p style={{ marginTop: "1rem", fontSize: "1.2rem", fontWeight: "500", color: "#007bff" }}>
+              Loading...
+            </p>
+          </div>
+        );
+      }
+    
+    if(status === 'authenticated' && session.user.role === "admin"){
+        return (
+            <div style={styles.container}>
+                {/* Sidebar */}
+                <div>
+                    <Sidebar />
+                </div>
+    
+                {/* Main Content */}
+                <div style={styles.mainContent}>
+                    <h1 style={styles.heading}>Admin Dashboard</h1>
+                    <button style={styles.button} onClick={handleLogout}>
+                        Logout
+                    </button>
+                </div>
             </div>
+        );
+    }
+    return null;
 
-            {/* Main Content */}
-            <div style={styles.mainContent}>
-                <h1 style={styles.heading}>Admin Dashboard</h1>
-                <button style={styles.button} onClick={handleLogout}>
-                    Logout
-                </button>
-            </div>
-        </div>
-    );
 }
 
 const styles = {

@@ -23,6 +23,7 @@ export default function OrganizerLogin() {
       const result = await signIn('credentials',{
         email: formData.email,
         password: formData.password,
+        role: "organizer",
         redirect: false,
       });
 

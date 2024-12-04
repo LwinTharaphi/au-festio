@@ -22,11 +22,15 @@ export default function Profile() {
 
   useEffect(() => {
     // console.log(session)
+    if (!session) {
+      // If no session, redirect to login page
+      router.push("/"); // or another appropriate route
+    }
     if (status === 'unauthenticated'){
-      router.push('/organizer-login')
+      router.push('/')
     }
 
-    if (status === "authenticated" && session?.user) {
+    if (status === "authenticated" && session?.user && session.user.role === "organizer") {
       const userId = session.user.id
       if (userId) {
         const fetchOrganizer = async () => {
@@ -97,7 +101,7 @@ export default function Profile() {
     );
   }
 
-  if(status === 'authenticated'){
+  if(status === 'authenticated' && session.user.role === "organizer"){
     return (
       <div style={{ display: "flex", minHeight: "100vh" }}>
         <Sidebar />
