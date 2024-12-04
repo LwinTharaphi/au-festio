@@ -14,7 +14,7 @@ import AddIcon from '@mui/icons-material/Add';
 import moment from "moment";
 import Sidebar from '../../../components/general-sidebar';
 import { useSession } from 'next-auth/react';
-
+import { Spinner } from 'react-bootstrap';
 
 function EventForm() {
   const {data: session, status} = useSession();
@@ -350,8 +350,25 @@ function EventForm() {
     return `${hour12}:${minute.toString().padStart(2, "0")} ${suffix}`;
   };
 
-  if(status === "loading"){
-    return <div>Loading...</div>
+  if (status === 'loading'){
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          flexDirection: "column",
+        }}
+      >
+        <Spinner animation="border" variant="primary" role="status" style={{ width: "2rem", height: "2rem" }}>
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+        <p style={{ marginTop: "1rem", fontSize: "1.2rem", fontWeight: "500", color: "#007bff" }}>
+          Loading...
+        </p>
+      </div>
+    );
   }
 
   if(status === "authenticated"){
@@ -478,7 +495,7 @@ function EventForm() {
                                 Registeration Date: {new Date(event.registerationDate).toISOString().split('T')[0]}
                               </Typography>
                               <Typography variant="h6" align="center">
-                                Evnent Date: {new Date(event.eventDate).toISOString().split('T')[0]}
+                                Event Date: {new Date(event.eventDate).toISOString().split('T')[0]}
                               </Typography>
                             </Grid>
                           ))}

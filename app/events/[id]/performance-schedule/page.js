@@ -6,8 +6,10 @@ import { FaTrash, FaEdit } from "react-icons/fa";
 import Sidebar from "../../../components/Sidebar";
 import "../../../components/Sidebar.css";
 import moment from 'moment';
+import { useSession } from 'next-auth/react';
 
 export default function EventPerformancesPage() {
+  const {data: session, status} = useSession();
   const { id } = useParams(); // Get eventId from the URL params
   const router = useRouter();
   const [performances, setPerformances] = useState([]);
@@ -27,61 +29,66 @@ export default function EventPerformancesPage() {
 
   // Fetch event details and performances for the event
   useEffect(() => {
-    const fetchEventData = async () => {
-      setError(null); // Clear previous errors before fetching data
-      try {
-        setLoading(true);
-        const response = await fetch(`/api/events/${id}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch event data.");
-        }
-
-        const event = await response.json();
-        setEventName(event.eventName);
-        setEventData(event); // Store event data in the state
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const fetchPerformances = async () => {
-      try {
-        const response = await fetch(`/api/events/${id}/performances`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch event performances.");
-        }
-        const data = await response.json();
-        setPerformances(data);
-      } catch (err) {
-        setError(err.message);
-      }
-    };
-
-    if (id) {
-      fetchEventData(); // Fetch event data
-      fetchPerformances(); // Fetch performances data
+    if (status === 'unauthenticated'){
+      router.push('/organizer-login')
     }
-  }, [id]);
-
-  useEffect(() => {
-    const fetchEventsList = async () => {
-      try {
-        const response = await fetch("/api/events");
-        if (!response.ok) {
-          throw new Error("Failed to fetch events list.");
+    if (status === 'authenticated' && session?.user){
+      const userId = session.user.id
+      if(userId){
+        const fetchEventData = async () => {
+          setError(null); // Clear previous errors before fetching data
+          try {
+            setLoading(true);
+            const response = await fetch(`/api/events/${id}`);
+            if (!response.ok) {
+              throw new Error("Failed to fetch event data.");
+            }
+    
+            const event = await response.json();
+            setEventName(event.eventName);
+            setEventData(event); // Store event data in the state
+          } catch (err) {
+            setError(err.message);
+          } finally {
+            setLoading(false);
+          }
+        };
+    
+        const fetchPerformances = async () => {
+          try {
+            const response = await fetch(`/api/events/${id}/performances`);
+            if (!response.ok) {
+              throw new Error("Failed to fetch event performances.");
+            }
+            const data = await response.json();
+            setPerformances(data);
+          } catch (err) {
+            setError(err.message);
+          }
+        };
+        const fetchEventsList = async () => {
+          try {
+            const response = await fetch("/api/events");
+            if (!response.ok) {
+              throw new Error("Failed to fetch events list.");
+            }
+            const data = await response.json();
+            setEventsList(data);
+            console.log("Fetched events:", data); // Log the fetched events
+          } catch (err) {
+            setError(err.message);
+          }
+        };
+    
+        if (id) {
+          fetchEventData(); // Fetch event data
+          fetchPerformances(); // Fetch performances data
         }
-        const data = await response.json();
-        setEventsList(data);
-        console.log("Fetched events:", data); // Log the fetched events
-      } catch (err) {
-        setError(err.message);
+        fetchEventsList();
       }
-    };
-  
-    fetchEventsList();
-  }, []);
+    }
+    
+  }, [id,,router,session,status]);
 
   // Handle form submission to add or update performance
   const handleSubmit = async (e) => {
@@ -172,175 +179,201 @@ export default function EventPerformancesPage() {
     router.push(`/events/${id}/performance-schedule`);
   };
 
-  return (
-    <Container fluid>
-      <Row>
-        {/* Sidebar */}
-        <Col xs={3} md={2} className="sidebar">
-          <Sidebar event={{ _id: id }} />
-        </Col>
+  if (status === 'loading'){
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          flexDirection: "column",
+        }}
+      >
+        <Spinner animation="border" variant="primary" role="status" style={{ width: "2rem", height: "2rem" }}>
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+        <p style={{ marginTop: "1rem", fontSize: "1.2rem", fontWeight: "500", color: "#007bff" }}>
+          Loading...
+        </p>
+      </div>
+    );
+  }
 
-        {/* Main Content */}
-        <Col xs={9} md={10} className="main-content">
-          <Container>
-          <div className="d-flex justify-content-between align-items-center mb-3 sticky-header">
-            <h4>Performances for {eventName}</h4>         
-            <Dropdown className="mb-4" style={{ textAlign: "right" }}>
-              <Dropdown.Toggle variant="secondary" id="dropdown-basic">
-                Select Event
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
-                {eventsList.length > 0 ? (
-                  eventsList.map((event) => (
-                    <Dropdown.Item key={event._id} onClick={() => handleEventChange(event._id)}>
-                      {event.eventName}
-                    </Dropdown.Item>
-                  ))
-                ) : (
-                  <Dropdown.Item disabled>No events found</Dropdown.Item>
-                )}
-              </Dropdown.Menu>
-            </Dropdown>
-            </div>
-            {/* Error Display */}
-            {error && <Alert variant="danger">{error}</Alert>}
+  if(status === 'authenticated'){
 
-            {loading ? (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                height: "100vh",
-                flexDirection: "column",
-              }}
-            >
-              <Spinner animation="border" variant="primary" role="status" style={{ width: "2rem", height: "2rem" }}>
-                <span className="visually-hidden">Loading...</span>
-              </Spinner>
-              <p style={{ marginTop: "1rem", fontSize: "1.2rem", fontWeight: "500", color: "#007bff" }}>
-                Loading...
-              </p>
-            </div>
-          ) : (
-            <>
-
-            {/* Form for Adding or Editing Performance */}
-            <Form onSubmit={handleSubmit} className="mb-4">
-              <h5>{editPerformanceId ? "Edit Performance" : "Add a Performance"}</h5>
-              <Row>
-                <Col md={2}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Serial No.</Form.Label>
-                    <Form.Control
-                      type="number"
-                      value={serialNo}
-                      onChange={(e) => setSerialNo(e.target.value)}
-                      required
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={3}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Performance Name</Form.Label>
-                    <Form.Control
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      required
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={4}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Description</Form.Label>
-                    <Form.Control
-                      as="textarea"
-                      rows={2}
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      required
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={2}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Start Time</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="e.g. 08:10 PM"
-                      value={startTime}
-                      onChange={(e) => setStartTime(e.target.value)}
-                      required
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={2}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>End Time</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="e.g. 09:00 PM"
-                      value={endTime}
-                      onChange={(e) => setEndTime(e.target.value)}
-                      required
-                    />
-                  </Form.Group>
-                </Col>
-              </Row>
-              <Button variant="primary" type="submit">
-                {editPerformanceId ? "Update Performance" : "Add Performance"}
-              </Button>
-            </Form>
-
-            {/* Table for Performance List */}
-            <Table striped bordered hover>
-              <thead>
-                <tr>
-                  <th>Serial No.</th>
-                  <th>Name</th>
-                  <th>Description</th>
-                  <th>Start Time</th>
-                  <th>End Time</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {performances.length > 0 ? (
-                  performances.map((performance) => (
-                    <tr key={performance._id}>
-                      <td>{performance.serialNo}</td>
-                      <td>{performance.name}</td>
-                      <td>{performance.description}</td>
-                      <td>{moment(performance.startTime).format("h:mm A")}</td>
-                      <td>{moment(performance.endTime).format("h:mm A")}</td>
-                      <td>
-                        <div style={{ display: "flex", alignItems: "center" }}>
-                          <FaEdit
-                            style={{ cursor: "pointer", color: "blue", marginRight: "10px" }}
-                            onClick={() => handleEdit(performance)}
-                          />
-                          <FaTrash
-                            style={{ cursor: "pointer", color: "red" }}
-                            onClick={() => handleDelete(performance._id)}
-                          />
-                        </div>
-                      </td>
-
-                    </tr>
-                  ))
-                ) : (
+    return (
+      <Container fluid>
+        <Row>
+          {/* Sidebar */}
+          <Col xs={3} md={2} className="sidebar">
+            <Sidebar event={{ _id: id }} />
+          </Col>
+  
+          {/* Main Content */}
+          <Col xs={9} md={10} className="main-content">
+            <Container>
+            <div className="d-flex justify-content-between align-items-center mb-3 sticky-header">
+              <h4>Performances for {eventName}</h4>         
+              <Dropdown className="mb-4" style={{ textAlign: "right" }}>
+                <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+                  Select Event
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  {eventsList.length > 0 ? (
+                    eventsList.map((event) => (
+                      <Dropdown.Item key={event._id} onClick={() => handleEventChange(event._id)}>
+                        {event.eventName}
+                      </Dropdown.Item>
+                    ))
+                  ) : (
+                    <Dropdown.Item disabled>No events found</Dropdown.Item>
+                  )}
+                </Dropdown.Menu>
+              </Dropdown>
+              </div>
+              {/* Error Display */}
+              {error && <Alert variant="danger">{error}</Alert>}
+  
+              {loading ? (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  height: "100vh",
+                  flexDirection: "column",
+                }}
+              >
+                <Spinner animation="border" variant="primary" role="status" style={{ width: "2rem", height: "2rem" }}>
+                  <span className="visually-hidden">Loading...</span>
+                </Spinner>
+                <p style={{ marginTop: "1rem", fontSize: "1.2rem", fontWeight: "500", color: "#007bff" }}>
+                  Loading...
+                </p>
+              </div>
+            ) : (
+              <>
+  
+              {/* Form for Adding or Editing Performance */}
+              <Form onSubmit={handleSubmit} className="mb-4">
+                <h5>{editPerformanceId ? "Edit Performance" : "Add a Performance"}</h5>
+                <Row>
+                  <Col md={2}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Serial No.</Form.Label>
+                      <Form.Control
+                        type="number"
+                        value={serialNo}
+                        onChange={(e) => setSerialNo(e.target.value)}
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={3}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Performance Name</Form.Label>
+                      <Form.Control
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={4}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Description</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={2}
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={2}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Start Time</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="e.g. 08:10 PM"
+                        value={startTime}
+                        onChange={(e) => setStartTime(e.target.value)}
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={2}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>End Time</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="e.g. 09:00 PM"
+                        value={endTime}
+                        onChange={(e) => setEndTime(e.target.value)}
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
+                </Row>
+                <Button variant="primary" type="submit">
+                  {editPerformanceId ? "Update Performance" : "Add Performance"}
+                </Button>
+              </Form>
+  
+              {/* Table for Performance List */}
+              <Table striped bordered hover>
+                <thead>
                   <tr>
-                    <td colSpan="6">No performances found.</td>
+                    <th>Serial No.</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th></th>
                   </tr>
-                )}
-              </tbody>
-            </Table>
-            </>
-            )}
-          </Container>
-        </Col>
-      </Row>
-    </Container>
-  );
+                </thead>
+                <tbody>
+                  {performances.length > 0 ? (
+                    performances.map((performance) => (
+                      <tr key={performance._id}>
+                        <td>{performance.serialNo}</td>
+                        <td>{performance.name}</td>
+                        <td>{performance.description}</td>
+                        <td>{moment(performance.startTime).format("h:mm A")}</td>
+                        <td>{moment(performance.endTime).format("h:mm A")}</td>
+                        <td>
+                          <div style={{ display: "flex", alignItems: "center" }}>
+                            <FaEdit
+                              style={{ cursor: "pointer", color: "blue", marginRight: "10px" }}
+                              onClick={() => handleEdit(performance)}
+                            />
+                            <FaTrash
+                              style={{ cursor: "pointer", color: "red" }}
+                              onClick={() => handleDelete(performance._id)}
+                            />
+                          </div>
+                        </td>
+  
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="6">No performances found.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </Table>
+              </>
+              )}
+            </Container>
+          </Col>
+        </Row>
+      </Container>
+    );
+
+  }
+  return null;
 }

@@ -37,8 +37,10 @@ ChartJS.register(
   Tooltip,
   Legend
 );
+import { useSession } from 'next-auth/react';
 
 export default function Dashboard() {
+  const {data: session, status} = useSession();
   const { id } = useParams(); // Get eventId from URL parameters
   const route = useRouter();
   const [data, setData] = useState(null);
@@ -46,24 +48,34 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        setLoading(true);
-        const response = await fetch(`/api/events/${id}/dashboards`);
-        if (!response.ok) throw new Error("Failed to fetch data");
-        const json = await response.json();
-        setData(json);
-      } catch (error) {
-        setError(error.message);
-        console.error("Error fetching dashboard data:", error.message);
-      } finally {
-        setLoading(false);
+    if (status === 'unauthenticated'){
+      route.push('/organizer-login')
+    }
+    if (status === 'authenticated' && session?.user){
+      const userId = session.user.id
+      if(userId){
+        async function fetchData() {
+          try {
+            setLoading(true);
+            const response = await fetch(`/api/events/${id}/dashboards`);
+            if (!response.ok) throw new Error("Failed to fetch data");
+            const json = await response.json();
+            setData(json);
+          } catch (error) {
+            setError(error.message);
+            console.error("Error fetching dashboard data:", error.message);
+          } finally {
+            setLoading(false);
+          }
+        }
+        fetchData();
       }
     }
-    fetchData();
-  }, [id]);
+  }, [id,route,session,status]);
 
-  if (loading)
+  const { stats, entryTimes, monthData, event, averageRating } = data || {};
+
+  if (status === 'loading' || !data){
     return (
       <div
         style={{
@@ -82,9 +94,8 @@ export default function Dashboard() {
         </p>
       </div>
     );
+  }
   if (error) return <Alert variant="danger">Error: {error}</Alert>;
-
-  const { stats, entryTimes, monthData, event, averageRating } = data;
 
   // Formatting Entry Times Data
   const timeLabels = Array.from(
@@ -100,191 +111,195 @@ export default function Dashboard() {
   );
   const monthCounts = Object.values(monthData);
 
-  return (
-    <Container fluid>
-      <Row>
-        {/* Sidebar */}
-        <Col
-          xs={2}
-          className="sidebar bg-white text-white p-3"
-          style={{ minHeight: "100vh" }}
-        >
-          <Sidebar event={{ _id: id }} />
-        </Col>
-
-        {/* Main Content */}
-        <Col xs={10} className="main-content p-4">
-          <Breadcrumb>
-            <Breadcrumb.Item href="/organizers/[id]/create-event">Event List</Breadcrumb.Item>
-            <Breadcrumb.Item href="/events">Events</Breadcrumb.Item>
-            <Breadcrumb.Item active>{event.eventName}</Breadcrumb.Item>
-          </Breadcrumb>
-          <div className="d-flex aligh-items-center justify-content-between">
-            <h3 className="display-5 mb-4 text-primary">
-              {event.eventName} Dashboard
-            </h3>
-            <Button variant="primary"
-              className="ms-2"
-              onClick={() => route.push(`/events/${id}/feedbacks`)}>
-              View FeedBacks</Button>
-          </div>
-          <p></p>
-
-          {/* Statistics Cards */}
-          <Row className="mb-4 g-4">
-            <Col md={3}>
-              <Card className="text-center shadow-sm">
-                <Card.Body>
-                  <BsPeopleFill size={30} className="mb-2 text-primary" />
-                  <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
-                    Total Registrations
-                  </Card.Title>
-                  <Card.Text style={{ fontSize: "1.5rem" }}>
-                    {stats.totalRegistrations}
-                  </Card.Text>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col md={3}>
-              <Card className="text-center shadow-sm">
-                <Card.Body>
-                  <BsShop size={30} className="mb-2 text-success" />
-                  <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
-                    Booths Registered
-                  </Card.Title>
-                  <Card.Text style={{ fontSize: "1.5rem" }}>
-                    {stats.boothsRegistered}
-                  </Card.Text>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col md={3}>
-              <Card className="text-center shadow-sm">
-                <Card.Body>
-                  <BsCheckCircle size={30} className="mb-2 text-info" />
-                  <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
-                    Check-Ins
-                  </Card.Title>
-                  <Card.Text style={{ fontSize: "1.5rem" }}>
-                    {stats.checkIns}
-                  </Card.Text>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col md={3}>
-              <Card className="text-center shadow-sm">
-                <Card.Body>
-                  {/* Centered Big Star */}
-                  <BsStarFill size={30} className="mb-2 text-warning" />
-                  {/* Card Title */}
-                  <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
-                    Average Rating
-                  </Card.Title>
-
-                  {/* Rating Value */}
-                  <Card.Text style={{ fontSize: "1.5rem" }}>
-                    {averageRating.toFixed(1)}
-                  </Card.Text>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-
-
-          {/* Charts Section */}
-          <Row className="g-4">
-            <Col md={6}>
-              <Card className="shadow-sm">
-                <Card.Body>
-                  <h5 className="text-center">Entry Times</h5>
-                  <Line
-                    data={{
-                      labels: timeLabels,
-                      datasets: [
-                        {
-                          label: "Entries Over Time",
-                          data: timeCounts,
-                          backgroundColor: "rgba(54, 162, 235, 0.2)",
-                          borderColor: "rgba(54, 162, 235, 1)",
-                          borderWidth: 1,
-                          tension: 0.4,
-                        },
-                      ],
-                    }}
-                    options={{
-                      responsive: true,
-                      plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                          callbacks: {
-                            label: (tooltipItem) =>
-                              `${tooltipItem.raw} people`,
+  if (status === 'authenticated'){
+    return (
+      <Container fluid>
+        <Row>
+          {/* Sidebar */}
+          <Col
+            xs={2}
+            className="sidebar bg-white text-white p-3"
+            style={{ minHeight: "100vh" }}
+          >
+            <Sidebar event={{ _id: id }} />
+          </Col>
+  
+          {/* Main Content */}
+          <Col xs={10} className="main-content p-4">
+            <Breadcrumb>
+              <Breadcrumb.Item href="/organizers/[id]/create-event">Event List</Breadcrumb.Item>
+              <Breadcrumb.Item href="/events">Events</Breadcrumb.Item>
+              <Breadcrumb.Item active>{event.eventName}</Breadcrumb.Item>
+            </Breadcrumb>
+            <div className="d-flex aligh-items-center justify-content-between">
+              <h3 className="display-5 mb-4 text-primary">
+                {event.eventName} Dashboard
+              </h3>
+              <Button variant="primary"
+                className="ms-2"
+                onClick={() => route.push(`/events/${id}/feedbacks`)}>
+                View FeedBacks</Button>
+            </div>
+            <p></p>
+  
+            {/* Statistics Cards */}
+            <Row className="mb-4 g-4">
+              <Col md={3}>
+                <Card className="text-center shadow-sm">
+                  <Card.Body>
+                    <BsPeopleFill size={30} className="mb-2 text-primary" />
+                    <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
+                      Total Registrations
+                    </Card.Title>
+                    <Card.Text style={{ fontSize: "1.5rem" }}>
+                      {stats.totalRegistrations}
+                    </Card.Text>
+                  </Card.Body>
+                </Card>
+              </Col>
+              <Col md={3}>
+                <Card className="text-center shadow-sm">
+                  <Card.Body>
+                    <BsShop size={30} className="mb-2 text-success" />
+                    <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
+                      Booths Registered
+                    </Card.Title>
+                    <Card.Text style={{ fontSize: "1.5rem" }}>
+                      {stats.boothsRegistered}
+                    </Card.Text>
+                  </Card.Body>
+                </Card>
+              </Col>
+              <Col md={3}>
+                <Card className="text-center shadow-sm">
+                  <Card.Body>
+                    <BsCheckCircle size={30} className="mb-2 text-info" />
+                    <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
+                      Check-Ins
+                    </Card.Title>
+                    <Card.Text style={{ fontSize: "1.5rem" }}>
+                      {stats.checkIns}
+                    </Card.Text>
+                  </Card.Body>
+                </Card>
+              </Col>
+              <Col md={3}>
+                <Card className="text-center shadow-sm">
+                  <Card.Body>
+                    {/* Centered Big Star */}
+                    <BsStarFill size={30} className="mb-2 text-warning" />
+                    {/* Card Title */}
+                    <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
+                      Average Rating
+                    </Card.Title>
+  
+                    {/* Rating Value */}
+                    <Card.Text style={{ fontSize: "1.5rem" }}>
+                      {averageRating.toFixed(1)}
+                    </Card.Text>
+                  </Card.Body>
+                </Card>
+              </Col>
+            </Row>
+  
+  
+            {/* Charts Section */}
+            <Row className="g-4">
+              <Col md={6}>
+                <Card className="shadow-sm">
+                  <Card.Body>
+                    <h5 className="text-center">Entry Times</h5>
+                    <Line
+                      data={{
+                        labels: timeLabels,
+                        datasets: [
+                          {
+                            label: "Entries Over Time",
+                            data: timeCounts,
+                            backgroundColor: "rgba(54, 162, 235, 0.2)",
+                            borderColor: "rgba(54, 162, 235, 1)",
+                            borderWidth: 1,
+                            tension: 0.4,
+                          },
+                        ],
+                      }}
+                      options={{
+                        responsive: true,
+                        plugins: {
+                          legend: { display: false },
+                          tooltip: {
+                            callbacks: {
+                              label: (tooltipItem) =>
+                                `${tooltipItem.raw} people`,
+                            },
                           },
                         },
-                      },
-                      scales: {
-                        x: {
-                          title: { display: true, text: "Time of Day" },
-                        },
-                        y: {
-                          title: { display: true, text: "Number of People" },
-                          beginAtZero: true,
-                        },
-                      },
-                    }}
-                  />
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col md={6}>
-              <Card className="shadow-sm">
-                <Card.Body>
-                  <h5 className="text-center">Monthly Crowd Flow</h5>
-                  <Bar
-                    data={{
-                      labels: monthLabels,
-                      datasets: [
-                        {
-                          label: "Monthly Entries",
-                          data: monthCounts,
-                          backgroundColor: "rgba(255, 159, 64, 0.2)",
-                          borderColor: "rgba(255, 159, 64, 1)",
-                          borderWidth: 1,
-                        },
-                      ],
-                    }}
-                    options={{
-                      responsive: true,
-                      plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                          callbacks: {
-                            label: (tooltipItem) =>
-                              `${tooltipItem.raw} entries`,
+                        scales: {
+                          x: {
+                            title: { display: true, text: "Time of Day" },
+                          },
+                          y: {
+                            title: { display: true, text: "Number of People" },
+                            beginAtZero: true,
                           },
                         },
-                      },
-                      scales: {
-                        x: {
-                          title: { display: true, text: "Month" },
+                      }}
+                    />
+                  </Card.Body>
+                </Card>
+              </Col>
+              <Col md={6}>
+                <Card className="shadow-sm">
+                  <Card.Body>
+                    <h5 className="text-center">Monthly Crowd Flow</h5>
+                    <Bar
+                      data={{
+                        labels: monthLabels,
+                        datasets: [
+                          {
+                            label: "Monthly Entries",
+                            data: monthCounts,
+                            backgroundColor: "rgba(255, 159, 64, 0.2)",
+                            borderColor: "rgba(255, 159, 64, 1)",
+                            borderWidth: 1,
+                          },
+                        ],
+                      }}
+                      options={{
+                        responsive: true,
+                        plugins: {
+                          legend: { display: false },
+                          tooltip: {
+                            callbacks: {
+                              label: (tooltipItem) =>
+                                `${tooltipItem.raw} entries`,
+                            },
+                          },
                         },
-                        y: {
-                          title: { display: true, text: "Number of Entries" },
-                          beginAtZero: true,
+                        scales: {
+                          x: {
+                            title: { display: true, text: "Month" },
+                          },
+                          y: {
+                            title: { display: true, text: "Number of Entries" },
+                            beginAtZero: true,
+                          },
                         },
-                      },
-                    }}
-                  />
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-          <Row>
-
-          </Row>
-
-        </Col>
-      </Row>
-    </Container>
-  );
+                      }}
+                    />
+                  </Card.Body>
+                </Card>
+              </Col>
+            </Row>
+            <Row>
+  
+            </Row>
+  
+          </Col>
+        </Row>
+      </Container>
+    );
+  }
+  return null;
+  
 }

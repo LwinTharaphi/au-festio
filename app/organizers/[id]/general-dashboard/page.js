@@ -5,6 +5,7 @@ import Sidebar from "../../../components/general-sidebar";
 import { Container, Row, Col } from 'react-bootstrap'; // Using React Bootstrap for layout
 import { useSession } from 'next-auth/react';
 import { useEffect } from 'react';
+import { Spinner } from 'reactstrap';
 
 export default function Dashboard()  {
   const {data: session, status } = useSession();
@@ -16,8 +17,26 @@ export default function Dashboard()  {
       router.push('/organizer-login')
     }
   },[status,router]);
+  
   if (status === 'loading'){
-    return <div>Loading...</div>
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          flexDirection: "column",
+        }}
+      >
+        <Spinner animation="border" variant="primary" role="status" style={{ width: "2rem", height: "2rem" }}>
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+        <p style={{ marginTop: "1rem", fontSize: "1.2rem", fontWeight: "500", color: "#007bff" }}>
+          Loading...
+        </p>
+      </div>
+    );
   }
 
   if(status === 'authenticated'){

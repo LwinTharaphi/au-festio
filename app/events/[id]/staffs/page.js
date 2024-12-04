@@ -7,8 +7,10 @@ import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FaTrash, FaEdit } from "react-icons/fa";
 import Sidebar from "../../../components/Sidebar";
 import "../../../components/Sidebar.css";
+import { useSession } from 'next-auth/react';
 
 export default function StaffPage() {
+  const {data: session, status} = useSession();
   const { id } = useParams(); // Get eventId from URL parameters
   const router = useRouter();
   const [eventName, setEventName] = useState(""); // State to hold the event name
@@ -45,59 +47,65 @@ export default function StaffPage() {
 
   // Fetch event name, roles, and staff based on eventId
   useEffect(() => {
-    const fetchEventData = async () => {
-      try {
-        setLoading(true);
-        const eventResponse = await fetch(`/api/events/${id}`);
-        if (!eventResponse.ok) {
-          throw new Error("Failed to fetch event data.");
-        }
-        const event = await eventResponse.json();
-        setEventName(event.eventName);
-
-        // Fetch roles data
-        const rolesResponse = await fetch(`/api/events/${id}/staffroles`);
-        if (!rolesResponse.ok) {
-          throw new Error("Failed to fetch roles.");
-        }
-        const rolesData = await rolesResponse.json();
-        setRoles(rolesData);
-
-        // Fetch staff data
-        const staffResponse = await fetch(`/api/events/${id}/staffs`);
-        if (!staffResponse.ok) {
-          throw new Error("Failed to fetch staff data.");
-        }
-        const staffData = await staffResponse.json();
-        setStaff(staffData);
-        setFilteredStaffs(staffData);
-      } catch (err) {
-        setError(err.message);
-      }finally {
-        setLoading(false);
+    if (status === 'unauthenticated'){
+      router.push('/organizer-login')
+    }
+    if (status === 'authenticated' && session?.user){
+      const userId = session.user.id
+      if(userId){
+        const fetchEventData = async () => {
+          try {
+            setLoading(true);
+            const eventResponse = await fetch(`/api/events/${id}`);
+            if (!eventResponse.ok) {
+              throw new Error("Failed to fetch event data.");
+            }
+            const event = await eventResponse.json();
+            setEventName(event.eventName);
+    
+            // Fetch roles data
+            const rolesResponse = await fetch(`/api/events/${id}/staffroles`);
+            if (!rolesResponse.ok) {
+              throw new Error("Failed to fetch roles.");
+            }
+            const rolesData = await rolesResponse.json();
+            setRoles(rolesData);
+    
+            // Fetch staff data
+            const staffResponse = await fetch(`/api/events/${id}/staffs`);
+            if (!staffResponse.ok) {
+              throw new Error("Failed to fetch staff data.");
+            }
+            const staffData = await staffResponse.json();
+            setStaff(staffData);
+            setFilteredStaffs(staffData);
+          } catch (err) {
+            setError(err.message);
+          }finally {
+            setLoading(false);
+          }
+        };
+        const fetchEventsList = async () => {
+          try {
+            const response = await fetch("/api/events");
+            if (!response.ok) {
+              throw new Error("Failed to fetch events list.");
+            }
+            const data = await response.json();
+            setEventsList(data);
+            console.log("Fetched events:", data); // Log the fetched events
+          } catch (err) {
+            setError(err.message);
+          }
+        };
+    
+        fetchEventsList();
+    
+        fetchEventData();
       }
-    };
-
-    fetchEventData();
-  }, [id]);
-
-  useEffect(() => {
-    const fetchEventsList = async () => {
-      try {
-        const response = await fetch("/api/events");
-        if (!response.ok) {
-          throw new Error("Failed to fetch events list.");
-        }
-        const data = await response.json();
-        setEventsList(data);
-        console.log("Fetched events:", data); // Log the fetched events
-      } catch (err) {
-        setError(err.message);
-      }
-    };
-
-    fetchEventsList();
-  }, []);
+    }
+    
+  }, [id,router,session,status]);
 
   useEffect(() => {
     // Filter the staff by ID or name when the searchID is updated
@@ -304,349 +312,374 @@ export default function StaffPage() {
   const handleEventChange = (id) => {
     router.push(`/events/${id}/staffs`);
   };
-  return (
-    <Container fluid>
-      <Row>
-        <Col xs={3} md={2} className="sidebar">
-          <Sidebar event={{ _id: id }} /> {/* Sidebar component */}
-        </Col>
-        <Col xs={9} md={10} className="main-content">
-          <Container>
-            {error && <Alert variant="danger">{error}</Alert>} {/* Show error if any */}
-            {/* {!error && eventName && <h4>Staff List for {eventName}</h4>} */}
-            {/* {!error && !eventName && <p>Loading event name...</p>} Show loading state */}
-            <div className="d-flex justify-content-between align-items-center mb-4 sticky-header">
-            <h4>Staff List for {eventName}</h4>
-            <Dropdown className="mb-4" style={{ textAlign: "right" }}>
-              <Dropdown.Toggle variant="secondary" id="dropdown-basic">
-                Select Event
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
-                {eventsList.length > 0 ? (
-                  eventsList.map((event) => (
-                    <Dropdown.Item key={event._id} onClick={() => handleEventChange(event._id)}>
-                      {event.eventName}
-                    </Dropdown.Item>
-                  ))
-                ) : (
-                  <Dropdown.Item disabled>No events found</Dropdown.Item>
-                )}
-              </Dropdown.Menu>
-            </Dropdown>
-            </div>
-            {loading ? (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                height: "100vh",
-                flexDirection: "column",
-              }}
-            >
-              <Spinner animation="border" variant="primary" role="status" style={{ width: "2rem", height: "2rem" }}>
-                <span className="visually-hidden">Loading...</span>
-              </Spinner>
-              <p style={{ marginTop: "1rem", fontSize: "1.2rem", fontWeight: "500", color: "#007bff" }}>
-                Loading...
-              </p>
-            </div>
-          ) : (
-            <>
-            {/* Role Cards */}
-            <div className="d-flex flex-wrap">
-              {roles.map((role) => (
-                <Card key={role._id} className="m-2" style={{ width: "18rem" }}>
+
+  if (status === 'loading'){
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          flexDirection: "column",
+        }}
+      >
+        <Spinner animation="border" variant="primary" role="status" style={{ width: "2rem", height: "2rem" }}>
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+        <p style={{ marginTop: "1rem", fontSize: "1.2rem", fontWeight: "500", color: "#007bff" }}>
+          Loading...
+        </p>
+      </div>
+    );
+  }
+
+  if (status === 'authenticated'){
+    return (
+      <Container fluid>
+        <Row>
+          <Col xs={3} md={2} className="sidebar">
+            <Sidebar event={{ _id: id }} /> {/* Sidebar component */}
+          </Col>
+          <Col xs={9} md={10} className="main-content">
+            <Container>
+              {error && <Alert variant="danger">{error}</Alert>} {/* Show error if any */}
+              {/* {!error && eventName && <h4>Staff List for {eventName}</h4>} */}
+              {/* {!error && !eventName && <p>Loading event name...</p>} Show loading state */}
+              <div className="d-flex justify-content-between align-items-center mb-4 sticky-header">
+              <h4>Staff List for {eventName}</h4>
+              <Dropdown className="mb-4" style={{ textAlign: "right" }}>
+                <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+                  Select Event
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  {eventsList.length > 0 ? (
+                    eventsList.map((event) => (
+                      <Dropdown.Item key={event._id} onClick={() => handleEventChange(event._id)}>
+                        {event.eventName}
+                      </Dropdown.Item>
+                    ))
+                  ) : (
+                    <Dropdown.Item disabled>No events found</Dropdown.Item>
+                  )}
+                </Dropdown.Menu>
+              </Dropdown>
+              </div>
+              {loading ? (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  height: "100vh",
+                  flexDirection: "column",
+                }}
+              >
+                <Spinner animation="border" variant="primary" role="status" style={{ width: "2rem", height: "2rem" }}>
+                  <span className="visually-hidden">Loading...</span>
+                </Spinner>
+                <p style={{ marginTop: "1rem", fontSize: "1.2rem", fontWeight: "500", color: "#007bff" }}>
+                  Loading...
+                </p>
+              </div>
+            ) : (
+              <>
+              {/* Role Cards */}
+              <div className="d-flex flex-wrap">
+                {roles.map((role) => (
+                  <Card key={role._id} className="m-2" style={{ width: "18rem" }}>
+                    <Card.Body>
+                      <div className="d-flex justify-content-between align-items-start">
+                        <div>
+                          <Card.Title>{role.name}</Card.Title>
+                          <Card.Text>Required: {role.count}</Card.Text>
+                        </div>
+                        <div>
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            className="me-2"
+                            onClick={() => handleShowModal(role)}
+                          >
+                            <FontAwesomeIcon icon={faEdit} /> {/* Edit Icon */}
+                          </Button>
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            onClick={() => handleShowDeleteModal(role)}
+                          >
+                            <FontAwesomeIcon icon={faTrash} />
+                          </Button>
+                        </div>
+                      </div>
+                    </Card.Body>
+                  </Card>
+                ))}
+  
+                {/* "Add New Role" Card */}
+                <Card className="m-2" style={{ width: "18rem", cursor: "pointer" }} onClick={() => handleShowModal()}>
                   <Card.Body>
-                    <div className="d-flex justify-content-between align-items-start">
-                      <div>
-                        <Card.Title>{role.name}</Card.Title>
-                        <Card.Text>Required: {role.count}</Card.Text>
-                      </div>
-                      <div>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          className="me-2"
-                          onClick={() => handleShowModal(role)}
-                        >
-                          <FontAwesomeIcon icon={faEdit} /> {/* Edit Icon */}
-                        </Button>
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          onClick={() => handleShowDeleteModal(role)}
-                        >
-                          <FontAwesomeIcon icon={faTrash} />
-                        </Button>
-                      </div>
-                    </div>
+                    <Card.Title>Add New Role</Card.Title>
                   </Card.Body>
                 </Card>
-              ))}
-
-              {/* "Add New Role" Card */}
-              <Card className="m-2" style={{ width: "18rem", cursor: "pointer" }} onClick={() => handleShowModal()}>
-                <Card.Body>
-                  <Card.Title>Add New Role</Card.Title>
-                </Card.Body>
-              </Card>
-            </div>
-
-            {/* Staff Table */}
-            <div className="d-flex justify-content-between align-items-center my-4">
-              <h5 className="mb-0">Registered Staff</h5>
-              <Form.Control
-                type="text"
-                placeholder="Search by ID or Name"
-                value={searchID}
-                onChange={handleSearchIDChange}
-                style={{ maxWidth: "300px" }}
-              />
-            </div>
-
-            <Table striped bordered hover>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Faculty</th>
-                  <th>Phone No</th>
-                  <th>Assigned Role</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredStaffs.map((staffMember) => (
-                  <tr key={staffMember._id}>
-                    <td>{staffMember.id}</td>
-                    <td>{staffMember.name}</td>
-                    <td>{staffMember.email}</td>
-                    <td>{staffMember.faculty}</td>
-                    <td>{staffMember.phone}</td>
-                    <td>{staffMember.role.name}</td>
-                    <td>
-                      <a
-                        href="#"
-                        onClick={() => handleShowApprovalModal(staffMember)}
-                        style={{ textDecoration: 'underline', color: 'inherit' }}
-                      >
-                        {staffMember.status}
-                      </a>
-                    </td>
-                    <td>
-                      <div style={{ display: "flex", alignItems: "center" }}>
-                        <FaEdit
-                          style={{ cursor: "pointer", color: "blue", marginRight: "10px" }}
-                          onClick={() => handleShowStaffModal(staffMember)}
-                        />
-                        <FaTrash
-                          style={{ cursor: "pointer", color: "red" }}
-                          onClick={() => handleShowStaffDeleteModal(staffMember)}
-                        />
-                      </div>
-                    </td>
+              </div>
+  
+              {/* Staff Table */}
+              <div className="d-flex justify-content-between align-items-center my-4">
+                <h5 className="mb-0">Registered Staff</h5>
+                <Form.Control
+                  type="text"
+                  placeholder="Search by ID or Name"
+                  value={searchID}
+                  onChange={handleSearchIDChange}
+                  style={{ maxWidth: "300px" }}
+                />
+              </div>
+  
+              <Table striped bordered hover>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Faculty</th>
+                    <th>Phone No</th>
+                    <th>Assigned Role</th>
+                    <th>Status</th>
+                    <th>Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </Table>
-
-            {/* Modal for Adding/Editing Staff */}
-            <Modal show={showStaffModal} onHide={handleCloseStaffModal}>
-              <Modal.Header closeButton>
-                <Modal.Title>{isEditingStaff ? "Edit Staff" : "Add Staff"}</Modal.Title>
-              </Modal.Header>
-              <Modal.Body>
-                <Form>
-                  <Form.Group controlId="formStaffName">
-                    <Form.Label>ID</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="Enter ID"
-                      value={newStaff.id}
-                      onChange={(e) => setNewStaff({ ...newStaff, id: e.target.value })}
-                    />
-                  </Form.Group>
-                  <Form.Group controlId="formStaffName">
-                    <Form.Label>Name</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="Enter name"
-                      value={newStaff.name}
-                      onChange={(e) => setNewStaff({ ...newStaff, name: e.target.value })}
-                    />
-                  </Form.Group>
-                  <Form.Group controlId="formStaffEmail" className="mt-3">
-                    <Form.Label>Email</Form.Label>
-                    <Form.Control
-                      type="email"
-                      placeholder="Enter email"
-                      value={newStaff.email}
-                      onChange={(e) => setNewStaff({ ...newStaff, email: e.target.value })}
-                    />
-                  </Form.Group>
-                  <Form.Group controlId="formStaffFaculty" className="mt-3">
-                    <Form.Label>Faculty</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="Enter faculty"
-                      value={newStaff.faculty}
-                      onChange={(e) => setNewStaff({ ...newStaff, faculty: e.target.value })}
-                    />
-                  </Form.Group>
-                  <Form.Group controlId="formStaffPhone" className="mt-3">
-                    <Form.Label>Phone No</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="Enter phone number"
-                      value={newStaff.phone}
-                      onChange={(e) => setNewStaff({ ...newStaff, phone: e.target.value })}
-                    />
-                  </Form.Group>
-                  <Form.Group controlId="formStaffRole" className="mt-3">
-                    <Form.Label>Role</Form.Label>
-                    <Form.Control
-                      as="select"
-                      value={newStaff.role}
-                      onChange={(e) => setNewStaff({ ...newStaff, role: e.target.value })}
+                </thead>
+                <tbody>
+                  {filteredStaffs.map((staffMember) => (
+                    <tr key={staffMember._id}>
+                      <td>{staffMember.id}</td>
+                      <td>{staffMember.name}</td>
+                      <td>{staffMember.email}</td>
+                      <td>{staffMember.faculty}</td>
+                      <td>{staffMember.phone}</td>
+                      <td>{staffMember.role.name}</td>
+                      <td>
+                        <a
+                          href="#"
+                          onClick={() => handleShowApprovalModal(staffMember)}
+                          style={{ textDecoration: 'underline', color: 'inherit' }}
+                        >
+                          {staffMember.status}
+                        </a>
+                      </td>
+                      <td>
+                        <div style={{ display: "flex", alignItems: "center" }}>
+                          <FaEdit
+                            style={{ cursor: "pointer", color: "blue", marginRight: "10px" }}
+                            onClick={() => handleShowStaffModal(staffMember)}
+                          />
+                          <FaTrash
+                            style={{ cursor: "pointer", color: "red" }}
+                            onClick={() => handleShowStaffDeleteModal(staffMember)}
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+  
+              {/* Modal for Adding/Editing Staff */}
+              <Modal show={showStaffModal} onHide={handleCloseStaffModal}>
+                <Modal.Header closeButton>
+                  <Modal.Title>{isEditingStaff ? "Edit Staff" : "Add Staff"}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  <Form>
+                    <Form.Group controlId="formStaffName">
+                      <Form.Label>ID</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="Enter ID"
+                        value={newStaff.id}
+                        onChange={(e) => setNewStaff({ ...newStaff, id: e.target.value })}
+                      />
+                    </Form.Group>
+                    <Form.Group controlId="formStaffName">
+                      <Form.Label>Name</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="Enter name"
+                        value={newStaff.name}
+                        onChange={(e) => setNewStaff({ ...newStaff, name: e.target.value })}
+                      />
+                    </Form.Group>
+                    <Form.Group controlId="formStaffEmail" className="mt-3">
+                      <Form.Label>Email</Form.Label>
+                      <Form.Control
+                        type="email"
+                        placeholder="Enter email"
+                        value={newStaff.email}
+                        onChange={(e) => setNewStaff({ ...newStaff, email: e.target.value })}
+                      />
+                    </Form.Group>
+                    <Form.Group controlId="formStaffFaculty" className="mt-3">
+                      <Form.Label>Faculty</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="Enter faculty"
+                        value={newStaff.faculty}
+                        onChange={(e) => setNewStaff({ ...newStaff, faculty: e.target.value })}
+                      />
+                    </Form.Group>
+                    <Form.Group controlId="formStaffPhone" className="mt-3">
+                      <Form.Label>Phone No</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="Enter phone number"
+                        value={newStaff.phone}
+                        onChange={(e) => setNewStaff({ ...newStaff, phone: e.target.value })}
+                      />
+                    </Form.Group>
+                    <Form.Group controlId="formStaffRole" className="mt-3">
+                      <Form.Label>Role</Form.Label>
+                      <Form.Control
+                        as="select"
+                        value={newStaff.role}
+                        onChange={(e) => setNewStaff({ ...newStaff, role: e.target.value })}
+                      >
+                        <option value="">Select a role</option>
+                        {roles.map((role) => (
+                          <option key={role._id} value={role._id}>
+                            {role.name}
+                          </option>
+                        ))}
+                      </Form.Control>
+                    </Form.Group>
+                  </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button variant="secondary" onClick={handleCloseStaffModal}>
+                    Close
+                  </Button>
+                  <Button variant="primary" onClick={handleSaveStaff}>
+                    Save Changes
+                  </Button>
+                </Modal.Footer>
+              </Modal>
+  
+              {/* Modal for Adding/Editing Role */}
+              <Modal show={showModal} onHide={handleCloseModal}>
+                <Modal.Header closeButton>
+                  <Modal.Title>{isEditing ? "Edit Role" : "Add Role"}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  <Form>
+                    <Form.Group controlId="formRoleName">
+                      <Form.Label>Role Name</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="Enter role name"
+                        value={newRole.name}
+                        onChange={(e) => setNewRole({ ...newRole, name: e.target.value })}
+                      />
+                    </Form.Group>
+                    <Form.Group controlId="formRoleCount" className="mt-3">
+                      <Form.Label>Number of People Needed</Form.Label>
+                      <Form.Control
+                        type="number"
+                        placeholder="Enter count"
+                        value={newRole.count}
+                        onChange={(e) => setNewRole({ ...newRole, count: e.target.value })}
+                      />
+                    </Form.Group>
+                  </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button variant="secondary" onClick={handleCloseModal}>
+                    Close
+                  </Button>
+                  <Button variant="primary" onClick={handleSaveRole}>
+                    Save Role
+                  </Button>
+                </Modal.Footer>
+              </Modal>
+  
+              <Modal show={showApprovalModal} onHide={handleCloseApprovalModal}>
+                <Modal.Header closeButton>
+                  <Modal.Title>Approve or Deny Staff</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  <p>Are you sure you want to {approvalStatus === "approved" ? "deny" : "approve"} this staff member?</p>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button variant="secondary" onClick={handleCloseApprovalModal}>
+                    Close
+                  </Button>
+                  <Button
+                    variant="success"
+                    onClick={() => handleSaveApproval("approved")}
+                  >
+                    Approve
+                  </Button>
+                  <Button
+                    variant="danger"
+                    onClick={() => handleSaveApproval("denied")}
+                  >
+                    Deny
+                  </Button>
+                </Modal.Footer>
+              </Modal>
+  
+              {/* Delete Confirmation Modal */}
+              {roleToDelete && (
+                <Modal show={showRoleDeleteModal} onHide={handleCloseDeleteModal} centered>
+                  <Modal.Header closeButton>
+                    <Modal.Title>Confirm Delete</Modal.Title>
+                  </Modal.Header>
+                  <Modal.Body>
+                    Are you sure you want to delete the role <strong>{roleToDelete.name}</strong>?
+                  </Modal.Body>
+                  <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseDeleteModal}>
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="danger"
+                      onClick={() => handleDeleteRole(roleToDelete._id)}
                     >
-                      <option value="">Select a role</option>
-                      {roles.map((role) => (
-                        <option key={role._id} value={role._id}>
-                          {role.name}
-                        </option>
-                      ))}
-                    </Form.Control>
-                  </Form.Group>
-                </Form>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button variant="secondary" onClick={handleCloseStaffModal}>
-                  Close
-                </Button>
-                <Button variant="primary" onClick={handleSaveStaff}>
-                  Save Changes
-                </Button>
-              </Modal.Footer>
-            </Modal>
-
-            {/* Modal for Adding/Editing Role */}
-            <Modal show={showModal} onHide={handleCloseModal}>
-              <Modal.Header closeButton>
-                <Modal.Title>{isEditing ? "Edit Role" : "Add Role"}</Modal.Title>
-              </Modal.Header>
-              <Modal.Body>
-                <Form>
-                  <Form.Group controlId="formRoleName">
-                    <Form.Label>Role Name</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="Enter role name"
-                      value={newRole.name}
-                      onChange={(e) => setNewRole({ ...newRole, name: e.target.value })}
-                    />
-                  </Form.Group>
-                  <Form.Group controlId="formRoleCount" className="mt-3">
-                    <Form.Label>Number of People Needed</Form.Label>
-                    <Form.Control
-                      type="number"
-                      placeholder="Enter count"
-                      value={newRole.count}
-                      onChange={(e) => setNewRole({ ...newRole, count: e.target.value })}
-                    />
-                  </Form.Group>
-                </Form>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button variant="secondary" onClick={handleCloseModal}>
-                  Close
-                </Button>
-                <Button variant="primary" onClick={handleSaveRole}>
-                  Save Role
-                </Button>
-              </Modal.Footer>
-            </Modal>
-
-            <Modal show={showApprovalModal} onHide={handleCloseApprovalModal}>
-              <Modal.Header closeButton>
-                <Modal.Title>Approve or Deny Staff</Modal.Title>
-              </Modal.Header>
-              <Modal.Body>
-                <p>Are you sure you want to {approvalStatus === "approved" ? "deny" : "approve"} this staff member?</p>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button variant="secondary" onClick={handleCloseApprovalModal}>
-                  Close
-                </Button>
-                <Button
-                  variant="success"
-                  onClick={() => handleSaveApproval("approved")}
-                >
-                  Approve
-                </Button>
-                <Button
-                  variant="danger"
-                  onClick={() => handleSaveApproval("denied")}
-                >
-                  Deny
-                </Button>
-              </Modal.Footer>
-            </Modal>
-
-            {/* Delete Confirmation Modal */}
-            {roleToDelete && (
-              <Modal show={showRoleDeleteModal} onHide={handleCloseDeleteModal} centered>
-                <Modal.Header closeButton>
-                  <Modal.Title>Confirm Delete</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                  Are you sure you want to delete the role <strong>{roleToDelete.name}</strong>?
-                </Modal.Body>
-                <Modal.Footer>
-                  <Button variant="secondary" onClick={handleCloseDeleteModal}>
-                    Cancel
-                  </Button>
-                  <Button
-                    variant="danger"
-                    onClick={() => handleDeleteRole(roleToDelete._id)}
-                  >
-                    Delete
-                  </Button>
-                </Modal.Footer>
-              </Modal>
-            )}
-
-            {/* Delete Confirmation Modal */}
-            {StaffToDelete && (
-              <Modal show={showStaffDeleteModal} onHide={handleCloseStaffDeleteModal} centered>
-                <Modal.Header closeButton>
-                  <Modal.Title>Confirm Delete</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                  Are you sure you want to delete the staff <strong>{StaffToDelete.name}</strong>?
-                </Modal.Body>
-                <Modal.Footer>
-                  <Button variant="secondary" onClick={handleCloseStaffDeleteModal}>
-                    Cancel
-                  </Button>
-                  <Button
-                    variant="danger"
-                    onClick={() => handleDeleteStaff(StaffToDelete._id)}
-                  >
-                    Delete
-                  </Button>
-                </Modal.Footer>
-              </Modal>
-            )}
-            </>
-            )}
-          </Container>
-        </Col>
-      </Row>        
-    </Container>
-  );
+                      Delete
+                    </Button>
+                  </Modal.Footer>
+                </Modal>
+              )}
+  
+              {/* Delete Confirmation Modal */}
+              {StaffToDelete && (
+                <Modal show={showStaffDeleteModal} onHide={handleCloseStaffDeleteModal} centered>
+                  <Modal.Header closeButton>
+                    <Modal.Title>Confirm Delete</Modal.Title>
+                  </Modal.Header>
+                  <Modal.Body>
+                    Are you sure you want to delete the staff <strong>{StaffToDelete.name}</strong>?
+                  </Modal.Body>
+                  <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseStaffDeleteModal}>
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="danger"
+                      onClick={() => handleDeleteStaff(StaffToDelete._id)}
+                    >
+                      Delete
+                    </Button>
+                  </Modal.Footer>
+                </Modal>
+              )}
+              </>
+              )}
+            </Container>
+          </Col>
+        </Row>        
+      </Container>
+    );
+  }
+  return null;
 }
 
 

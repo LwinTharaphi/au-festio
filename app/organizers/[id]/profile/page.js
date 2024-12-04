@@ -76,8 +76,25 @@ export default function Profile() {
     }
   };
 
-  if(status ==="loading"){
-    return <div>Loading...</div>
+  if (status === 'loading'){
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          flexDirection: "column",
+        }}
+      >
+        <Spinner animation="border" variant="primary" role="status" style={{ width: "2rem", height: "2rem" }}>
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+        <p style={{ marginTop: "1rem", fontSize: "1.2rem", fontWeight: "500", color: "#007bff" }}>
+          Loading...
+        </p>
+      </div>
+    );
   }
 
   if(status === 'authenticated'){
