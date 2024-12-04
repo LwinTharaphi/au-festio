@@ -23,7 +23,7 @@ export default function Sidebar() {
     <Navbar expand="lg" className="flex-column sidebar">
       <Navbar.Brand
         className="mb-4 logo"
-        onClick={() => router.push('/dashboard')} // Direct to dashboard
+        onClick={() => router.push(`/organizers/${userId}/general-dashboard`)} // Direct to dashboard
         style={{ cursor: "pointer" }}
       >
         <img
@@ -35,7 +35,7 @@ export default function Sidebar() {
 
       <Nav className="flex-column">
       <Nav.Link
-          onClick={() => id && router.push(`/organizers/${userId}/general-dashboard`)}
+          onClick={() => userId && router.push(`/organizers/${userId}/general-dashboard`)}
           className="sidebar-link my-2"
         >
           <BsGrid className="me-2" /> Dashboard
@@ -43,7 +43,7 @@ export default function Sidebar() {
 
         {/* Profile */}
         <Nav.Link
-          onClick={() => id && router.push(`/organizers/${userId}/profile`)}
+          onClick={() => userId && router.push(`/organizers/${userId}/profile`)}
           className="sidebar-link my-2"
         >
           <BsPerson className="me-2" /> Profile

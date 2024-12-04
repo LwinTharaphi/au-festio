@@ -70,7 +70,7 @@ const authOptions = {
       }
       return token;
     },
-    async session({session, token}){
+    async session({session, token,user}){
       if(token){
         session.user.id = token.id;
         session.user.name = token.name;

@@ -1,6 +1,5 @@
 import EventOrganizer from "@/models/EventOrganizer";
 import dbConnect from "@/lib/db";
-import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 
 // GET: Fetch all performances for a specific event
