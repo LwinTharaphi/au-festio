@@ -136,9 +136,9 @@ export default function Dashboard() {
               <Breadcrumb.Item active>{event.eventName}</Breadcrumb.Item>
             </Breadcrumb>
             <div className="d-flex aligh-items-center justify-content-between">
-              <h3 className="display-5 mb-4 text-primary">
+              <h2 className="text-primary">
                 {event.eventName} Dashboard
-              </h3>
+              </h2>
               <Button variant="primary"
                 className="ms-2"
                 onClick={() => route.push(`/events/${id}/feedbacks`)}>

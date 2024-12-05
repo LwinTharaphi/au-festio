@@ -2,7 +2,7 @@
 import { useRouter, useParams } from 'next/navigation';
 import React from 'react';
 import Sidebar from "../../../components/general-sidebar";
-import { Container, Row, Col } from 'react-bootstrap'; // Using React Bootstrap for layout
+import { Container, Row, Col, Button } from 'react-bootstrap'; // Using React Bootstrap for layout
 import { useSession } from 'next-auth/react';
 import { useEffect } from 'react';
 import { Spinner } from 'reactstrap';
@@ -10,6 +10,7 @@ import { Spinner } from 'reactstrap';
 export default function Dashboard()  {
   const {data: session, status } = useSession();
   const router = useRouter();
+  const { id } = useParams();
   console.log(session)
 
   useEffect(()=>{
@@ -52,13 +53,14 @@ export default function Dashboard()  {
       {/* Main content area */}
       <div style={{ flex: 1, padding: '20px' }}>
         <Container>
-          <Row>
-            <Col>
+        <div className="d-flex justify-content-between align-items-center mb-4">
               <h3>Dashboard</h3>
-              <p>Welcome to the Dashboard!</p>
-            </Col>
-          </Row>
-
+              <Button variant="primary"
+                className="ms-2"
+                onClick={() => router.push(`/organizers/${id}/history`)}>
+                View History</Button>
+                </div>     
+                <p>Welcome to the Dashboard!</p>
           {/* Example widgets */}
           <Row>
             <Col md={4}>

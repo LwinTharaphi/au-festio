@@ -1,58 +1,52 @@
+"use client";
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import { Card, Row, Col, Spinner } from "react-bootstrap";
-import { useSession } from 'next-auth/react'
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
-export default function OrganizerHistoryPage () {
-  const {data: session, status} = useSession();
+export default function OrganizerHistoryPage() {
+  const { data: session, status } = useSession();
   const router = useRouter();
-  const { id } = useParams(); // Get the organizer ID from the route
   const [completedEvents, setCompletedEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!session) {
-      // If no session, redirect to login page
-      router.push("/"); // or another appropriate route
-    }
-    // Fetch completed events for the organizer
     const fetchCompletedEvents = async () => {
-      // console.log(session)
-    if (status === 'unauthenticated'){
-      router.push('/')
-    }
-
-    if (status === "authenticated" && session?.user && session.user.role === "organizer") {
-      const userId = session.user.id
-      if (userId) {
-        try {
-          const response = await fetch(`/api/organizers/${id}/history`);
-          if (!response.ok) throw new Error("Failed to fetch completed events.");
-          const data = await response.json();
-          setCompletedEvents(data);
-        } catch (error) {
-          console.error(error);
-        } finally {
-          setLoading(false);
+      try {
+        if (!session || status === "unauthenticated") {
+          // Redirect to login if session is not authenticated
+          router.push("/");
+          return;
         }
-      };
-  
-      fetchCompletedEvents();
-      }
-    }
-  
-  }, [id,router,session,status]);
 
-  if (loading) {
-    return (
-      <div className="text-center mt-5">
-        <Spinner animation="border" />
-        <p>Loading completed events...</p>
-      </div>
-    );
-  }
-  if (status === 'loading'){
+        if (status === "authenticated" && session.user.role === "organizer") {
+          setLoading(true);
+          const response = await fetch(`/api/events`);
+          if (!response.ok) {
+            throw new Error("Failed to fetch events.");
+          }
+          const events = await response.json();
+
+          // Check if events are completed based on `eventDate`
+          const today = new Date();
+          const filteredEvents = events.filter((event) => {
+            const eventDate = new Date(event.eventDate); // Parse eventDate
+            return eventDate < today; // Completed if eventDate is in the past
+          });
+
+          setCompletedEvents(filteredEvents); // Update state with filtered events
+        }
+      } catch (error) {
+        console.error("Error fetching events:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCompletedEvents();
+  }, [router, session, status]);
+
+  if (loading || status === "loading") {
     return (
       <div
         style={{
@@ -73,27 +67,27 @@ export default function OrganizerHistoryPage () {
     );
   }
 
-  if(status === "authenticated" && session.user.role === "organizer"){
+  if (status === "authenticated" && session.user.role === "organizer") {
     return (
       <div className="container mt-5">
-        <h1 className="mb-4">Completed Events</h1>
+        <h3 className="mb-4">History</h3>
         {completedEvents.length === 0 ? (
           <p>No completed events found.</p>
         ) : (
           <Row xs={1} md={2} lg={3} className="g-4">
-            {completedEvents.map((event) => (
-              <Col key={event.id}>
+            {completedEvents.map((event, index) => (
+              <Col key={index}>
                 <Card>
                   <Card.Img
                     variant="top"
-                    src={event.imageUrl || "https://via.placeholder.com/300"}
+                    src={event.poster}
                     alt={event.name}
                   />
                   <Card.Body>
-                    <Card.Title>{event.name}</Card.Title>
+                    <Card.Title>{event.eventName}</Card.Title>
                     <Card.Text>
                       <strong>Completed on:</strong>{" "}
-                      {new Date(event.completedDate).toLocaleDateString()}
+                      {new Date(event.eventDate).toLocaleDateString()}
                     </Card.Text>
                     <Card.Text>{event.description}</Card.Text>
                   </Card.Body>
@@ -106,5 +100,4 @@ export default function OrganizerHistoryPage () {
     );
   }
   return null;
-};
-
+}
