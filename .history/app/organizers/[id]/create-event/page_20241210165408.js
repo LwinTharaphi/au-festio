@@ -122,7 +122,7 @@ function EventForm() {
 
   const categorizeEvents = (events) => {
     const today = moment();
-    const groupedEvents = { ongoing: {}, upcoming: {}};
+    const groupedEvents = { ongoing: {}, upcoming: {}, completed: {} };
   
     events.forEach((event, index) => {
       const registrationDate = moment(event.registerationDate);
@@ -411,7 +411,7 @@ function EventForm() {
   
             {/* Event List by Status */}
             {Object.keys(groupedEvents).length > 0 ? (
-              ["ongoing", "upcoming"].map((status) => (
+              ["ongoing", "upcoming", "completed"].map((status) => (
                 Object.keys(groupedEvents[status] || {}).length > 0 ? (
                   <Box key={status} sx={{ marginTop: 4 }}>
                     <Typography variant="h5" sx={{ marginBottom: 3 }}>
