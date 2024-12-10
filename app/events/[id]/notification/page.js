@@ -20,13 +20,10 @@ export default function NotificationPage() {
 
     // Fetch event and student data
     useEffect(() => {
-        // if (!session) {
-        //     // If no session, redirect to login page
-        //     router.push("/"); // or another appropriate route
-        //   }
-        if (status === 'unauthenticated'){
-            router.push('/')
-          }
+        if (status === "loading") return;  // Don't redirect while loading
+        if (status === 'unauthenticated' || session?.user?.role !== "organizer"){
+          router.push('/')
+        }
           if (status === 'authenticated' && session?.user && session.user.role === "organizer"){
             const userId = session.user.id
             if(userId){

@@ -13,10 +13,9 @@ export default function OrganizerHistoryPage() {
   useEffect(() => {
     const fetchCompletedEvents = async () => {
       try {
-        if (status === "unauthenticated") {
-          // Redirect to login if session is not authenticated
-          router.push("/");
-          return;
+        if (status === "loading") return;  // Don't redirect while loading
+        if (status === 'unauthenticated' || session?.user?.role !== "organizer"){
+          router.push('/')
         }
 
         if (status === "authenticated" && session.user.role === "organizer") {

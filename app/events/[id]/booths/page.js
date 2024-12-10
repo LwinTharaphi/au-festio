@@ -39,7 +39,8 @@ export default function BoothPage() {
 
   // Fetch event name and booths based on eventId
   useEffect(() => {
-    if (status === 'unauthenticated'){
+    if (status === "loading") return;  // Don't redirect while loading
+    if (status === 'unauthenticated' || session?.user?.role !== "organizer"){
       router.push('/')
     }
     if (status === 'authenticated' && session?.user && session.user.role === "organizer"){

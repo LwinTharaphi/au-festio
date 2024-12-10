@@ -48,11 +48,8 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // if (!session) {
-    //   // If no session, redirect to login page
-    //   route.push("/"); // or another appropriate route
-    // }
-    if (status === 'unauthenticated'){
+    if (status === "loading") return;  // Don't redirect while loading
+    if (status === 'unauthenticated' || session?.user?.role !== "organizer"){
       route.push('/')
     }
     if (status === 'authenticated' && session?.user && session.user.role === "organizer"){

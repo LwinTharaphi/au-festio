@@ -28,12 +28,9 @@ export default function EventOrganizersPage() {
 
   // Fetch organizers data
   useEffect(() => {
-    if (!session) {
-      // If no session, redirect to login page
-      router.push("/"); // or another appropriate route
-    }
-    if (status === 'unauthenticated'){
-      router.push('/')
+    if (status === "loading") return;  // Don't redirect while loading
+    if (status === 'unauthenticated' || session?.user?.role !== "admin"){
+          router.push('/')
     }
 
     if (status === "authenticated" && session.user.role === "admin") {

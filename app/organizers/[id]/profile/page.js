@@ -19,14 +19,20 @@ export default function Profile() {
     confirmPassword: "",
   });
   const [passwordChangeMessage, setPasswordChangeMessage] = useState("");
+ // Use effect that runs when session status changes
+//  useEffect(() => {
+//   if (status === "loading") return;  // Don't redirect while loading
+  
+//   if (!session?.user) {
+//     router.push("/");  // Redirect to sign-in page if not authenticated
+//   }
+// }, [session, status, router]);  // Dependencies: session, status, and router
+  
 
   useEffect(() => {
-    // console.log(session)
-    // if (!session) {
-    //   // If no session, redirect to login page
-    //   router.push("/"); // or another appropriate route
-    // }
-    if (status === 'unauthenticated'){
+    if (status === "loading") return;  // Don't redirect while loading
+  
+    if (status === 'unauthenticated' || session?.user?.role !== "organizer"){
       router.push('/')
     }
 

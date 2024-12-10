@@ -14,9 +14,9 @@ export default function StudentDetails() {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        if (status === 'unauthenticated') {
-            router.push('/');
-            return;
+        if (status === "loading") return;  // Don't redirect while loading
+        if (status === 'unauthenticated' || session?.user?.role !== "organizer"){
+          router.push('/')
         }
 
         if (status === 'authenticated' && session?.user?.role !== 'organizer') {
