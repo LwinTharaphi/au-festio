@@ -39,6 +39,10 @@ export default function BoothPage() {
 
   // Fetch event name and booths based on eventId
   useEffect(() => {
+    // if (!session) {
+    //   // If no session, redirect to login page
+    //   router.push("/"); // or another appropriate route
+    // }
     if (status === 'unauthenticated'){
       router.push('/')
     }

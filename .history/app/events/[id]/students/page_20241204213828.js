@@ -34,18 +34,15 @@ export default function RegisteredStudentsPage() {
   });
 
   useEffect(() => {
-    // localStorage.setItem("lastVisitedRoute",router.asPath);
-    if (status === "loading") return;
+    if (!session) {
+      // If no session, redirect to login page
+      router.push("/"); // or another appropriate route
+    }
     if (status === 'unauthenticated'){
       router.push('/')
     }
     if (status === 'authenticated' && session?.user && session.user.role === "organizer"){
       const userId = session.user.id
-      const lastVisitedRoute = localStorage.getItem("lastVisitedRoute");
-      if (lastVisitedRoute && lastVisitedRoute !== "/"){
-        router.push(lastVisitedRoute);
-        localStorage.removeItem("lastVisitedRoute");
-      }
       if(userId){
         const fetchEventData = async () => {
           setError(null); // Clear previous errors before fetching data

@@ -34,7 +34,7 @@ export default function RegisteredStudentsPage() {
   });
 
   useEffect(() => {
-    // localStorage.setItem("lastVisitedRoute",router.asPath);
+    localStorage.setItem("lastVisitedRoute",router.asPath);
     if (status === "loading") return;
     if (status === 'unauthenticated'){
       router.push('/')

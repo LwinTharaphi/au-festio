@@ -34,8 +34,10 @@ export default function RegisteredStudentsPage() {
   });
 
   useEffect(() => {
-    // localStorage.setItem("lastVisitedRoute",router.asPath);
-    if (status === "loading") return;
+    if (!session) {
+      // If no session, redirect to login page
+      router.push("/"); // or another appropriate route
+    }
     if (status === 'unauthenticated'){
       router.push('/')
     }

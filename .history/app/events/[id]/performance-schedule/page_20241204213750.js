@@ -29,10 +29,10 @@ export default function EventPerformancesPage() {
 
   // Fetch event details and performances for the event
   useEffect(() => {
-    // if (!session) {
-    //   // If no session, redirect to login page
-    //   router.push("/"); // or another appropriate route
-    // }
+    if (!session) {
+      // If no session, redirect to login page
+      router.push("/"); // or another appropriate route
+    }
     if (status === 'unauthenticated'){
       router.push('/')
     }

@@ -47,10 +47,10 @@ export default function StaffPage() {
 
   // Fetch event name, roles, and staff based on eventId
   useEffect(() => {
-    // if (!session) {
-    //   // If no session, redirect to login page
-    //   router.push("/"); // or another appropriate route
-    // }
+    if (!session) {
+      // If no session, redirect to login page
+      router.push("/"); // or another appropriate route
+    }
     if (status === 'unauthenticated'){
       router.push('/')
     }

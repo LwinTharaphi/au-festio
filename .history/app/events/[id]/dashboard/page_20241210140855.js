@@ -48,10 +48,10 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // if (!session) {
-    //   // If no session, redirect to login page
-    //   route.push("/"); // or another appropriate route
-    // }
+    if (!session) {
+      // If no session, redirect to login page
+      route.push("/"); // or another appropriate route
+    }
     if (status === 'unauthenticated'){
       route.push('/')
     }

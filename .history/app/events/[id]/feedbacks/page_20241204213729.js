@@ -35,10 +35,10 @@ export default function FeedbackPage() {
   const { id } = useParams(); // Event ID from URL parameters
 
   useEffect(() => {
-    // if (!session) {
-    //   // If no session, redirect to login page
-    //   router.push("/"); // or another appropriate route
-    // }
+    if (!session) {
+      // If no session, redirect to login page
+      router.push("/"); // or another appropriate route
+    }
     if (status === 'unauthenticated'){
       router.push('/')
     }
