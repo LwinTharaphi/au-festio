@@ -1,12 +1,56 @@
 import Booth from "@/models/Booth";
 import dbConnect from "@/lib/db";
-import { nanoid } from "nanoid"; // Import nanoid for unique boothId
+import multer from "multer";
+import path from "path";
+
+// Configure Multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "public/uploads"); // Save files in "public/uploads"
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
+});
+
+const upload = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if ([".png", ".jpg", ".jpeg"].includes(ext)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image files are allowed"), false);
+    }
+  },
+});
+
+export const config = {
+  api: {
+    bodyParser: false, // Disable body parser for file uploads
+  },
+};
+
+// Helper function to handle Multer uploads
+async function parseMultipartRequest(req, res) {
+  const uploadMiddleware = upload.single("image");
+  await new Promise((resolve, reject) => {
+    uploadMiddleware(req, res, (err) => {
+      if (err) reject(err);
+      resolve();
+    });
+  });
+  return req;
+}
 
 // GET: Fetch all booths for a specific event
 export async function GET(req, { params }) {
   await dbConnect();
-  const { id } = await params; // Event ID
+
   try {
+    const { id } = params; // Await `params` destructure for Next.js dynamic routes
+    if (!id) return new Response("Event ID is required", { status: 400 });
+
     const booths = await Booth.find({ eventId: id });
     return new Response(JSON.stringify(booths), { status: 200 });
   } catch (error) {
@@ -15,39 +59,28 @@ export async function GET(req, { params }) {
   }
 }
 
-// POST: Create a new booth for a specific event
-export async function POST(req, { params }) {
+
+// PUT: Update a specific booth, including image upload
+export async function PUT(req, res) {
   await dbConnect();
-  const { id } = await params; // Event ID
-
   try {
-    const data = await req.json();
-    const newBooth = new Booth({
-      ...data,
-      eventId: id,
-      boothId: nanoid(10), // Automatically generate boothId
-    });
-    await newBooth.save();
-    return new Response(JSON.stringify(newBooth), { status: 201 });
-  } catch (error) {
-    console.error("Error creating booth:", error);
-    return new Response("Error creating booth", { status: 500 });
-  }
-}
+    const parsedReq = await parseMultipartRequest(req, res);
+    const { id, boothid } = parsedReq.params;
 
-// PUT: Update a specific booth
-export async function PUT(req, { params }) {
-  await dbConnect();
-  const { id, boothid } = await params; // Event ID and Booth ID
-  const data = await req.json();
+    // Parse form data
+    const data = JSON.parse(parsedReq.body?.fields || "{}");
+    if (parsedReq.file) {
+      data.image = `/uploads/${parsedReq.file.filename}`;
+    }
 
-  try {
     const updatedBooth = await Booth.findOneAndUpdate(
       { boothId: boothid, eventId: id },
       data,
       { new: true }
     );
+
     if (!updatedBooth) return new Response("Booth not found", { status: 404 });
+
     return new Response(JSON.stringify(updatedBooth), { status: 200 });
   } catch (error) {
     console.error("Error updating booth:", error);
@@ -58,8 +91,8 @@ export async function PUT(req, { params }) {
 // DELETE: Delete a specific booth
 export async function DELETE(req, { params }) {
   await dbConnect();
-  const { id, boothid } = await params; // Event ID and Booth ID
   try {
+    const { id, boothid } = params;
     const deletedBooth = await Booth.findOneAndDelete({ boothId: boothid, eventId: id });
     if (!deletedBooth) return new Response("Booth not found", { status: 404 });
     return new Response("Booth deleted successfully", { status: 200 });
