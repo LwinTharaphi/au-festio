@@ -57,6 +57,11 @@ function EventForm() {
   const [startTimeDisplay, setStartTimeDisplay] = useState(""); // Holds 12-hour format
   const [endTimeDisplay, setEndTimeDisplay] = useState("");
 
+  const [price, setPrice] = useState("");
+  const [hasDiscount, setHasDiscount] = useState(false);
+  const [discount, setDiscount] = useState("");
+
+
   const handleFabClick = () => {
     resetForm();
     setIsEditing(false);
@@ -181,7 +186,10 @@ function EventForm() {
     formData.append('posterName',posterName || '');
 
     if (isPaid){
+      formData.append('price', price || '');
       formData.append('qrName', qrName || '');
+      if (hasDiscount) formData.append('discount', discount || '');
+
     }
 
     // Add additional fields for AR
@@ -263,6 +271,9 @@ function EventForm() {
     setQrName('');
     setIsArEnabled(false);
     setIsPaid(false);
+    setPrice('');
+    setHasDiscount(false);
+    setDiscount('');
     setSelectedEventIndex(null);
     setIsEditing(false);
     setHasSeatLimitation(false);
@@ -316,6 +327,9 @@ function EventForm() {
     setQrName(eventToEdit.qrName || '');
     setIsArEnabled(Boolean(eventToEdit.venueName));
     setIsPaid(eventToEdit.isPaid || false);
+    setPrice(eventToEdit.price || '');
+    setHasDiscount(Boolean(eventToEdit.discount && eventToEdit.discount > 0))
+    setDiscount(eventToEdit.discount || '');
     // setSelectedEventIndex(); // Store the index for saving the updated event later
     setAnchorEl(null); // Close the menu after edit
     setIsEditing(true);
@@ -494,10 +508,14 @@ function EventForm() {
                                 </Menu>
                               </Card>
                               <Typography variant="h6" align="center">
-                                Registeration Date: {new Date(event.registerationDate).toISOString().split('T')[0]}
+                                Registeration Date: {event.registerationDate 
+                                  ? new Date(event.registerationDate).toISOString().split('T')[0]
+                                  : "Invalid Date"}
                               </Typography>
                               <Typography variant="h6" align="center">
-                                Event Date: {new Date(event.eventDate).toISOString().split('T')[0]}
+                                Event Date: {event.eventDate 
+                                  ? new Date(event.eventDate).toISOString().split('T')[0]
+                                  : "Invalid Date"}
                               </Typography>
                             </Grid>
                           ))}
@@ -695,45 +713,70 @@ function EventForm() {
                     ]}
                   />
                   {isPaid && (
-                    <Box sx={{ display: "flex", alignItems: "center", marginBottom: 2 }}>
+                    <>
                       <TextField
-                        label="QR Name"
-                        value={qrName || ""}
-                        placeholder="No file uploaded"
+                        label="Price"
+                        value={price || ""}
+                        onChange={(e) => setPrice(e.target.value)}
+                        placeholder="Enter price"
                         variant="outlined"
                         fullWidth
-                        InputProps={{
-                          readOnly: true,
-                          style: { backgroundColor: "#f5f5f5" },
-                        }}
-                        sx={{ marginRight: 2 }}
+                        sx={{ marginBottom: 2 }}
                       />
-                      <Button
-                        variant="contained"
-                        component="span"
-                        onClick={() => qrInputRef.current.click()}
-                      >
-                        Upload
-                      </Button>
-                      {qrName && (
-                        <IconButton
-                          color="error"
-                          onClick={() => handleDeleteFile("qr")}
-                          sx={{ marginLeft: 1 }}
-                        >
-                          <CloseIcon />
-                        </IconButton>
+                      <FormField 
+                        title="Early Bird Discount"
+                        type="switch"
+                        value={hasDiscount}
+                        onChange={setHasDiscount}
+                      />
+                      {hasDiscount && (
+                        <FormField 
+                          title="Discount Percentage"
+                          type="number"
+                          value={discount}
+                          onChange={setDiscount}
+                        />
                       )}
-                      <input
-                        id="qr-upload"
-                        type="file"
-                        ref={qrInputRef}
-                        key={isEditing ? "editing" : "new"} // Reset the file input when editing
-                        accept="image/*"
-                        onChange={(e) => handleFileChange(e, "qr")}
-                        style={{ display: "none" }}
-                      />
-                  </Box>
+                      <Box sx={{ display: "flex", alignItems: "center", marginBottom: 2 }}>
+                        <TextField
+                          label="QR Name"
+                          value={qrName || ""}
+                          placeholder="No file uploaded"
+                          variant="outlined"
+                          fullWidth
+                          InputProps={{
+                            readOnly: true,
+                            style: { backgroundColor: "#f5f5f5" },
+                          }}
+                          sx={{ marginRight: 2 }}
+                        />
+                        <Button
+                          variant="contained"
+                          component="span"
+                          onClick={() => qrInputRef.current.click()}
+                        >
+                          Upload
+                        </Button>
+                        {qrName && (
+                          <IconButton
+                            color="error"
+                            onClick={() => handleDeleteFile("qr")}
+                            sx={{ marginLeft: 1 }}
+                          >
+                            <CloseIcon />
+                          </IconButton>
+                        )}
+                        <input
+                          id="qr-upload"
+                          type="file"
+                          ref={qrInputRef}
+                          key={isEditing ? "editing" : "new"} // Reset the file input when editing
+                          accept="image/*"
+                          onChange={(e) => handleFileChange(e, "qr")}
+                          style={{ display: "none" }}
+                        />
+                    </Box>
+                  </>
                   )}
                   <FormField
                     title="Seat Limitation"

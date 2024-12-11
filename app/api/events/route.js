@@ -68,6 +68,10 @@ export async function POST(req) {
     const endTime = formData.get('endTime');
     const location = formData.get('location');
     const isPaid = formData.get('isPaid') === 'true'; // Convert to boolean if needed
+    const price = isPaid ? parseFloat(formData.get('price')) : null; // Parse price only if paid
+    const discount = isPaid && formData.has('discount') 
+      ? parseFloat(formData.get('discount')) 
+      : 0;
     const venueName = formData.get('venueName');
     const latitude = formData.get('latitude');
     const longitude = formData.get('longitude');
@@ -81,6 +85,14 @@ export async function POST(req) {
     const qrPath = qr ? await uploadFile(qr,'QR') : null;
     const seats = formData.get('seats')? Number(formData.get('seats')): undefined;
 
+    // Validation for paid events
+    if (isPaid && (price === null || price <= 0)) {
+      return NextResponse.json({ error: 'Price is required for paid events and must be greater than 0' }, { status: 400 });
+    }
+    if (isPaid && (discount < 0 || discount > 100)) {
+      return NextResponse.json({ error: 'Discount must be between 0 and 100' }, { status: 400 });
+    }
+
     // Create event object
     const newEvent = {
       eventName,
@@ -90,6 +102,8 @@ export async function POST(req) {
       endTime,
       location,
       isPaid,
+      price,
+      discount,
       venueName,
       latitude,
       longitude,

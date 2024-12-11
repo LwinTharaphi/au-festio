@@ -31,6 +31,10 @@ export async function PUT(request, { params }) {
     const endTime = formData.get("endTime");
     const location = formData.get("location");
     const isPaid = formData.get("isPaid") === "true";
+    const price = isPaid ? parseFloat(formData.get('price')) : null; // Parse price only if paid
+    const discount = isPaid && formData.has('discount') 
+      ? parseFloat(formData.get('discount')) 
+      : 0;
     const venueName = formData.get("venueName");
     const latitude = formData.get("latitude");
     const longitude = formData.get("longitude");
@@ -38,7 +42,7 @@ export async function PUT(request, { params }) {
     const poster = formData.get("poster");
     const posterName = formData.get("posterName");
     const qr = formData.get("qr");
-    const qrName = formData.get("qrName");
+    const qrName = isPaid? formData.get("qrName"): null;
     const seats = formData.get('seats')? Number(formData.get('seats')): undefined;
 
     const updatedData = {
@@ -49,6 +53,8 @@ export async function PUT(request, { params }) {
       endTime,
       location,
       isPaid,
+      price,
+      discount,
       venueName,
       latitude,
       longitude,
