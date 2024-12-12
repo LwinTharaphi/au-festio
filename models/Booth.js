@@ -7,8 +7,8 @@ const boothSchema = new mongoose.Schema(
     boothNumber: { type: String, required: true },
     boothName: { type: String, required: false },
     vendorName: { type: String, required: true },
-    image: { type: String, required: false }, // Added image field
-    registrationTime: { type: Date, default: Date.now },
+    image: { type: String, required: false }, // New field for the image URL
+    registerationTime: { type: Date, default: Date.now },
   },
   { timestamps: true }
 );

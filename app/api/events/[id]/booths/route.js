@@ -1,56 +1,14 @@
+import formidable from "formidable";
+import { promises as fs } from "fs";
 import Booth from "@/models/Booth";
 import dbConnect from "@/lib/db";
-import multer from "multer";
-import path from "path";
-
-// Configure Multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "public/uploads"); // Save files in "public/uploads"
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  },
-});
-
-const upload = multer({
-  storage,
-  fileFilter: (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    if ([".png", ".jpg", ".jpeg"].includes(ext)) {
-      cb(null, true);
-    } else {
-      cb(new Error("Only image files are allowed"), false);
-    }
-  },
-});
-
-export const config = {
-  api: {
-    bodyParser: false, // Disable body parser for file uploads
-  },
-};
-
-// Helper function to handle Multer uploads
-async function parseMultipartRequest(req, res) {
-  const uploadMiddleware = upload.single("image");
-  await new Promise((resolve, reject) => {
-    uploadMiddleware(req, res, (err) => {
-      if (err) reject(err);
-      resolve();
-    });
-  });
-  return req;
-}
+import { nanoid } from "nanoid"; // Import nanoid for unique boothId
 
 // GET: Fetch all booths for a specific event
 export async function GET(req, { params }) {
   await dbConnect();
-
+  const { id } = params; // Event ID
   try {
-    const { id } = params; // Await `params` destructure for Next.js dynamic routes
-    if (!id) return new Response("Event ID is required", { status: 400 });
-
     const booths = await Booth.find({ eventId: id });
     return new Response(JSON.stringify(booths), { status: 200 });
   } catch (error) {
@@ -59,29 +17,94 @@ export async function GET(req, { params }) {
   }
 }
 
-
-// PUT: Update a specific booth, including image upload
-export async function PUT(req, res) {
+// POST: Create a new booth for a specific event with image upload
+export async function POST(req, { params }) {
   await dbConnect();
+  const { id } = params; // Event ID
+
+  // Initialize formidable for handling file uploads
+  const form = new formidable.IncomingForm({
+    multiples: false, // Single file upload
+    uploadDir: "./uploads", // Directory to save uploaded files
+    keepExtensions: true, // Keep file extensions
+  });
+
   try {
-    const parsedReq = await parseMultipartRequest(req, res);
-    const { id, boothid } = parsedReq.params;
+    return new Promise((resolve, reject) => {
+      // Parse the incoming request
+      form.parse(req, async (err, fields, files) => {
+        if (err) {
+          console.error("Error parsing form:", err);
+          reject(new Response("Error uploading file", { status: 500 }));
+          return;
+        }
 
-    // Parse form data
-    const data = JSON.parse(parsedReq.body?.fields || "{}");
-    if (parsedReq.file) {
-      data.image = `/uploads/${parsedReq.file.filename}`;
-    }
+        // Prepare the booth data
+        const newBoothData = {
+          ...fields,
+          eventId: id,
+          boothId: nanoid(10), // Generate a unique boothId
+          image: files.image ? `/uploads/${files.image.newFilename}` : undefined, // Save image path
+        };
 
-    const updatedBooth = await Booth.findOneAndUpdate(
-      { boothId: boothid, eventId: id },
-      data,
-      { new: true }
-    );
+        if (files.image) {
+          const oldPath = files.image.filepath; // Temporary path
+          const newPath = `./uploads/${files.image.newFilename}`; // Final path
+          await fs.rename(oldPath, newPath); // Move file to the final destination
+        }
 
-    if (!updatedBooth) return new Response("Booth not found", { status: 404 });
+        // Save the booth to the database
+        const newBooth = new Booth(newBoothData);
+        await newBooth.save();
+        resolve(new Response(JSON.stringify(newBooth), { status: 201 }));
+      });
+    });
+  } catch (error) {
+    console.error("Error creating booth:", error);
+    return new Response("Error creating booth", { status: 500 });
+  }
+}
 
-    return new Response(JSON.stringify(updatedBooth), { status: 200 });
+// PUT: Update a specific booth
+export async function PUT(req, { params }) {
+  await dbConnect();
+  const { id, boothid } = params; // Event ID and Booth ID
+
+  const form = new formidable.IncomingForm({
+    multiples: false,
+    uploadDir: "./uploads",
+    keepExtensions: true,
+  });
+
+  try {
+    const booth = await Booth.findOne({ boothId: boothid, eventId: id });
+    if (!booth) return new Response("Booth not found", { status: 404 });
+
+    return new Promise((resolve, reject) => {
+      form.parse(req, async (err, fields, files) => {
+        if (err) {
+          console.error("Error parsing form:", err);
+          reject(new Response("Error uploading file", { status: 500 }));
+          return;
+        }
+
+        const updatedData = fields;
+        if (files.image) {
+          const oldPath = files.image.filepath;
+          const newPath = `./uploads/${files.image.newFilename}`;
+          await fs.rename(oldPath, newPath);
+          updatedData.image = `/uploads/${files.image.newFilename}`;
+        }
+
+        const updatedBooth = await Booth.findOneAndUpdate(
+          { boothId: boothid, eventId: id },
+          updatedData,
+          { new: true }
+        );
+
+        resolve(new Response(JSON.stringify(updatedBooth), { status: 200 }));
+      });
+    });
   } catch (error) {
     console.error("Error updating booth:", error);
     return new Response("Error updating booth", { status: 500 });
@@ -91,8 +114,8 @@ export async function PUT(req, res) {
 // DELETE: Delete a specific booth
 export async function DELETE(req, { params }) {
   await dbConnect();
+  const { id, boothid } = params; // Event ID and Booth ID
   try {
-    const { id, boothid } = params;
     const deletedBooth = await Booth.findOneAndDelete({ boothId: boothid, eventId: id });
     if (!deletedBooth) return new Response("Booth not found", { status: 404 });
     return new Response("Booth deleted successfully", { status: 200 });
