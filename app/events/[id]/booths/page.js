@@ -38,6 +38,7 @@ export default function BoothPage() {
   }); // State for new/edit booth data
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
 
+  // Fetch event name and booths based on eventId
   useEffect(() => {
     if (status === "loading") return; // Don't redirect while loading
     if (status === "unauthenticated" || session?.user?.role !== "organizer") {
@@ -78,7 +79,6 @@ export default function BoothPage() {
       fetchEventAndBooths();
     }
   }, [id, router, session, status]);
-
   const handleSaveBooth = async () => {
     try {
       const url = editMode
@@ -150,6 +150,9 @@ export default function BoothPage() {
     );
   });
 
+  const handleBoothClick = (booth) => {
+    setSelectedBooth(booth);
+  };
   if (status === "loading") {
     return (
       <div className="loading-container">
@@ -192,13 +195,19 @@ export default function BoothPage() {
               <Row>
                 {filteredBooths.map((booth) => (
                   <Col md={6} key={booth.boothId}>
-                    <Card>
-                      <Card.Img variant="top" src={booth.image} alt={booth.boothName} />
+                    <Card onClick={() => handleBoothClick(booth)} style={{ cursor: "pointer" }}>
+                      <Card.Img variant="top" src={booth.image || "/placeholder.jpg"} alt={booth.boothName} />
                       <Card.Body>
                         <Card.Title>Booth {booth.boothNumber}</Card.Title>
                         <Card.Text>Vendor: {booth.vendorName}</Card.Text>
-                        <Button variant="primary" onClick={() => handleEditBooth(booth)}>Edit</Button>{" "}
-                        <Button variant="danger" onClick={() => handleDeleteBooth(booth.boothId)}>Delete</Button>
+                        <Button variant="primary" onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditBooth(booth);
+                        }}>Edit</Button>{" "}
+                        <Button variant="danger" onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteBooth(booth.boothId);
+                        }}>Delete</Button>
                       </Card.Body>
                     </Card>
                   </Col>
@@ -234,6 +243,26 @@ export default function BoothPage() {
             </Container>
           </Col>
         </Row>
+        {/* Booth Details */}
+        {selectedBooth && (
+          <Modal show={Boolean(selectedBooth)} onHide={() => setSelectedBooth(null)}>
+            <Modal.Header closeButton>
+              <Modal.Title>Booth Details</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <p><strong>Booth Number:</strong> {selectedBooth.boothNumber}</p>
+              <p><strong>Booth Name:</strong> {selectedBooth.boothName}</p>
+              <p><strong>Vendor Name:</strong> {selectedBooth.vendorName}</p>
+              <p><strong>Registered On:</strong> {new Date(selectedBooth.registerationTime).toLocaleString()}</p>
+              {selectedBooth.image && <img src={selectedBooth.image} alt={selectedBooth.boothName} style={{ width: "100%" }} />}
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={() => setSelectedBooth(null)}>
+                Close
+              </Button>
+            </Modal.Footer>
+          </Modal>
+        )}
 
         {/* Modal for Adding/Editing Booth */}
         <Modal show={showModal} onHide={() => setShowModal(false)}>
