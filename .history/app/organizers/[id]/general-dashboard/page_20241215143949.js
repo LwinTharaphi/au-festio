@@ -23,8 +23,8 @@ export default function Dashboard()  {
       if(userId){
         async function fetchData() {
           try {
-            // setLoading(true);
-            const response = await fetch(`/api/organizers/${userId}/general-dashboard`);
+            setLoading(true);
+            const response = await fetch(`/api/events/${id}/dashboards`);
             if (!response.ok) throw new Error("Failed to fetch data");
             const json = await response.json();
             setData(json);
@@ -32,7 +32,7 @@ export default function Dashboard()  {
             setError(error.message);
             console.error("Error fetching dashboard data:", error.message);
           } finally {
-            // setLoading(false);
+            setLoading(false);
           }
         }
         fetchData();

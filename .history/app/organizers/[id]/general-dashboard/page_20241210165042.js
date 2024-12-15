@@ -13,32 +13,12 @@ export default function Dashboard()  {
   const { id } = useParams();
   console.log(session)
 
-  useEffect(() => {
+  useEffect(()=>{
     if (status === "loading") return;  // Don't redirect while loading
     if (status === 'unauthenticated' || session?.user?.role !== "organizer"){
       router.push('/')
     }
-    if (status === 'authenticated' && session?.user && session.user.role === "organizer"){
-      const userId = session.user.id
-      if(userId){
-        async function fetchData() {
-          try {
-            // setLoading(true);
-            const response = await fetch(`/api/organizers/${userId}/general-dashboard`);
-            if (!response.ok) throw new Error("Failed to fetch data");
-            const json = await response.json();
-            setData(json);
-          } catch (error) {
-            setError(error.message);
-            console.error("Error fetching dashboard data:", error.message);
-          } finally {
-            // setLoading(false);
-          }
-        }
-        fetchData();
-      }
-    }
-  }, [id,router,session,status]);
+  },[status,router,session]);
   
   if (status === 'loading'){
     return (
