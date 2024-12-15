@@ -31,16 +31,15 @@ export async function GET(request) {
 
     // Prepare the staff counts data
     const Events = await Promise.all(events.map(async (event) => {
-        const todayDate = today.startOf('day'); // Set today's date to midnight
         const registrationDate = moment(event.registrationDate);
         const eventDate = moment(event.eventDate);
 
         // Categorize the event based on the dates
-        if (todayDate.isBetween(registrationDate, eventDate, "day", "[]")) {
+        if (today.isBetween(registrationDate, eventDate, "day", "[]")) {
             ongoingEvent++;
-        } else if (todayDate.isBefore(registrationDate, "day")) {
+        } else if (today.isBefore(registrationDate, "day")) {
             upcomingEvent++;
-        } else if (todayDate.isAfter(eventDate, "day")) {
+        } else if (today.isAfter(eventDate, "day")) {
             completedEvent++;
         }
         // Get roles for this event
