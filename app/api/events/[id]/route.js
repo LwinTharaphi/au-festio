@@ -35,6 +35,16 @@ export async function PUT(request, { params }) {
     const discount = isPaid && formData.has('discount') 
       ? parseFloat(formData.get('discount')) 
       : 0;
+      let refundPolicy = [];
+      if (isPaid && formData.has("refundPolicy")) {
+        try {
+          refundPolicy = JSON.parse(formData.get("refundPolicy"));
+          console.log("Parsed refundPolicy:", refundPolicy);
+        } catch (error) {
+          console.error("Failed to parse refundPolicy:", error);
+          refundPolicy = [];
+        }
+      }
     const venueName = formData.get("venueName");
     const latitude = formData.get("latitude");
     const longitude = formData.get("longitude");
@@ -55,6 +65,7 @@ export async function PUT(request, { params }) {
       isPaid,
       price,
       discount,
+      refundPolicy: Array.isArray(refundPolicy) ? refundPolicy : [],
       venueName,
       latitude,
       longitude,

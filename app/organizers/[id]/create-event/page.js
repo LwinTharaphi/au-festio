@@ -35,7 +35,7 @@ function EventForm() {
   const [posterName, setPosterName] = useState('');
   const [qr, setQr] = useState(null);
   const [qrName, setQrName] = useState('');
-  // Create refs for the file input elements
+  // Create refs for the file input elements  console
   const posterInputRef = useRef(null);
   const qrInputRef = useRef(null);
 
@@ -60,6 +60,36 @@ function EventForm() {
   const [price, setPrice] = useState("");
   const [hasDiscount, setHasDiscount] = useState(false);
   const [discount, setDiscount] = useState("");
+
+  // State to manage refund policy array
+  const [refundPolicy, setRefundPolicy] = useState([]);
+
+  // Function to add a new policy
+  const addRefundPolicy = () => {
+    setRefundPolicy((prevPolicies) => [
+      ...prevPolicies,
+      { days: "", percentage: "" } // Adding a single new, empty refund policy
+    ]);
+  };
+
+  // Function to update a specific policy
+  const updateRefundPolicy = (index, updatedPolicy) => {
+    setRefundPolicy((prevPolicies) => {
+      const updatedPolicies = [...prevPolicies];
+      updatedPolicies[index] = updatedPolicy;
+      return updatedPolicies;
+    });
+  };
+  
+
+  // Function to remove a specific policy
+  const removeRefundPolicy = (index) => {
+    setRefundPolicy((prevPolicies) =>
+      prevPolicies.filter((_, i) => i !== index)
+    );
+  };
+  
+
 
 
   const handleFabClick = () => {
@@ -132,17 +162,17 @@ function EventForm() {
     events.forEach((event, index) => {
       const registrationDate = moment(event.registerationDate);
       const eventDate = moment(event.eventDate);
-      console.log(`Event: ${event.eventName}`);
-      console.log("Registration Date:", registrationDate.format("DD/MM/YYYY"));
-      console.log("Event Date:", eventDate.format("DD/MM/YYYY"));
+      // console.log(`Event: ${event.eventName}`);
+      // console.log("Registration Date:", registrationDate.format("DD/MM/YYYY"));
+      // console.log("Event Date:", eventDate.format("DD/MM/YYYY"));
   
       let categories = "";
       if (today.isBetween(registrationDate, eventDate, "day", "[]")) {
         categories = "ongoing";
-        console.log("Status: Ongoing");
+        // console.log("Status: Ongoing");
       } else if (today.isBefore(registrationDate, "day")) {
         categories = "upcoming";
-        console.log("Status: Upcoming");
+        // console.log("Status: Upcoming");
       } 
       // else if (today.isAfter(eventDate, "day")) {
       //   categories = "completed";
@@ -167,7 +197,7 @@ function EventForm() {
   
   
   const groupedEvents = categorizeEvents(events);
-  console.log("Grouped events",groupedEvents)
+  // console.log("Grouped events",groupedEvents)
 
   const handleSubmit = async(event) => {
     event.preventDefault(); // Prevent the default form submission
@@ -188,8 +218,8 @@ function EventForm() {
     if (isPaid){
       formData.append('price', price || '');
       formData.append('qrName', qrName || '');
+      formData.append("refundPolicy", JSON.stringify(refundPolicy || []));
       if (hasDiscount) formData.append('discount', discount || '');
-
     }
 
     // Add additional fields for AR
@@ -233,7 +263,7 @@ function EventForm() {
 
       if (response.ok) {
         const eventData = await response.json();
-        console.log('Event successfully saved:', eventData);
+        console.log('Event successfully saved:');
   
         if (isEditing) {
           // Update the events list with the modified event
@@ -274,6 +304,7 @@ function EventForm() {
     setPrice('');
     setHasDiscount(false);
     setDiscount('');
+    setRefundPolicy([]);
     setSelectedEventIndex(null);
     setIsEditing(false);
     setHasSeatLimitation(false);
@@ -302,7 +333,7 @@ function EventForm() {
   const handleEdit = () => {
     // console.log('Editing event with index:', eventIndex);
     const eventToEdit = events[selectedEventIndex]
-    console.log(eventToEdit)
+    // console.log(eventToEdit)
     // Format the date to YYYY-MM-DD (compatible with HTML date input)
     const formattedDate = eventToEdit.registerationDate 
       ? new Date(eventToEdit.registerationDate).toISOString().split('T')[0]
@@ -330,6 +361,7 @@ function EventForm() {
     setPrice(eventToEdit.price || '');
     setHasDiscount(Boolean(eventToEdit.discount && eventToEdit.discount > 0))
     setDiscount(eventToEdit.discount || '');
+    setRefundPolicy(Array.isArray(eventToEdit.refundPolicy) ? eventToEdit.refundPolicy : []);
     // setSelectedEventIndex(); // Store the index for saving the updated event later
     setAnchorEl(null); // Close the menu after edit
     setIsEditing(true);
@@ -337,18 +369,18 @@ function EventForm() {
   };
 
   const confirmDelete = () => {
-    console.log("deleted index",eventToDeleteIndex)
+    // console.log("deleted index",eventToDeleteIndex)
     // setEventToDeleteIndex(index);
     setDeleteModalOpen(true); // Open the delete confirmation modal
     setAnchorEl(null); // Close the menu
   };
 
   const handleMenuClick = (event, index) => {
-    console.log(index)
+    // console.log(index)
     setAnchorEl(event.currentTarget);
     setSelectedEventIndex(index);
     setEventToDeleteIndex(index)
-    console.log("events",events)
+    // console.log("events",events)
   };
 
   const handleCloseMenu = () => {
@@ -466,7 +498,7 @@ function EventForm() {
                                   <IconButton
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      console.log("menu click",event._index)
+                                      // console.log("menu click",event._index)
                                       handleMenuClick(e, event._index);
                                     }}
                                     sx={{ color: "rgba(0, 0, 0, 0.54)" }}
@@ -491,7 +523,7 @@ function EventForm() {
                                 >
                                   <MenuItem
                                     onClick={() => {
-                                      console.log("delete confirm",eventIndex)
+                                      // console.log("delete confirm",eventIndex)
                                       confirmDelete();
                                     }}
                                   >
@@ -499,7 +531,7 @@ function EventForm() {
                                   </MenuItem>
                                   <MenuItem
                                     onClick={(e) => {
-                                      console.log("clicked edit",event._index)
+                                      // console.log("clicked edit",event._index)
                                       handleEdit();
                                     }}
                                   >
@@ -776,6 +808,48 @@ function EventForm() {
                           style={{ display: "none" }}
                         />
                     </Box>
+                    {Array.isArray(refundPolicy) &&
+                    refundPolicy.map((policy, index) => (
+                      <Box
+                        key={index}
+                        sx={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}
+                      >
+                        <Typography variant="subtitle1" style={{ marginBottom: '8px' }}>
+                          Refund Policy:
+                        </Typography>
+                        <TextField
+                          label="Days"
+                          type="number"
+                          value={policy.days || ""}
+                          onChange={(e) =>
+                            updateRefundPolicy(index, { ...policy, days: e.target.value })
+                          }
+                          placeholder="Days"
+                          variant="outlined"
+                          fullWidth
+                        />
+                        <TextField
+                          label="Refund (%)"
+                          type="number"
+                          value={policy.percentage || ""}
+                          onChange={(e) =>
+                            updateRefundPolicy(index, { ...policy, percentage: e.target.value })
+                          }
+                          placeholder="Refund Percentage"
+                          variant="outlined"
+                          fullWidth
+                        />
+                        <IconButton
+                          color="error"
+                          onClick={() => removeRefundPolicy(index)}
+                        >
+                          <CloseIcon />
+                        </IconButton>
+                      </Box>
+                    ))}
+                    <Button variant="contained" onClick={addRefundPolicy}>
+                      Add Refund Policy
+                    </Button>
                   </>
                   )}
                   <FormField

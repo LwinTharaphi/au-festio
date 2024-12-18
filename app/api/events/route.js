@@ -25,20 +25,20 @@ export async function GET(request) {
      if (!posterPath) {
        console.log('No poster found for event:', event._id);
      } else {
-       console.log('Poster Path:', posterPath);
+       console.log('There is a Poster Path:');
      }
 
      const qrPath = event.qr;
      if(!qrPath){
       console.log('No qr found for event:',event._id);
      } else {
-      console.log('QR Path:', qrPath);
+      console.log('There is a QR Path:');
      }
  
      // Construct the full URL based on the relative path stored in the database
      const posterUrl = `/${posterPath}`; // Use your server URL here
  
-     console.log('Poster URL:', posterUrl);
+    //  console.log('Poster URL:', posterUrl);
 
      const qrUrl = `/${qrPath}`;
  
@@ -72,6 +72,16 @@ export async function POST(req) {
     const discount = isPaid && formData.has('discount') 
       ? parseFloat(formData.get('discount')) 
       : 0;
+    let refundPolicy = [];
+    if (isPaid && formData.has("refundPolicy")) {
+      try {
+        refundPolicy = JSON.parse(formData.get("refundPolicy"));
+        console.log("Parsed refundPolicy:", refundPolicy);
+      } catch (error) {
+        console.error("Failed to parse refundPolicy:", error);
+        refundPolicy = [];
+      }
+    }
     const venueName = formData.get('venueName');
     const latitude = formData.get('latitude');
     const longitude = formData.get('longitude');
@@ -104,6 +114,7 @@ export async function POST(req) {
       isPaid,
       price,
       discount,
+      refundPolicy: Array.isArray(refundPolicy) ? refundPolicy : [],
       venueName,
       latitude,
       longitude,

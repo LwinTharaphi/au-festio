@@ -15,6 +15,15 @@ const EventSchema = new mongoose.Schema({
   qr: {type: Buffer},
   price: { type: Number, required: function () { return this.isPaid; }, min: 0 },
   discount: { type: Number, default: 0, min: 0, max: 100 },
+  refundPolicy: {
+    type: [
+      {
+        days: { type: Number, required: true },
+        percentage: { type: Number, required: true },
+      },
+    ],
+    default: [],
+  },
   venueName: {type: String},
   latitude: {type: String},
   longitude: {type: String},
