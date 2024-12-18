@@ -44,7 +44,6 @@ export default function OrganizerLogin() {
       } else {
         const response = await fetch('/api/auth/session');
         const session = await response.json();
-
         if (!session?.user?.id) {
           setError('Unable to retrieve user information');
           return;
@@ -151,9 +150,23 @@ export default function OrganizerLogin() {
         return;
       }
     else {
-      const response = await fetch('/api/auth/session');
-      const session = await response.json();
+      const loginResult = await signIn("credentials", {
+        email: formData.email,
+        password: newPassword,
+        role: "organizer",
+        redirect: false, // Prevent automatic redirection
+      });
+      console.log(formData.email)
+      console.log(newPassword)
 
+      if (loginResult.error) {
+        setError(loginResult.error || "Failed to log in after password reset");
+        return;
+      }
+
+      // Refresh session to ensure the user data is updated
+      const updatedSession = await fetch("/api/auth/session");
+      const session = await updatedSession.json();
       if (!session?.user?.id) {
         setError('Unable to retrieve user information');
         return;
