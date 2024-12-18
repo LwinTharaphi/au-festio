@@ -286,7 +286,6 @@ export default function Dashboard() {
               <Col md={6}>
                 <Card className="shadow-sm">
                   <Card.Body>
-                    <h5 className="text-center">Staffs</h5>
                     <Form.Select
                       value={selectedEvent ? selectedEvent.eventName : ""}
                       onChange={(e) => {
@@ -295,8 +294,8 @@ export default function Dashboard() {
                         updateStaffChart(event);
                       }}
                     >
-                      {events.map(event => (
-                        <option key={event.id} value={event.eventName}>
+                      {events.map((event) => (
+                        <option key={event.eventName} value={event.eventName}>
                           {event.eventName}
                         </option>
                       ))}
