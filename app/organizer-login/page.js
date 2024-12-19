@@ -118,67 +118,67 @@ export default function OrganizerLogin() {
 
   const handlePasswordReset = async (e) => {
     e.preventDefault();
-  
+
     if (!newPassword || !confirmPassword) {
       setPasswordChangeMessage("Please fill in both password fields.");
       return;
     }
-  
+
     if (newPassword !== confirmPassword) {
       setPasswordChangeMessage("New password and confirmation do not match.");
       return;
     }
-  
+
     try {
-      const response = await fetch(`/api/event-organizers/reset-password`, { 
+      const response = await fetch(`/api/event-organizers/reset-password`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           'otp-email': otpEmail,
         },
         body: JSON.stringify({
-          
+
           isOtpVerified: true,
           newPassword,
           confirmPassword,
         }), // sending only the new password
       });
-  
+
       if (!response.ok) {
         const error = await response.json();
         console.error('Error:', error.error);
         return;
       }
-    else {
-      const loginResult = await signIn("credentials", {
-        email: formData.email,
-        password: newPassword,
-        role: "organizer",
-        redirect: false, // Prevent automatic redirection
-      });
-      console.log(formData.email)
-      console.log(newPassword)
+      else {
+        const loginResult = await signIn("credentials", {
+          email: otpEmail,
+          password: newPassword,
+          role: "organizer",
+          redirect: false, // Prevent automatic redirection
+        });
+        console.log(otpEmail)
+        console.log(newPassword)
 
-      if (loginResult.error) {
-        setError(loginResult.error || "Failed to log in after password reset");
-        return;
-      }
+        if (loginResult.error) {
+          setError(loginResult.error || "Failed to log in after password reset");
+          return;
+        }
 
-      // Refresh session to ensure the user data is updated
-      const updatedSession = await fetch("/api/auth/session");
-      const session = await updatedSession.json();
-      if (!session?.user?.id) {
-        setError('Unable to retrieve user information');
-        return;
+        // Refresh session to ensure the user data is updated
+        const updatedSession = await fetch("/api/auth/session");
+        const session = await updatedSession.json();
+        if (!session?.user?.id) {
+          setError('Unable to retrieve user information');
+          return;
+        }
+        setMessage("Password reset successful! Redirecting...");
+        router.push(`/organizers/${session.user.id}/general-dashboard`);
       }
-      setMessage("Password reset successful! Redirecting...");
-      router.push(`/organizers/${session.user.id}/general-dashboard`);
-    }
     } catch (error) {
       console.error('Error:', error.message);
     }
   };
-  
+
   return (
     <div className="page">
       <div className="left-section">
@@ -188,89 +188,124 @@ export default function OrganizerLogin() {
       <div className="right-section">
         {!showForgotPassword ? (
           <>
-            <h3>Sign In</h3>
-            <form onSubmit={handleSubmit}>
-              <div className="input-group">
-                <input
-                  type="email"
-                  placeholder="Email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  required
-                />
+            <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
+              <div className="card p-4" style={{ maxWidth: '400px', width: '100%', border: '1px solid #0070f3' }}>
+                <h3 className="text-center mb-4">Sign In</h3>
+                <form onSubmit={handleSubmit}>
+                  <div className="mb-3">
+                    <input
+                      type="email"
+                      className="form-control"
+                      placeholder="Email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <input
+                      type="password"
+                      className="form-control"
+                      placeholder="Password"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <button type="submit" className="btn btn-primary w-100">
+                    Sign In
+                  </button>
+                  <p
+                    className="text-center mt-3 text-primary"
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => setShowForgotPassword(true)}
+                  >
+                    Forgot password?
+                  </p>
+                </form>
+                {message && <p className="text-center mt-3 text-success">{message}</p>}
+              {error && <p className="text-center mt-3 text-danger">{error}</p>}
               </div>
-              <div className="input-group">
-                <input
-                  type="password"
-                  placeholder="Password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  required
-                />
-              </div>
-              <button type="submit">Sign In</button>
-              <p className="forgot-password" onClick={() => setShowForgotPassword(true)}>
-                Forgot password?
-              </p>
-            </form>
+            </div>
+
           </>
         ) : (
           <>
-            <h3>Forgot Password</h3>
-            {!otpSent ? (
-              <form onSubmit={handleSendOtp}>
-                <div className="input-group">
-                  <input
-                    type="email"
-                    placeholder="Enter your email"
-                    value={otpEmail}
-                    onChange={(e) => setOtpEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <button type="submit">Send OTP</button>
-              </form>
-            ) : !passwordReset ? (
-              <form onSubmit={handleOtpSubmit}>
-                <div className="input-group">
-                  <input
-                    type="text"
-                    placeholder="Enter OTP"
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
-                    required
-                  />
-                </div>
-                <button type="submit">Verify OTP</button>
-              </form>
-            ) : (
-              <form onSubmit={handlePasswordReset}>
-                <div className="input-group">
-                  <input
-                    type="password"
-                    placeholder="New Password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="input-group">
-                  <input
-                    type="password"
-                    placeholder="Confirm New Password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <button type="submit">Reset Password</button>
-              </form>
-            )}
-            {otpSent && <p className="otp-message">Use the 6-digit OTP to log in.</p>}
+            <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
+              <div className="card p-4" style={{ maxWidth: '400px', width: '100%', border: '1px solid #0070f3' }}>
+                <h3 className="text-center mb-4">Forgot Password</h3>
+                {!otpSent ? (
+                  <form onSubmit={handleSendOtp}>
+                    <div className="mb-3">
+                      <input
+                        type="email"
+                        className="form-control"
+                        placeholder="Enter your email"
+                        value={otpEmail}
+                        onChange={(e) => setOtpEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <button type="submit" className="btn btn-primary w-100">
+                      Send OTP
+                    </button>
+                  </form>
+                ) : !passwordReset ? (
+                  <form onSubmit={handleOtpSubmit}>
+                    <div className="mb-3">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Enter OTP"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <button type="submit" className="btn btn-primary w-100">
+                      Verify OTP
+                    </button>
+                  </form>
+                ) : (
+                  <form onSubmit={handlePasswordReset}>
+                    <div className="mb-3">
+                      <input
+                        type="password"
+                        className="form-control"
+                        placeholder="New Password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <input
+                        type="password"
+                        className="form-control"
+                        placeholder="Confirm New Password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <button type="submit" className="btn btn-primary w-100">
+                      Reset Password
+                    </button>
+                  </form>
+                )}
+                {otpSent && (
+                  <p className="text-center mt-3 text-success">
+                    Use the 6-digit OTP to log in.
+                  </p>
+                )}
+                {message && <p className="text-center mt-3 text-success">{message}</p>}
+                {error && <p className="text-center mt-3 text-danger">{error}</p>}
+              </div>
+            </div>
           </>
         )}
-        {message && <p className="message success">{message}</p>}
-        {error && <p className="message error">{error}</p>}
+        {/* {message && <p className="message success">{message}</p>}
+        {error && <p className="message error">{error}</p>} */}
       </div>
       <style jsx>{`
         .page {
