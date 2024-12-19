@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Pie, Bar } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement } from 'chart.js';
 import html2canvas from 'html2canvas';
+import { AiFillDelete } from 'react-icons/ai';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
 
@@ -16,6 +17,8 @@ export default function OrganizerHistoryPage() {
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState(null);
 
   useEffect(() => {
     const fetchCompletedEvents = async () => {
@@ -51,6 +54,30 @@ export default function OrganizerHistoryPage() {
 
     fetchCompletedEvents();
   }, [router, session, status]);
+
+  const handleDeleteClick = (eventId) => {
+    setEventToDelete(eventId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      const response = await fetch(`/api/events/${eventToDelete}`, { method: 'DELETE' });
+      if (!response.ok) {
+        throw new Error("Failed to delete event.");
+      }
+      setCompletedEvents((prev) => prev.filter((event) => event._id !== eventToDelete));
+      setShowDeleteModal(false);
+      setEventToDelete(null);
+    } catch (error) {
+      console.error("Error deleting event:", error);
+    }
+  };
+
+  const handleCloseDeleteModal = () => {
+    setShowDeleteModal(false);
+    setEventToDelete(null);
+  };
 
   const handleCardClick = async (eventId) => {
     try {
@@ -104,7 +131,7 @@ export default function OrganizerHistoryPage() {
       // Temporarily hide the buttons
       const buttons = document.querySelectorAll('.modal-footer button');
       buttons.forEach(button => button.classList.add('hide-buttons'));
-  
+
       // Wait for the DOM to update before capturing the screenshot
       setTimeout(() => {
         html2canvas(document.querySelector("#event-statistics-modal")).then((canvas) => {
@@ -112,14 +139,14 @@ export default function OrganizerHistoryPage() {
           link.href = canvas.toDataURL();
           link.download = `event-statistics-${selectedEvent.eventName}.png`;
           link.click();
-  
+
           // Show the buttons back after saving
           buttons.forEach(button => button.classList.remove('hide-buttons'));
         });
       }, 100); // Delay of 100ms to ensure DOM updates
     }
   };
-  
+
 
   if (loading || status === "loading") {
     return (
@@ -157,7 +184,13 @@ export default function OrganizerHistoryPage() {
                     variant="top"
                     src={event.poster}
                     alt={event.name}
+                    style={{
+                      height: "200px", // Fixed height
+                      objectFit: "cover", // Ensures the image fills the space proportionally
+                      width: "100%", // Ensures it spans the card's width
+                    }}
                   />
+
                   <Card.Body>
                     <Card.Title>{event.eventName}</Card.Title>
                     <Card.Text>
@@ -166,22 +199,48 @@ export default function OrganizerHistoryPage() {
                     </Card.Text>
                     <Card.Text>{event.description}</Card.Text>
                   </Card.Body>
+                  <AiFillDelete
+                    style={{
+                      position: "absolute",
+                      top: "10px",
+                      right: "10px",
+                      color: "blue",
+                      cursor: "pointer",
+                      fontSize: '1.5rem',
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent the card's onClick from being triggered
+                      handleDeleteClick(event._id);
+                    }}
+                  />
                 </Card>
               </Col>
             ))}
           </Row>
         )}
 
+        {/* Delete Confirmation Modal */}
+        <Modal show={showDeleteModal} onHide={handleCloseDeleteModal}>
+          <Modal.Header closeButton>
+            <Modal.Title>Confirm Delete</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>Are you sure you want to delete this event?</Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleCloseDeleteModal}>Cancel</Button>
+            <Button variant="danger" onClick={confirmDelete}>Delete</Button>
+          </Modal.Footer>
+        </Modal>
+
         <Modal show={showModal} onHide={handleClose} id="event-statistics-modal" size="lg">
           <Modal.Header closeButton>
-            <Modal.Title>Event Statistics: {selectedEvent?.eventName}</Modal.Title>           
+            <Modal.Title>Event Statistics: {selectedEvent?.eventName}</Modal.Title>
           </Modal.Header>
           <Modal.Body style={{ height: 'auto', padding: '3rem' }}>
             {selectedEvent ? (
               <div>
                 <Row>
                   <Col>
-                    <Card style={{ border: '2px solid #b1e7cc' }}> 
+                    <Card style={{ border: '2px solid #b1e7cc' }}>
                       <Card.Body>
                         <Card.Title style={{ fontSize: '0.8rem' }}>Registered Students</Card.Title>
                         <Card.Text>{selectedEvent.totalRegistered}</Card.Text>
