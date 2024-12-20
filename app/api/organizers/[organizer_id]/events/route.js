@@ -56,7 +56,10 @@ export async function GET(request,{ params }) {
 
 
 // Handle the POST request for creating events and handling file uploads
-export async function POST(req) {
+export async function POST(req,{ params}) {
+  // Connect to your database and save the event
+  await dbConnect(); // Ensure the dbConnect function is correctly set up
+  const { organizer_id } = params;
   try {
     // Parse form data (including files)
     const formData = await req.formData();
@@ -106,6 +109,7 @@ export async function POST(req) {
 
     // Create event object
     const newEvent = {
+      organizer: organizer_id,
       eventName,
       registerationDate,
       eventDate,
@@ -125,9 +129,6 @@ export async function POST(req) {
       qrName: qr ? qr.name : null,
       seats,
     };
-
-    // Connect to your database and save the event
-    await dbConnect(); // Ensure the dbConnect function is correctly set up
     const event = new Event(newEvent);
     await event.save();
 

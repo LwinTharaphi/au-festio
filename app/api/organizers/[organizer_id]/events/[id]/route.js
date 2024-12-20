@@ -5,10 +5,10 @@ import { NextResponse } from 'next/server';
 
 export async function GET(request, { params }) {
   await dbConnect();
-  const { id } = await params;
+  const { organizer_id, id } = await params;
 
   try {
-    const event = await Event.findById(id);
+    const event = await Event.findOne({ organizer: organizer_id, _id: id });
     if (!event) {
       return new Response(JSON.stringify({ error: "Event not found" }), { status: 404 });
     }
@@ -20,7 +20,7 @@ export async function GET(request, { params }) {
 
 export async function PUT(request, { params }) {
   await dbConnect();
-  const { id } = await params;
+  const { organizer_id, id } = await params;
 
   try {
     const formData = await request.formData();

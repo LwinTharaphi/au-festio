@@ -58,7 +58,7 @@ export default function Dashboard() {
         async function fetchData() {
           try {
             setLoading(true);
-            const response = await fetch(`/api/events/${id}/dashboards`);
+            const response = await fetch(`/api/organizers/${userId}/events/${id}/dashboards`);
             if (!response.ok) throw new Error("Failed to fetch data");
             const json = await response.json();
             setData(json);

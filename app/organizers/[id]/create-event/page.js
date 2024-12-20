@@ -204,6 +204,7 @@ function EventForm() {
 
     // Create a FormData object to append all form data, including file uploads
     const formData = new FormData();
+    const userId = session.user.id;
 
     formData.append('eventName',eventName || '');
     formData.append('registerationDate',registerationDate || '');
@@ -249,13 +250,13 @@ function EventForm() {
         // Update the existing event only if editing
         const eventId = events[selectedEventIndex]._id;
         // console.log(eventId)
-        response = await fetch(`/api/events/${eventId}`,{
+        response = await fetch(`/api/organizers/${userId}/events/${eventId}`,{
           method: 'PUT',
           body: formData,
         });
       } else {
          // Create a new event if not editing
-        response = await fetch('/api/events', {
+        response = await fetch(`/api/organizers/${userId}/events`, {
           method: 'POST',
           body: formData,
         });
@@ -313,9 +314,10 @@ function EventForm() {
 
   const handleDelete = async (index) => {
     // console.log("deleted index",index)
+    const userId = session.user.id;
     const eventId = events[index]._id;  // Get event id for deletion
     try {
-      const response = await fetch(`/api/events/${eventId}`, {
+      const response = await fetch(`/api/organizers/${userId}/events/${eventId}`, {
         method: 'DELETE',
       });
       if (response.ok) {
