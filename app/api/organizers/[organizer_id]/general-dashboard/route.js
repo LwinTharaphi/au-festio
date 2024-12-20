@@ -5,8 +5,9 @@ import Staffrole from "@/models/Staffrole";
 import Student from "@/models/Student";
 import moment from "moment";
 
-export async function GET(request) {
+export async function GET(request, { params }) {
     await dbConnect();
+    const { organizer_id } = await params;
 
     // Count total events, paid events, and free events
     const totalEvents = await Event.countDocuments();
@@ -14,7 +15,7 @@ export async function GET(request) {
     const freeEvents = await Event.countDocuments({ isPaid: false });
 
     // Get all events
-    const events = await Event.find();
+    const events = await Event.find({organizer: organizer_id});
 
     // Get all staff and roles
     const staffs = await Staff.find().populate('role'); // Assuming staff has a 'role' field that references Staffrole

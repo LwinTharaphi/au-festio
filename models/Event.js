@@ -2,6 +2,7 @@
 import mongoose from "mongoose";
 
 const EventSchema = new mongoose.Schema({
+  organizer: { type: mongoose.Schema.Types.ObjectId, ref: "EventOrganizer", required: true }, // Reference to Event model
   eventName: { type: String, required: true },
   registerationDate: { type: Date, required: true},
   eventDate: {type: Date, required: true},

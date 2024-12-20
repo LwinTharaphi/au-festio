@@ -11,9 +11,10 @@ export const config = {
   },
 };
 
-export async function GET(request) {
+export async function GET(request,{ params }) {
   await dbConnect();
-  const events = await Event.find();
+  const { organizer_id } = await params;
+  const events = await Event.find({organizer: organizer_id});
 
   // Map through events to process the poster field
   const eventsWithPoster = events.map(event => {

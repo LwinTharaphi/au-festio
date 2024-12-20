@@ -142,7 +142,7 @@ function EventForm() {
       const userId = session.user.id
       if(userId){
         const fetchEvents = async()=>{
-          const response = await fetch(`/api/events`);
+          const response = await fetch(`/api/organizers/${userId}/events`);
           const data = await response.json();
           const sortedEvents = data.sort((a,b)=>
           new Date(a.registerationDate) - new Date(b.registerationDate));
