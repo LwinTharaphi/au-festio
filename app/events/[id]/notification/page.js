@@ -10,6 +10,7 @@ export default function NotificationPage() {
     const {data: session, status} = useSession();
     const router = useRouter();
     const { id } = useParams(); // Fetch event ID from route
+    const userId = session?.user?.id;
     const [students, setStudents] = useState([]);
     const [selectedStudents, setSelectedStudents] = useState([]);
     const [notificationTitle, setNotificationTitle] = useState("");
@@ -30,7 +31,7 @@ export default function NotificationPage() {
                 const fetchEventData = async () => {
                     try {
                         setLoading(true);
-                        const response = await fetch(`/api/events/${id}`);
+                        const response = await fetch(`/api/organizers/${userId}/events/${id}`);
                         if (!response.ok) {
                             throw new Error("Failed to fetch event data.");
                         }
@@ -45,7 +46,7 @@ export default function NotificationPage() {
         
                 const fetchStudents = async () => {
                     try {
-                        const response = await fetch(`/api/events/${id}/students`);
+                        const response = await fetch(`/api/organizers/${userId}/events/${id}/students`);
                         if (!response.ok) {
                             throw new Error("Failed to fetch students.");
                         }
@@ -82,7 +83,7 @@ export default function NotificationPage() {
     // Send notification to individual student
     const handleSendNotification = async (studentId) => {
         try {
-            await fetch(`/api/events/${id}/notifications`, {
+            await fetch(`/api/organizers/${userId}/events/${id}/notifications`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -100,7 +101,7 @@ export default function NotificationPage() {
     // Send notifications to all selected students
     const handleSendAll = async () => {
         try {
-            await fetch(`/api/events/${id}/notifications/bulk`, {
+            await fetch(`/api/organizers/${userId}/events/${id}/notifications/bulk`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

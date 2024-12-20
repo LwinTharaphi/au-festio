@@ -12,6 +12,7 @@ ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarEle
 
 export default function OrganizerHistoryPage() {
   const { data: session, status } = useSession();
+  const userId = session?.user?.id;
   const router = useRouter();
   const [completedEvents, setCompletedEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,7 +31,8 @@ export default function OrganizerHistoryPage() {
 
         if (status === "authenticated" && session.user.role === "organizer") {
           setLoading(true);
-          const response = await fetch(`/api/events`);
+          const userId = session.user.id;
+          const response = await fetch(`/api/organizers/${userId}/events`);
           if (!response.ok) {
             throw new Error("Failed to fetch events.");
           }
@@ -62,7 +64,7 @@ export default function OrganizerHistoryPage() {
 
   const confirmDelete = async () => {
     try {
-      const response = await fetch(`/api/events/${eventToDelete}`, { method: 'DELETE' });
+      const response = await fetch(`/api/organizers/${userId}/events/${eventToDelete}`, { method: 'DELETE' });
       if (!response.ok) {
         throw new Error("Failed to delete event.");
       }
@@ -82,22 +84,22 @@ export default function OrganizerHistoryPage() {
   const handleCardClick = async (eventId) => {
     try {
       // Fetch students data
-      const studentsResponse = await fetch(`/api/events/${eventId}/students`);
+      const studentsResponse = await fetch(`/api/organizers/${userId}/events/${eventId}/students`);
       const studentsData = await studentsResponse.json();
 
       // Fetch staffs data
-      const staffsResponse = await fetch(`/api/events/${eventId}/staffs`);
+      const staffsResponse = await fetch(`/api/organizers/${userId}/events/${eventId}/staffs`);
       const staffsData = await staffsResponse.json();
 
       // Fetch staffs data
-      const boothsResponse = await fetch(`/api/events/${eventId}/booths`);
+      const boothsResponse = await fetch(`/api/organizers/${userId}/events/${eventId}/booths`);
       const boothsData = await boothsResponse.json();
 
-      const feedbacksResponse = await fetch(`/api/events/${eventId}/feedbacks`);
+      const feedbacksResponse = await fetch(`/api/organizers/${userId}/events/${eventId}/feedbacks`);
       const feedbacksData = await feedbacksResponse.json();
 
       // Assuming booths and feedback are part of the event data or another endpoint
-      const eventResponse = await fetch(`/api/events/${eventId}`);
+      const eventResponse = await fetch(`/api/organizers/${userId}/events/${eventId}`);
       const eventData = await eventResponse.json();
 
       // Count feedback stars (1 to 5)

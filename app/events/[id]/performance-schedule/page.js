@@ -11,6 +11,7 @@ import { useSession } from 'next-auth/react';
 export default function EventPerformancesPage() {
   const {data: session, status} = useSession();
   const { id } = useParams(); // Get eventId from the URL params
+  const userId = session?.user?.id;
   const router = useRouter();
   const [performances, setPerformances] = useState([]);
   const [eventData, setEventData] = useState(null); // State to store event data
@@ -40,7 +41,7 @@ export default function EventPerformancesPage() {
           setError(null); // Clear previous errors before fetching data
           try {
             setLoading(true);
-            const response = await fetch(`/api/events/${id}`);
+            const response = await fetch(`/api/organizers/${userId}/events/${id}`);
             if (!response.ok) {
               throw new Error("Failed to fetch event data.");
             }
@@ -57,7 +58,7 @@ export default function EventPerformancesPage() {
     
         const fetchPerformances = async () => {
           try {
-            const response = await fetch(`/api/events/${id}/performances`);
+            const response = await fetch(`/api/organizers/${userId}/events/${id}/performances`);
             if (!response.ok) {
               throw new Error("Failed to fetch event performances.");
             }
@@ -69,7 +70,7 @@ export default function EventPerformancesPage() {
         };
         const fetchEventsList = async () => {
           try {
-            const response = await fetch("/api/events");
+            const response = await fetch(`/api/organizers/${userId}/events`);
             if (!response.ok) {
               throw new Error("Failed to fetch events list.");
             }
@@ -114,7 +115,7 @@ export default function EventPerformancesPage() {
       let response;
       if (editPerformanceId) {
         // Update performance
-        response = await fetch(`/api/events/${id}/performances/${editPerformanceId}`, {
+        response = await fetch(`/api/organizers/${userId}/events/${id}/performances/${editPerformanceId}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -131,7 +132,7 @@ export default function EventPerformancesPage() {
         setEditPerformanceId(null);
       } else {
         // Add new performance
-        response = await fetch(`/api/events/${id}/performances`, {
+        response = await fetch(`/api/organizers/${userId}/events/${id}/performances`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -157,7 +158,7 @@ export default function EventPerformancesPage() {
   // Handle delete performance
   const handleDelete = async (performanceId) => {
     try {
-      await fetch(`/api/events/${id}/performances/${performanceId}`, {
+      await fetch(`/api/organizers/${userId}/events/${id}/performances/${performanceId}`, {
         method: "DELETE",
       });
       setPerformances(performances.filter((performance) => performance._id !== performanceId));

@@ -26,6 +26,7 @@ const renderStars = (rating) => {
 
 export default function FeedbackPage() {
   const {data: session, status} = useSession();
+  const userId = session?.user?.id;
   const [eventName, setEventName] = useState("");
   const router = useRouter();
   const [eventsList, setEventsList] = useState([]);
@@ -46,7 +47,7 @@ export default function FeedbackPage() {
           setError(null); // Clear previous errors before fetching data
           try {
             setLoading(true);
-            const response = await fetch(`/api/events/${id}`);
+            const response = await fetch(`/api/organizers/${userId}/events/${id}`);
             if (!response.ok) {
               throw new Error("Failed to fetch event data.");
             }
@@ -61,7 +62,7 @@ export default function FeedbackPage() {
     
         const fetchFeedbacks = async () => {
           try {
-            const response = await fetch(`/api/events/${id}/feedbacks`);
+            const response = await fetch(`/api/organizers/${userId}/events/${id}/feedbacks`);
             if (!response.ok) {
               throw new Error("Failed to fetch feedbacks.");
             }
@@ -73,7 +74,7 @@ export default function FeedbackPage() {
         };
         const fetchEventsList = async () => {
           try {
-            const response = await fetch("/api/events");
+            const response = await fetch(`/api/organizers/${userId}/events`);
             if (!response.ok) {
               throw new Error("Failed to fetch events list.");
             }

@@ -9,6 +9,7 @@ export default function StudentDetails() {
     const { id: eventId, studentId } = useParams();
     const router = useRouter();
     const { data: session, status } = useSession();
+    const userId = session?.user?.id;
     const [student, setStudent] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -28,7 +29,7 @@ export default function StudentDetails() {
             try {
                 setLoading(true);
                 setError(null);
-                const response = await fetch(`/api/events/${eventId}/students/${studentId}`);
+                const response = await fetch(`/api/organizers/${userId}/events/${eventId}/students/${studentId}`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch student details.');
                 }
@@ -44,11 +45,11 @@ export default function StudentDetails() {
         if (status === 'authenticated' && eventId && studentId) {
             fetchStudentDetails();
         }
-    }, [eventId, studentId, session, status, router]);
+    }, [eventId, studentId, session, status, router, userId]);
 
     const handleConfirm = async () => {
         try {
-            const response = await fetch(`/api/events/${id}/students/${studentId}/checkin`, {
+            const response = await fetch(`/api/organizers/${userId}/events/${id}/students/${studentId}/checkin`, {
                 method: 'POST',
             });
             if (response.ok) {

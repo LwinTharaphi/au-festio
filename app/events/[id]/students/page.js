@@ -10,6 +10,7 @@ import { useSession } from 'next-auth/react';
 export default function RegisteredStudentsPage() {
   const {data: session, status} = useSession();
   const { id } = useParams(); // Use this as eventId
+  const userId = session?.user?.id;
   const router = useRouter();
   const [eventData, setEventData] = useState(null);
   const [eventName, setEventName] = useState("");
@@ -45,7 +46,7 @@ export default function RegisteredStudentsPage() {
           setError(null); // Clear previous errors before fetching data
           try {
             setLoading(true);
-            const response = await fetch(`/api/events/${id}`);
+            const response = await fetch(`/api/organizers/${userId}/events/${id}`);
             if (!response.ok) {
               throw new Error("Failed to fetch event data.");
             }
@@ -62,7 +63,7 @@ export default function RegisteredStudentsPage() {
     
         const fetchStudents = async () => {
           try {
-            const response = await fetch(`/api/events/${id}/students`);
+            const response = await fetch(`/api/organizers/${userId}/events/${id}/students`);
             if (!response.ok) {
               throw new Error("Failed to fetch registered students.");
             }
@@ -77,7 +78,7 @@ export default function RegisteredStudentsPage() {
         };
         const fetchEventsList = async () => {
           try {
-            const response = await fetch("/api/events");
+            const response = await fetch(`/api/organizers/${userId}/events`);
             if (!response.ok) {
               throw new Error("Failed to fetch events list.");
             }
@@ -114,7 +115,7 @@ export default function RegisteredStudentsPage() {
 
   const updateStatus = async (studentId, status) => {
     try {
-      await fetch(`/api/events/${id}/students/${studentId}`, {
+      await fetch(`/api/organizers/${userId}/events/${id}/students/${studentId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
@@ -139,7 +140,7 @@ export default function RegisteredStudentsPage() {
 
   const handleDelete = async () => {
     try {
-      await fetch(`/api/events/${id}/students/${selectedStudent._id}`, { method: "DELETE" });
+      await fetch(`/api/organizers/${userId}/events/${id}/students/${selectedStudent._id}`, { method: "DELETE" });
 
       // Update local state
       setStudents(prevStudents =>
@@ -174,7 +175,7 @@ export default function RegisteredStudentsPage() {
 
   const handleUpdateStudent = async () => {
     try {
-      await fetch(`/api/events/${id}/students/${selectedStudent._id}`, {
+      await fetch(`/api/organizers/${userId}/events/${id}/students/${selectedStudent._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedStudent),

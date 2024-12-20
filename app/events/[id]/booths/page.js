@@ -21,6 +21,7 @@ export default function BoothPage() {
   const { data: session, status } = useSession();
   const { id } = useParams(); // Get eventId from URL parameters
   const router = useRouter();
+  const userId = session?.user?.id;
   const [eventName, setEventName] = useState(""); // State to hold the event name
   const [eventsList, setEventsList] = useState([]);
   const [booths, setBooths] = useState([]); // State to hold booth data
@@ -48,12 +49,12 @@ export default function BoothPage() {
       const fetchEventAndBooths = async () => {
         try {
           setLoading(true);
-          const eventResponse = await fetch(`/api/events/${id}`);
+          const eventResponse = await fetch(`/api/organizers/${userId}/events/${id}`);
           if (!eventResponse.ok) throw new Error("Failed to fetch event data.");
           const event = await eventResponse.json();
           setEventName(event.eventName);
 
-          const boothsResponse = await fetch(`/api/events/${id}/booths`);
+          const boothsResponse = await fetch(`/api/organizers/${userId}/events/${id}/booths`);
           if (!boothsResponse.ok) throw new Error("Failed to fetch booth data.");
           const boothsData = await boothsResponse.json();
           setBooths(boothsData);
@@ -66,7 +67,7 @@ export default function BoothPage() {
 
       const fetchEventsList = async () => {
         try {
-          const response = await fetch("/api/events");
+          const response = await fetch(`/api/organizers/${userId}/events`);
           if (!response.ok) throw new Error("Failed to fetch events list.");
           const data = await response.json();
           setEventsList(data);
@@ -78,12 +79,12 @@ export default function BoothPage() {
       fetchEventsList();
       fetchEventAndBooths();
     }
-  }, [id, router, session, status]);
+  }, [id, router, session, status,userId]);
   const handleSaveBooth = async () => {
     try {
       const url = editMode
-        ? `/api/events/${id}/booths/${currentBooth.boothId}`
-        : `/api/events/${id}/booths`;
+        ? `/api/organizers/${userId}/events/${id}/booths/${currentBooth.boothId}`
+        : `/api/organizers/${userId}/events/${id}/booths`;
       const method = editMode ? "PUT" : "POST";
 
       const formData = new FormData();
@@ -118,7 +119,7 @@ export default function BoothPage() {
 
   const handleDeleteBooth = async (boothId) => {
     try {
-      await fetch(`/api/events/${id}/booths/${boothId}`, { method: "DELETE" });
+      await fetch(`/api/organizers/${userId}/events/${id}/booths/${boothId}`, { method: "DELETE" });
       setBooths((prevBooths) => prevBooths.filter((booth) => booth.boothId !== boothId));
     } catch (err) {
       setError("Failed to delete booth.");

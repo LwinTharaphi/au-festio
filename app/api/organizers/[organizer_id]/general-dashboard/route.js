@@ -10,9 +10,9 @@ export async function GET(request, { params }) {
     const { organizer_id } = await params;
 
     // Count total events, paid events, and free events
-    const totalEvents = await Event.countDocuments();
-    const paidEvents = await Event.countDocuments({ isPaid: true });
-    const freeEvents = await Event.countDocuments({ isPaid: false });
+    const totalEvents = await Event.countDocuments({organizer: organizer_id});
+    const paidEvents = await Event.countDocuments({organizer: organizer_id, isPaid: true });
+    const freeEvents = await Event.countDocuments({organizer: organizer_id, isPaid: false });
 
     // Get all events
     const events = await Event.find({organizer: organizer_id});

@@ -13,6 +13,7 @@ export default function StaffPage() {
   const {data: session, status} = useSession();
   const { id } = useParams(); // Get eventId from URL parameters
   const router = useRouter();
+  const userId = session?.user?.id;
   const [eventName, setEventName] = useState(""); // State to hold the event name
   const [eventsList, setEventsList] = useState([]);
   const [error, setError] = useState(null); // State to handle any error
@@ -57,7 +58,7 @@ export default function StaffPage() {
         const fetchEventData = async () => {
           try {
             setLoading(true);
-            const eventResponse = await fetch(`/api/events/${id}`);
+            const eventResponse = await fetch(`/api/organizers/${userId}/events/${id}`);
             if (!eventResponse.ok) {
               throw new Error("Failed to fetch event data.");
             }
@@ -65,7 +66,7 @@ export default function StaffPage() {
             setEventName(event.eventName);
     
             // Fetch roles data
-            const rolesResponse = await fetch(`/api/events/${id}/staffroles`);
+            const rolesResponse = await fetch(`/api/organizers/${userId}/events/${id}/staffroles`);
             if (!rolesResponse.ok) {
               throw new Error("Failed to fetch roles.");
             }
@@ -73,7 +74,7 @@ export default function StaffPage() {
             setRoles(rolesData);
     
             // Fetch staff data
-            const staffResponse = await fetch(`/api/events/${id}/staffs`);
+            const staffResponse = await fetch(`/api/organizers/${userId}/events/${id}/staffs`);
             if (!staffResponse.ok) {
               throw new Error("Failed to fetch staff data.");
             }
@@ -88,7 +89,7 @@ export default function StaffPage() {
         };
         const fetchEventsList = async () => {
           try {
-            const response = await fetch("/api/events");
+            const response = await fetch(`/api/organizers/${userId}/events`);
             if (!response.ok) {
               throw new Error("Failed to fetch events list.");
             }
@@ -169,7 +170,7 @@ export default function StaffPage() {
 
     try {
       const updatedStaff = { ...currentStaff, status }; // Update the status of the staff
-      const response = await fetch(`/api/events/${id}/staffs/${currentStaff._id}`, {
+      const response = await fetch(`/api/organizers/${userId}/events/${id}/staffs/${currentStaff._id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -190,7 +191,7 @@ export default function StaffPage() {
   const handleSaveStaff = async () => {
     try {
       if (isEditingStaff) {
-        const response = await fetch(`/api/events/${id}/staffs/${editStaffId}`, {
+        const response = await fetch(`/api/organizers/${userId}/events/${id}/staffs/${editStaffId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(newStaff),
@@ -228,7 +229,7 @@ export default function StaffPage() {
     try {
       if (isEditing) {
         // Update existing role
-        const response = await fetch(`/api/events/${id}/staffroles/${editRoleId}`, {
+        const response = await fetch(`/api/organizers/${userId}/events/${id}/staffroles/${editRoleId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(newRole),
@@ -240,7 +241,7 @@ export default function StaffPage() {
         setRoles(roles.map((role) => (role._id === editRoleId ? updatedRole : role)));
       } else {
         // Add new role
-        const response = await fetch(`/api/events/${id}/staffroles`, {
+        const response = await fetch(`/api/organizers/${userId}/events/${id}/staffroles`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(newRole),
@@ -260,7 +261,7 @@ export default function StaffPage() {
   // Handle deleting a role
   const handleDeleteRole = async (roleId) => {
     try {
-      const response = await fetch(`/api/events/${id}/staffroles/${roleId}`, {
+      const response = await fetch(`/api/organizers/${userId}/events/${id}/staffroles/${roleId}`, {
         method: "DELETE",
       });
       if (!response.ok) {
@@ -287,7 +288,7 @@ export default function StaffPage() {
   // Handle deleting a staff member
   const handleDeleteStaff = async (staffId) => {
     try {
-      const response = await fetch(`/api/events/${id}/staffs/${staffId}`, {
+      const response = await fetch(`/api/organizers/${userId}/events/${id}/staffs/${staffId}`, {
         method: "DELETE",
       });
       if (!response.ok) {
