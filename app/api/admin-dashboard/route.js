@@ -31,13 +31,15 @@ export async function GET(request) {
 
     // Prepare the staff counts data
     const Events = await Promise.all(events.map(async (event) => {
+        const registrationDate = moment(event.registerationDate);
         const eventDate = moment(event.eventDate);
-        if (eventDate.isBefore(today, 'day')) {
-        completedEvent++;
-        } else if (eventDate.isSame(today, 'day')) {
-        ongoingEvent++;
-        } else {
-        upcomingEvent++;
+
+        if (today.isBetween(registrationDate, eventDate, "day", "[]")) {
+            ongoingEvent++;
+        } else if (today.isBefore(registrationDate, "day")) {
+            upcomingEvent++;
+        } else if (today.isAfter(eventDate, "day")) {
+            completedEvent++;
         }
 
         // Get all staff and roles

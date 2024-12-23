@@ -24,18 +24,18 @@ export async function GET(request, { params }) {
 
     // Get today's date
     const today = moment();
+    console.log("Today's Date:", today.toISOString());
 
     // Initialize counters for event categories
     let ongoingEvent = 0;
     let upcomingEvent = 0;
     let completedEvent = 0;
 
-    // Prepare the staff counts data
-    const Events = await Promise.all(events.map(async (event) => {
-        const registrationDate = moment(event.registrationDate);
+    // Categorize events
+    events.forEach((event) => {
+        const registrationDate = moment(event.registerationDate);
         const eventDate = moment(event.eventDate);
 
-        // Categorize the event based on the dates
         if (today.isBetween(registrationDate, eventDate, "day", "[]")) {
             ongoingEvent++;
         } else if (today.isBefore(registrationDate, "day")) {
@@ -43,6 +43,10 @@ export async function GET(request, { params }) {
         } else if (today.isAfter(eventDate, "day")) {
             completedEvent++;
         }
+    });
+
+    // Prepare the staff counts data
+    const Events = await Promise.all(events.map(async (event) => {
         // Get roles for this event
         const rolesForEvent = staffRoles.filter(role => role.eventId.toString() === event._id.toString());
 
