@@ -7,7 +7,7 @@ import { useSession } from 'next-auth/react';
 import { Spinner } from 'reactstrap';
 import { BsPeopleFill, BsShop, BsCheckCircle, BsStarFill } from "react-icons/bs";
 import { Bar } from "react-chartjs-2";
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, SubTitle } from "chart.js";
 // Register the components
 ChartJS.register(
   CategoryScale,
@@ -15,7 +15,8 @@ ChartJS.register(
   BarElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  SubTitle
 );
 
 export default function Dashboard() {
@@ -26,7 +27,10 @@ export default function Dashboard() {
   const [error, setError] = useState(null);
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [staffChartData, setStaffChartData] = useState(null);
+  const [staffChartData, setStaffChartData] = useState({
+    labels: [],
+    datasets: [],
+  });
 
   useEffect(() => {
     if (status === "loading") return;  // Don't redirect while loading
@@ -58,18 +62,21 @@ export default function Dashboard() {
   }, [status, session, router]);  // Removed `data` from dependencies
 
   const updateStaffChart = (event) => {
-    if (!event) return;
+    if (!event || !event.roles || event.roles.length === 0) {
+      // Reset to empty chart
+      setStaffChartData({
+        labels: [],
+        datasets: [],
+      });
+      console.log("No event or roles available. Resetting chart.");
+      return;
+    }
+    // if (!event) return;
     const roles = event.roles || []; // Assuming `staffRoles` is an array of objects
     const labels = roles.map(role => role.name); // Role names
     const staffNeeded = roles.map(role => role.staffNeeded);
     const staffRegistered = roles.map(role => role.staffRegistered);
     const staffMissing = roles.map(role => Math.max(0, role.staffNeeded - role.staffRegistered));
-
-    console.log("Roles:", roles);
-    console.log("Labels:", labels);
-    console.log("Staff Needed:", staffNeeded);
-    console.log("Staff Registered:", staffRegistered);
-    console.log("Staff Missing:", staffMissing);
 
     setStaffChartData({
       labels,
@@ -301,29 +308,41 @@ export default function Dashboard() {
                       ))}
                     </Form.Select>
 
-                    {staffChartData && (
-                      <div style={{ marginTop: '20px' }}>
-                        <h5 className="text-center">Staff Overview</h5>
-                        <Bar
-                          data={staffChartData}
-                          options={{
-                            responsive: true,
-                            scales: {
-                              x: { title: { display: true, text: "Roles" } },
-                              y: { title: { display: true, text: "Count" }, beginAtZero: true },
+                    {/* Show the row and columns even if no event is selected */}
+                    <div style={{ marginTop: '20px' }}>
+                      <h5 className="text-center">Staff Overview</h5>
+                      <Bar
+                        data={staffChartData}
+                        options={{
+                          responsive: true,
+                          scales: {
+                            x: { title: { display: true, text: "Roles" } },
+                            y: { title: { display: true, text: "Count" }, beginAtZero: true },
+                          },
+                          plugins: {
+                            tooltip: { enabled: false },
+                            legend: { display: true },
+                            title: {
+                              display: true,
+                              text: `Staff Overview for Event: ${selectedEvent?.eventName}`,
                             },
-                            plugins: {
-                              tooltip: { enabled: false }, // Disable tooltips
-                              legend: { display: true },
-                              title: {
-                                display: true,
-                                text: `Staff Overview for Event: ${selectedEvent?.eventName}`,
+                            subtitle: {
+                              display: events.length === 0,
+                              text: "There is no event to select. Please add the event",
+                              color: 'red',
+                              font: {
+                                size: 12,
+                                weight: 'normal',
                               },
+                              padding: {
+                                top: 10,
+                                bottom: 30
+                              }
                             },
-                          }}
-                        />
-                      </div>
-                    )}
+                          },
+                        }}
+                      />
+                    </div>
                   </Card.Body>
                 </Card>
               </Col>

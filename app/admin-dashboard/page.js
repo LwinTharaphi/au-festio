@@ -7,7 +7,7 @@ import { useSession } from 'next-auth/react';
 import { Spinner } from 'reactstrap';
 import { BsPeopleFill, BsShop, BsCheckCircle, BsStarFill } from "react-icons/bs";
 import { Bar } from "react-chartjs-2";
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, SubTitle } from "chart.js";
 // Register the components
 ChartJS.register(
   CategoryScale,
@@ -15,7 +15,8 @@ ChartJS.register(
   BarElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  SubTitle
 );
 
 export default function AdminDashboard() {
@@ -27,7 +28,10 @@ export default function AdminDashboard() {
   const [events, setEvents] = useState([]);
   const [organizers, setOrganizers] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [staffChartData, setStaffChartData] = useState(null);
+  const [staffChartData, setStaffChartData] = useState({
+    labels: [],
+    datasets: [],
+  });
   const [selectedOrganizer, setSelectedOrganizer] = useState(null);
 
   useEffect(() => {
@@ -78,11 +82,27 @@ export default function AdminDashboard() {
 
   const handleOrganizerChange = (organizerId) => {
     setSelectedOrganizer(organizerId);
+    setData(null); // Reset the data to show loading spinner
+    setEvents([]); // Reset the events to show loading spinner
+    setStaffChartData({
+      labels: [],
+      datasets: [],
+    }); // Reset the staff chart data
+    setSelectedEvent(null); // Reset the selected event
     fetchDashboardData(organizerId);
   };
 
   const updateStaffChart = (event) => {
-    if (!event) return;
+    if (!event || !event.roles || event.roles.length === 0) {
+      // Reset to empty chart
+      setStaffChartData({
+        labels: [],
+        datasets: [],
+      });
+      console.log("No event or roles available. Resetting chart.");
+      return;
+    }
+    // if (!event) return;
     const roles = event.roles || []; // Assuming `roles` is an array of objects
     const labels = roles.map(role => role.name); // Role names
     const staffNeeded = roles.map(role => role.staffNeeded);
@@ -173,7 +193,7 @@ export default function AdminDashboard() {
               ))}
             </DropdownButton>
 
-            {selectedEvent && (
+            {(selectedEvent || events.length === 0) && (
               <>
                 <Row className="mb-4 g-4">
                   <Col md={4}>
@@ -323,9 +343,9 @@ export default function AdminDashboard() {
                           ))}
                         </Form.Select>
 
-                        {staffChartData && (
-                          <div style={{ marginTop: '20px' }}>
-                            <h5 className="text-center">Staff Overview</h5>
+                         {/* Show the row and columns even if no event is selected */}
+                        <div style={{ marginTop: '20px' }}>
+                          <h5 className="text-center">Staff Overview</h5>
                             <Bar
                               data={staffChartData}
                               options={{
@@ -335,17 +355,29 @@ export default function AdminDashboard() {
                                   y: { title: { display: true, text: "Count" }, beginAtZero: true },
                                 },
                                 plugins: {
-                                  tooltip: { enabled: false }, // Disable tooltips
+                                  tooltip: { enabled: false },
                                   legend: { display: true },
                                   title: {
                                     display: true,
                                     text: `Staff Overview for Event: ${selectedEvent?.eventName}`,
                                   },
+                                  subtitle: {
+                                    display: events.length === 0,
+                                    text: "There is no event to select. Please add the event",
+                                    color: 'red',
+                                    font: {
+                                      size: 12,
+                                      weight: 'normal',
+                                    },
+                                    padding: {
+                                      top: 10,
+                                      bottom: 30
+                                    }
+                                  },
                                 },
                               }}
                             />
-                          </div>
-                        )}
+                        </div>
                       </Card.Body>
                     </Card>
                   </Col>
