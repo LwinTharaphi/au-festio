@@ -25,6 +25,7 @@ export default function EventOrganizersPage() {
   const [organizerToDelete, setOrganizerToDelete] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showResetAllModal, setShowResetAllModal] = useState(false);
 
   // Fetch organizers data
   useEffect(() => {
@@ -143,6 +144,23 @@ export default function EventOrganizersPage() {
 
   const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
 
+  const handleResetAllPasswords = async () => {
+    try {
+      const response = await fetch(`/api/event-organizers/reset-all-passwords`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ defaultPassword: "12345" }),
+      });
+      if (!response.ok) throw new Error("Failed to reset passwords.");
+      alert("Passwords reset successfully, and emails sent to all organizers.");
+      refreshEvents(); // Refresh the table to reflect changes
+    } catch (err) {
+      setError("Failed to reset all passwords.");
+    } finally {
+      setShowResetAllModal(false);
+    }
+  };
+
   if (status === 'loading'){
     return (
       <div
@@ -194,6 +212,12 @@ export default function EventOrganizersPage() {
               </div>
             ) : (
               <>
+              {/* Reset All Passwords Button */}
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <Button variant="warning" onClick={() => setShowResetAllModal(true)}>
+                  Reset All Passwords
+                </Button>
+              </div>
               <Table striped bordered hover>
                 <thead>
                   <tr>
@@ -321,6 +345,23 @@ export default function EventOrganizersPage() {
             </Button>
           </Modal.Footer>
         </Modal>
+         {/* Reset All Passwords Confirmation Modal */}
+      <Modal show={showResetAllModal} onHide={() => setShowResetAllModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Reset All Passwords</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Are you sure you want to reset all organizers&apos; passwords to <strong>12345</strong>? This action will also notify them via email.
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowResetAllModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="warning" onClick={handleResetAllPasswords}>
+            Reset Passwords
+          </Button>
+        </Modal.Footer>
+      </Modal>
       </Container>
     );
   }
