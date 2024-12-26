@@ -117,13 +117,9 @@ export default function Dashboard() {
       <Container fluid>
         <Row>
           {/* Sidebar */}
-          <Col
-            xs={2}
-            className="sidebar bg-white text-white p-3"
-            style={{ minHeight: "100vh" }}
-          >
-            <Sidebar event={{ _id: id }} />
-          </Col>
+          <Col xs={3} md={2} className="sidebar">
+                      <Sidebar event={{ _id: id }} /> {/* Sidebar component */}
+                    </Col>
   
           {/* Main Content */}
           <Col xs={10} className="main-content p-4">

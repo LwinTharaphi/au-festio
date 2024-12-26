@@ -1,17 +1,28 @@
 import React from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Nav, Navbar } from "react-bootstrap";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Sidebar.css';
-import { BsGrid, BsPeople, BsShop, BsPerson, BsQrCodeScan, BsBoxArrowRight ,BsBell, BsClock} from "react-icons/bs"; // Add icons
+import {
+  BsGrid,
+  BsPeople,
+  BsShop,
+  BsPerson,
+  BsQrCodeScan,
+  BsBell,
+  BsClock
+} from "react-icons/bs"; // Add icons
+import { usePathname } from "next/navigation";
 
 export default function Sidebar({ event }) {
   const router = useRouter();
+  const pathname = usePathname();
 
   if (!event) {
     return <div className="sidebar-loading">Loading...</div>; // Handle loading state
   }
+
+  const isActive = (path) => pathname === path ? 'active' : '';
 
   return (
     <Navbar expand="lg" className="flex-column sidebar">
@@ -31,13 +42,15 @@ export default function Sidebar({ event }) {
         {/* Dashboard */}
         <Nav.Link
           onClick={() => router.push(`/events/${event._id}/dashboard`)}
-          className="sidebar-link my-2"
+          className={`sidebar-link my-2 ${isActive(`/events/${event._id}/dashboard`)}`}
         >
           <BsGrid className="me-2" /> Dashboard
         </Nav.Link>
+
+        {/* Performance Schedule */}
         <Nav.Link
           onClick={() => router.push(`/events/${event._id}/performance-schedule`)}
-          className="sidebar-link my-2"
+          className={`sidebar-link my-2 ${isActive(`/events/${event._id}/performance-schedule`)}`}
         >
           <BsClock className="me-2" /> Performance Schedule
         </Nav.Link>
@@ -45,7 +58,7 @@ export default function Sidebar({ event }) {
         {/* Registered Students */}
         <Nav.Link
           onClick={() => router.push(`/events/${event._id}/students`)}
-          className="sidebar-link my-2"
+          className={`sidebar-link my-2 ${isActive(`/events/${event._id}/students`)}`}
         >
           <BsPeople className="me-2" /> Registered Students
         </Nav.Link>
@@ -53,7 +66,7 @@ export default function Sidebar({ event }) {
         {/* Booths */}
         <Nav.Link
           onClick={() => router.push(`/events/${event._id}/booths`)}
-          className="sidebar-link my-2"
+          className={`sidebar-link my-2 ${isActive(`/events/${event._id}/booths`)}`}
         >
           <BsShop className="me-2" /> Booths
         </Nav.Link>
@@ -61,7 +74,7 @@ export default function Sidebar({ event }) {
         {/* Staffs */}
         <Nav.Link
           onClick={() => router.push(`/events/${event._id}/staffs`)}
-          className="sidebar-link my-2"
+          className={`sidebar-link my-2 ${isActive(`/events/${event._id}/staffs`)}`}
         >
           <BsPerson className="me-2" /> Staffs
         </Nav.Link>
@@ -69,15 +82,17 @@ export default function Sidebar({ event }) {
         {/* Scan QR */}
         <Nav.Link
           onClick={() => router.push(`/events/${event._id}/scan`)}
-          className="sidebar-link my-2"
+          className={`sidebar-link my-2 ${isActive(`/events/${event._id}/scan`)}`}
         >
           <BsQrCodeScan className="me-2" /> Scan QR
         </Nav.Link>
+
+        {/* Notifications */}
         <Nav.Link
           onClick={() => router.push(`/events/${event._id}/notification`)}
-          className="sidebar-link my-2"
+          className={`sidebar-link my-2 ${isActive(`/events/${event._id}/notification`)}`}
         >
-          <BsBell className="me-2" />Notification
+          <BsBell className="me-2" /> Notification
         </Nav.Link>
       </Nav>
     </Navbar>

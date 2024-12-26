@@ -2,8 +2,8 @@
 .sidebar {
   background-color: #f8f9fa; /* Soft background */
   color: #333; /* Text color */
-  min-height: 100vh; /* Full height */
-  padding: 20px; /* Spacing */
+  height: 100vh; /* Full height */
+  padding: 0px; /* Spacing */
   position: sticky;
   top: 0;
   left: 0;
@@ -23,7 +23,7 @@
 
 /* Nav Link Styles */
 .sidebar .sidebar-link {
-  font-size: 1rem; /* Standard size */
+  font-size: 0.9rem; /* Standard size */
   font-weight: 500;
   color: #495057; /* Soft gray */
   padding: 10px;
