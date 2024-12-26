@@ -13,8 +13,8 @@ const EventSchema = new mongoose.Schema({
   phone: {type: String, required: function () { return this.isPaid; }},
   posterName: {type: String},
   poster: {type: Buffer, required: true},
-  qrName: {type: String},
-  qr: {type: Buffer},
+  // qrName: {type: String},
+  // qr: {type: Buffer},
   price: { type: Number, required: function () { return this.isPaid; }, min: 0 },
   discount: { type: Number, default: 0, min: 0, max: 100 },
   refundPolicy: {

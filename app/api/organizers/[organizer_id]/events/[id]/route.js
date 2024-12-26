@@ -39,10 +39,10 @@ export async function PUT(request, { params }) {
     const discount = isPaid && formData.has('discount') 
       ? parseFloat(formData.get('discount')) 
       : 0;
-    const isEarlyBirdValidFlag = isPaid && formData.has('discount') && isEarlyBirdValid(registerationDate);
-    const discountPrice = isEarlyBirdValidFlag ? price - (price * discount)/100 : 0;
-    const amount = isEarlyBirdValidFlag ? discountPrice : price;
-    console.log('Amount:', amount);
+    // const isEarlyBirdValidFlag = isPaid && formData.has('discount') && isEarlyBirdValid(registerationDate);
+    // const discountPrice = isEarlyBirdValidFlag ? price - (price * discount)/100 : 0;
+    // const amount = isEarlyBirdValidFlag ? discountPrice : price;
+    // console.log('Amount:', amount);
     let refundPolicy = [];
     if (isPaid && formData.has("refundPolicy")) {
       try {
@@ -61,15 +61,15 @@ export async function PUT(request, { params }) {
     const posterName = formData.get("posterName");
     const seats = formData.get('seats')? Number(formData.get('seats')): undefined;
 
-    const qrData = isPaid ? generatePayload(phone, { amount: amount }): null;
-    const qrSvg = isPaid
-      ? await qrcode.toString(qrData, { type: "svg", color: { dark: "#000", light: "#fff" } })
-      : null;
-    // Convert the SVG string into a Buffer (file-like object)
-    const qrBuffer = qrSvg ? Buffer.from(qrSvg) : null;
+    // const qrData = isPaid ? generatePayload(phone, { amount: amount }): null;
+    // const qrSvg = isPaid
+    //   ? await qrcode.toString(qrData, { type: "svg", color: { dark: "#000", light: "#fff" } })
+    //   : null;
+    // // Convert the SVG string into a Buffer (file-like object)
+    // const qrBuffer = qrSvg ? Buffer.from(qrSvg) : null;
 
-    // Upload the QR code if it was generated
-    const qrPath = qrBuffer ? await uploadFile(qrBuffer, "qrcodes") : null;
+    // // Upload the QR code if it was generated
+    // const qrPath = qrBuffer ? await uploadFile(qrBuffer, "qrcodes") : null;
 
     const updatedData = {
       eventName,
@@ -87,8 +87,8 @@ export async function PUT(request, { params }) {
       longitude,
       seats,
       posterName,
-      qrName: qrPath ? path.basename(qrPath) : null,
-      qr: qrPath ? qrPath : null,
+      // qrName: qrPath ? path.basename(qrPath) : null,
+      // qr: qrPath ? qrPath : null,
       phone,
     };
 
@@ -109,14 +109,14 @@ export async function PUT(request, { params }) {
     return NextResponse.json({ error: "Failed to update event" }, { status: 500 });
   }
 }
-const isEarlyBirdValid = (registrationTimestamp) => {
-  const now = new Date();
-  const registrationDate = new Date(registrationTimestamp);
-  const timeDifference = now - registrationDate; // in milliseconds
-  const hoursPassed = timeDifference / (1000 * 60 * 60); // convert to hours
+// const isEarlyBirdValid = (registrationTimestamp) => {
+//   const now = new Date();
+//   const registrationDate = new Date(registrationTimestamp);
+//   const timeDifference = now - registrationDate; // in milliseconds
+//   const hoursPassed = timeDifference / (1000 * 60 * 60); // convert to hours
 
-  return hoursPassed <= 24; // Early bird discount valid for 24 hours
-};
+//   return hoursPassed <= 24; // Early bird discount valid for 24 hours
+// };
 
 
 export async function DELETE(request, { params }) {

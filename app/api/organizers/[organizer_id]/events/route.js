@@ -30,24 +30,24 @@ export async function GET(request,{ params }) {
        console.log('There is a Poster Path:');
      }
 
-     const qrPath = event.qr;
-     if(!qrPath){
-      console.log('No qr found for event:',event._id);
-     } else {
-      console.log('There is a QR Path:');
-     }
+    //  const qrPath = event.qr;
+    //  if(!qrPath){
+    //   console.log('No qr found for event:',event._id);
+    //  } else {
+    //   console.log('There is a QR Path:');
+    //  }
  
      // Construct the full URL based on the relative path stored in the database
      const posterUrl = `/${posterPath}`; // Use your server URL here
  
     //  console.log('Poster URL:', posterUrl);
 
-     const qrUrl = `/${qrPath}`;
+    //  const qrUrl = `/${qrPath}`;
  
      return {
        ...event.toObject(),
        poster: posterUrl, // Attach the URL to the poster field
-       qr: qrUrl,
+      //  qr: qrUrl,
      };
   });
 
@@ -78,10 +78,10 @@ export async function POST(req,{ params}) {
     const discount = isPaid && formData.has('discount') 
       ? parseFloat(formData.get('discount')) 
       : 0;
-    const isEarlyBirdValid = isPaid && formData.has('discount') && isEarlyBirdValid(registerationDate);
-    const discountPrice = isEarlyBirdValid ? price - (price * discount)/100 : 0;
-    const amount = isEarlyBirdValid ? discountPrice : price;
-    console.log('Amount:', amount);
+    // const isEarlyBirdValid = isPaid && formData.has('discount') && isEarlyBirdValid(registerationDate);
+    // const discountPrice = isEarlyBirdValid ? price - (price * discount)/100 : 0;
+    // const amount = isEarlyBirdValid ? discountPrice : price;
+    // console.log('Amount:', amount);
     let refundPolicy = [];
     if (isPaid && formData.has("refundPolicy")) {
       try {
@@ -111,18 +111,18 @@ export async function POST(req,{ params}) {
       return NextResponse.json({ error: 'Discount must be between 0 and 100' }, { status: 400 });
     }
 
-    const qrData = isPaid ? generatePayload(phone, { amount: amount }): null;
-    console.log('QR Data:', qrData);
-    const qrSvg = isPaid
-      ? await qrcode.toString(qrData, { type: "svg", color: { dark: "#000", light: "#fff" } })
-      : null;
-    console.log('QR SVG:', qrSvg);
-    // Convert the SVG string into a Buffer (file-like object)
-    const qrBuffer = qrSvg ? Buffer.from(qrSvg) : null;
+    // const qrData = isPaid ? generatePayload(phone, { amount: amount }): null;
+    // console.log('QR Data:', qrData);
+    // const qrSvg = isPaid
+    //   ? await qrcode.toString(qrData, { type: "svg", color: { dark: "#000", light: "#fff" } })
+    //   : null;
+    // console.log('QR SVG:', qrSvg);
+    // // Convert the SVG string into a Buffer (file-like object)
+    // const qrBuffer = qrSvg ? Buffer.from(qrSvg) : null;
 
-    // Upload the QR code if it was generated
-    const qrPath = qrBuffer ? await uploadFile(qrBuffer, "qrcodes") : null;
-    console.log('QR Path:', qrPath);
+    // // Upload the QR code if it was generated
+    // const qrPath = qrBuffer ? await uploadFile(qrBuffer, "qrcodes") : null;
+    // console.log('QR Path:', qrPath);
 
     // Create event object
     const newEvent = {
@@ -142,8 +142,8 @@ export async function POST(req,{ params}) {
       longitude,
       poster: posterPath,
       posterName: poster ? poster.name : null,
-      qr: qrPath,
-      qrName: qrPath ? path.basename(qrPath) : null,
+      // qr: qrPath,
+      // qrName: qrPath ? path.basename(qrPath) : null,
       seats,
       phone,
     };
@@ -197,11 +197,11 @@ export async function uploadFile(file, folder) {
   }
 }
 
-const isEarlyBirdValid = (registrationTimestamp) => {
-  const now = new Date();
-  const registrationDate = new Date(registrationTimestamp);
-  const timeDifference = now - registrationDate; // in milliseconds
-  const hoursPassed = timeDifference / (1000 * 60 * 60); // convert to hours
+// const isEarlyBirdValid = (registrationTimestamp) => {
+//   const now = new Date();
+//   const registrationDate = new Date(registrationTimestamp);
+//   const timeDifference = now - registrationDate; // in milliseconds
+//   const hoursPassed = timeDifference / (1000 * 60 * 60); // convert to hours
 
-  return hoursPassed <= 24; // Early bird discount valid for 24 hours
-};
+//   return hoursPassed <= 24; // Early bird discount valid for 24 hours
+// };
