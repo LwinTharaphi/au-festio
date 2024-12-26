@@ -143,9 +143,13 @@ export default function Dashboard() {
     const studentsRegistered = events.map(event => event.studentsRegistered);
     const studentsCheckIn = events.map(event => event.studentsCheckIn);
     return (
-      <div style={{ display: 'flex' }}>
-        {/* Sidebar */}
-        <Sidebar />
+      <div style={{ display: 'flex', flexDirection: 'column', minheight: '100vh' }}>
+      {/* Navbar at the top */}
+      <div className="navbar-container" style={{ position: 'sticky', top: 0, zIndex: 1050 }}>
+        <Sidebar /> {/* Sidebar component */}
+      </div>
+
+      <div style={{ display: 'flex', flex: 1 }}>
         
         {/* Main content area */}
         <div style={{ flex: 1, padding: '20px' }}>
@@ -349,6 +353,7 @@ export default function Dashboard() {
             </Row>
           </Container>
         </div>
+      </div>
       </div>
     );
   }

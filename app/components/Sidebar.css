@@ -87,3 +87,33 @@
   border-bottom: 1px solid #ddd; /* Optional: adds a subtle border */
 }
 
+/* Sidebar.css */
+.sticky-top {
+  z-index: 1050;
+}
+
+.navbar-link {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+.navbar-link:hover {
+  color: #007bff;
+}
+
+.logo-img {
+  height: 40px;
+  width: auto;
+  margin-left: 30px;
+}
+/* Sidebar.css */
+.navbar-link.active {
+  
+  color: #fff; /* Change the color of the active link */
+  background-color: #2188f6; /* Add a subtle background highlight */
+  border-radius: 18px; /* Slightly rounded corners for a smooth look */
+  padding: 8px 16px; /* Add some padding for a more comfortable click area */
+  transition: all 0.3s ease; /* Smooth transition effect */
+}
+

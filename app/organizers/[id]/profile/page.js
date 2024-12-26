@@ -7,7 +7,7 @@ import Sidebar from "../../../components/general-sidebar";
 import { useSession } from 'next-auth/react'
 
 export default function Profile() {
-  const {data: session, status} = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [organizer, setOrganizer] = useState(null);
   const [error, setError] = useState("");
@@ -19,20 +19,20 @@ export default function Profile() {
     confirmPassword: "",
   });
   const [passwordChangeMessage, setPasswordChangeMessage] = useState("");
- // Use effect that runs when session status changes
-//  useEffect(() => {
-//   if (status === "loading") return;  // Don't redirect while loading
-  
-//   if (!session?.user) {
-//     router.push("/");  // Redirect to sign-in page if not authenticated
-//   }
-// }, [session, status, router]);  // Dependencies: session, status, and router
-  
+  // Use effect that runs when session status changes
+  //  useEffect(() => {
+  //   if (status === "loading") return;  // Don't redirect while loading
+
+  //   if (!session?.user) {
+  //     router.push("/");  // Redirect to sign-in page if not authenticated
+  //   }
+  // }, [session, status, router]);  // Dependencies: session, status, and router
+
 
   useEffect(() => {
     if (status === "loading") return;  // Don't redirect while loading
-  
-    if (status === 'unauthenticated' || session?.user?.role !== "organizer"){
+
+    if (status === 'unauthenticated' || session?.user?.role !== "organizer") {
       router.push('/')
     }
 
@@ -55,11 +55,11 @@ export default function Profile() {
         fetchOrganizer();
       }
     }
-  }, [status,router,session]);
+  }, [status, router, session]);
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
-    if(!session?.user){
+    if (!session?.user) {
       setPasswordChangeMessage("You must be logged in to change your password");
       return;
     }
@@ -86,7 +86,7 @@ export default function Profile() {
     }
   };
 
-  if (status === 'loading'){
+  if (status === 'loading') {
     return (
       <div
         style={{
@@ -107,143 +107,149 @@ export default function Profile() {
     );
   }
 
-  if(status === 'authenticated' && session.user.role === "organizer"){
+  if (status === 'authenticated' && session.user.role === "organizer") {
     return (
-      <div style={{ display: "flex", minHeight: "100vh" }}>
-        <Sidebar />
-        <div style={{ flex: 1, padding: "20px" }}>
-          <Container>
-            <h1 className="mb-4">Profile</h1>
-            {error && <Alert variant="danger">{error}</Alert>}
-            {loading ? (
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  height: "100vh",
-                  flexDirection: "column",
-                }}
-              >
-                <Spinner animation="border" variant="primary" role="status" style={{ width: "2rem", height: "2rem" }}>
-                  <span className="visually-hidden">Loading...</span>
-                </Spinner>
-                <p style={{ marginTop: "1rem", fontSize: "1.2rem", fontWeight: "500", color: "#007bff" }}>
-                  Loading...
-                </p>
-              </div>
-            ) : (
-              <>
-                {organizer && (
-                  <div className="d-flex flex-column align-items-center mb-5">
-                    <div
-                      className="rounded-circle mb-3"
-                      style={{
-                        width: "120px",
-                        height: "120px",
-                        backgroundColor: organizer.profilePicture ? "transparent" : "#007bff",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        overflow: "hidden",
-                      }}
-                    >
-                      {organizer.profilePicture ? (
-                        <img
-                          src={organizer.profilePicture}
-                          alt={`${organizer.name}'s profile`}
-                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                        />
-                      ) : (
-                        <span style={{ color: "#fff", fontSize: "36px", fontWeight: "bold" }}>
-                          {organizer.name
-                            .split(" ")
-                            .map((word) => word[0])
-                            .join("")}
-                        </span>
-                      )}
-                    </div>
-                    <h3>{organizer.name}</h3>
-                    <p>
-                      <strong>Email:</strong> {organizer.email}
-                    </p>
-                    <p>
-                      <strong>Phone:</strong> {organizer.phone}
-                    </p>
-                    <Button
-                      variant="primary"
-                      onClick={() => setShowChangePassword((prev) => !prev)}
-                      className="mt-3"
-                    >
-                      {showChangePassword ? "Cancel" : "Change Password"}
-                    </Button>
-                  </div>
-                )}
-  
-                {showChangePassword && (
-                  <Row className="justify-content-center">
-                    <Col md={6}>
-                      <div className="p-4 shadow-sm rounded bg-light">
-                        <h4 className="text-center mb-4">Change Password</h4>
-                        {passwordChangeMessage && (
-                          <Alert
-                            variant={
-                              passwordChangeMessage.includes("successfully")
-                                ? "success"
-                                : "danger"
-                            }
-                          >
-                            {passwordChangeMessage}
-                          </Alert>
+      <div style={{ display: 'flex', flexDirection: 'column', minheight: '100vh' }}>
+        {/* Navbar at the top */}
+        <div className="navbar-container" style={{ position: 'sticky', top: 0, zIndex: 1050 }}>
+          <Sidebar /> {/* Sidebar component */}
+        </div>
+
+        <div style={{ display: 'flex', flex: 1 }}>
+          <div style={{ flex: 1, padding: "20px" }}>
+            <Container>
+              <h1 className="mb-4">Profile</h1>
+              {error && <Alert variant="danger">{error}</Alert>}
+              {loading ? (
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "100vh",
+                    flexDirection: "column",
+                  }}
+                >
+                  <Spinner animation="border" variant="primary" role="status" style={{ width: "2rem", height: "2rem" }}>
+                    <span className="visually-hidden">Loading...</span>
+                  </Spinner>
+                  <p style={{ marginTop: "1rem", fontSize: "1.2rem", fontWeight: "500", color: "#007bff" }}>
+                    Loading...
+                  </p>
+                </div>
+              ) : (
+                <>
+                  {organizer && (
+                    <div className="d-flex flex-column align-items-center mb-5">
+                      <div
+                        className="rounded-circle mb-3"
+                        style={{
+                          width: "120px",
+                          height: "120px",
+                          backgroundColor: organizer.profilePicture ? "transparent" : "#007bff",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          overflow: "hidden",
+                        }}
+                      >
+                        {organizer.profilePicture ? (
+                          <img
+                            src={organizer.profilePicture}
+                            alt={`${organizer.name}'s profile`}
+                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                          />
+                        ) : (
+                          <span style={{ color: "#fff", fontSize: "36px", fontWeight: "bold" }}>
+                            {organizer.name
+                              .split(" ")
+                              .map((word) => word[0])
+                              .join("")}
+                          </span>
                         )}
-                        <Form onSubmit={handlePasswordChange}>
-                          <Form.Group controlId="currentPassword" className="mb-3">
-                            <Form.Label>Current Password</Form.Label>
-                            <Form.Control
-                              type="password"
-                              placeholder="Enter current password"
-                              value={passwords.currentPassword}
-                              onChange={(e) =>
-                                setPasswords({ ...passwords, currentPassword: e.target.value })
-                              }
-                              required
-                            />
-                          </Form.Group>
-                          <Form.Group controlId="newPassword" className="mb-3">
-                            <Form.Label>New Password</Form.Label>
-                            <Form.Control
-                              type="password"
-                              placeholder="Enter new password"
-                              value={passwords.newPassword}
-                              onChange={(e) =>
-                                setPasswords({ ...passwords, newPassword: e.target.value })
-                              }
-                              required
-                            />
-                          </Form.Group>
-                          <Form.Group controlId="confirmPassword" className="mb-3">
-                            <Form.Label>Confirm New Password</Form.Label>
-                            <Form.Control
-                              type="password"
-                              placeholder="Confirm new password"
-                              value={passwords.confirmPassword}
-                              onChange={(e) =>
-                                setPasswords({ ...passwords, confirmPassword: e.target.value })
-                              }
-                              required
-                            />
-                          </Form.Group>
-                          <Button variant="success" type="submit" className="w-100">
-                            Change Password
-                          </Button>
-                        </Form>
                       </div>
-                    </Col>
-                  </Row>
-                )}
-              </>
-            )}
-          </Container>
+                      <h3>{organizer.name}</h3>
+                      <p>
+                        <strong>Email:</strong> {organizer.email}
+                      </p>
+                      <p>
+                        <strong>Phone:</strong> {organizer.phone}
+                      </p>
+                      <Button
+                        variant="primary"
+                        onClick={() => setShowChangePassword((prev) => !prev)}
+                        className="mt-3"
+                      >
+                        {showChangePassword ? "Cancel" : "Change Password"}
+                      </Button>
+                    </div>
+                  )}
+
+                  {showChangePassword && (
+                    <Row className="justify-content-center">
+                      <Col md={6}>
+                        <div className="p-4 shadow-sm rounded bg-light">
+                          <h4 className="text-center mb-4">Change Password</h4>
+                          {passwordChangeMessage && (
+                            <Alert
+                              variant={
+                                passwordChangeMessage.includes("successfully")
+                                  ? "success"
+                                  : "danger"
+                              }
+                            >
+                              {passwordChangeMessage}
+                            </Alert>
+                          )}
+                          <Form onSubmit={handlePasswordChange}>
+                            <Form.Group controlId="currentPassword" className="mb-3">
+                              <Form.Label>Current Password</Form.Label>
+                              <Form.Control
+                                type="password"
+                                placeholder="Enter current password"
+                                value={passwords.currentPassword}
+                                onChange={(e) =>
+                                  setPasswords({ ...passwords, currentPassword: e.target.value })
+                                }
+                                required
+                              />
+                            </Form.Group>
+                            <Form.Group controlId="newPassword" className="mb-3">
+                              <Form.Label>New Password</Form.Label>
+                              <Form.Control
+                                type="password"
+                                placeholder="Enter new password"
+                                value={passwords.newPassword}
+                                onChange={(e) =>
+                                  setPasswords({ ...passwords, newPassword: e.target.value })
+                                }
+                                required
+                              />
+                            </Form.Group>
+                            <Form.Group controlId="confirmPassword" className="mb-3">
+                              <Form.Label>Confirm New Password</Form.Label>
+                              <Form.Control
+                                type="password"
+                                placeholder="Confirm new password"
+                                value={passwords.confirmPassword}
+                                onChange={(e) =>
+                                  setPasswords({ ...passwords, confirmPassword: e.target.value })
+                                }
+                                required
+                              />
+                            </Form.Group>
+                            <Button variant="success" type="submit" className="w-100">
+                              Change Password
+                            </Button>
+                          </Form>
+                        </div>
+                      </Col>
+                    </Row>
+                  )}
+                </>
+              )}
+            </Container>
+          </div>
         </div>
       </div>
     );
