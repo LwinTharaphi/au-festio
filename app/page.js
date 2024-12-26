@@ -6,21 +6,29 @@ export default function Home() {
 
     return (
         <div style={styles.pageContainer}>
-            <div style={styles.cardContainer}>
-                <h1 style={styles.heading}>Choose Login Role</h1>
-                <div style={styles.buttonGroup}>
-                    <button
-                        style={styles.button}
-                        onClick={() => router.push('/admin-login')}
-                    >
-                        Login as Admin
-                    </button>
-                    <button
-                        style={styles.button}
-                        onClick={() => router.push('/organizer-login')}
-                    >
-                        Login as Organizer
-                    </button>
+            <div style={styles.leftColumn}>
+                <h1 style={styles.welcomeHeading}>Welcome to AU Festio</h1>
+                <p style={styles.description}>
+                    Please choose your role to proceed.
+                </p>
+            </div>
+            <div style={styles.rightColumn}>
+                <div style={styles.cardContainer}>
+                    <h1 style={styles.heading}>Choose Login Role</h1>
+                    <div style={styles.buttonGroup}>
+                        <button
+                            style={styles.button}
+                            onClick={() => router.push('/admin-login')}
+                        >
+                            Login as Admin
+                        </button>
+                        <button
+                            style={styles.button}
+                            onClick={() => router.push('/organizer-login')}
+                        >
+                            Login as Organizer
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -30,10 +38,35 @@ export default function Home() {
 const styles = {
     pageContainer: {
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        flexDirection: 'row',
         height: '100vh',
         backgroundColor: '#f0f2f5',
+    },
+    leftColumn: {
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '20px',
+        background: 'linear-gradient(to bottom, #0070f3, #005bb5)', // Fixed syntax
+        color: '#fff',
+        textAlign: 'center',
+    },
+    welcomeHeading: {
+        fontSize: '32px',
+        fontWeight: 'bold',
+        marginBottom: '15px',
+    },
+    description: {
+        fontSize: '18px',
+        lineHeight: '1.5',
+    },
+    rightColumn: {
+        flex: 1,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         padding: '20px',
     },
     cardContainer: {
@@ -71,9 +104,5 @@ const styles = {
         borderRadius: '10px',
         cursor: 'pointer',
         transition: 'transform 0.2s, background-color 0.3s',
-    },
-    buttonHover: {
-        backgroundColor: '#0056b3',
-        transform: 'scale(1.05)',
     },
 };

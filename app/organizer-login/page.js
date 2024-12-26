@@ -182,130 +182,117 @@ export default function OrganizerLogin() {
   return (
     <div className="page">
       <div className="left-section">
-        <h2>Welcome to AUFESTIO</h2>
-        <p>Your one-stop solution for managing events effortlessly.</p>
+        <h1 style={styles.welcomeHeading}>Welcome to AU Festio</h1>
+        <p style={styles.description}>Your one-stop solution for managing events effortlessly.</p>
       </div>
       <div className="right-section">
         {!showForgotPassword ? (
-          <>
-            <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
-              <div className="card p-4" style={{ maxWidth: '400px', width: '100%', border: '1px solid #0070f3' }}>
-                <h3 className="text-center mb-4">Sign In</h3>
-                <form onSubmit={handleSubmit}>
-                  <div className="mb-3">
+          <div style={styles.pageContainer}>
+            <div style={styles.cardContainer}>
+              <h3 style={styles.heading}>Sign In</h3>
+              <form onSubmit={handleSubmit}>
+                <div style={styles.inputGroup}>
+                  <input
+                    type="email"
+                    style={styles.input}
+                    placeholder="Email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    required
+                  />
+                </div>
+                <div style={styles.inputGroup}>
+                  <input
+                    type="password"
+                    style={styles.input}
+                    placeholder="Password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    required
+                  />
+                </div>
+                <button type="submit" style={styles.button}>
+                  Sign In
+                </button>
+                <p
+                  style={styles.forgotPassword}
+                  onClick={() => setShowForgotPassword(true)}
+                >
+                  Forgot password?
+                </p>
+              </form>
+              {message && <p style={styles.successMessage}>{message}</p>}
+              {error && <p style={styles.errorMessage}>{error}</p>}
+            </div>
+          </div>
+        ) : (
+          <div style={styles.pageContainer}>
+            <div style={styles.cardContainer}>
+              <h3 style={styles.heading}>Forgot Password</h3>
+              {!otpSent ? (
+                <form onSubmit={handleSendOtp}>
+                  <div style={styles.inputGroup}>
                     <input
                       type="email"
-                      className="form-control"
-                      placeholder="Email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      style={styles.input}
+                      placeholder="Enter your email"
+                      value={otpEmail}
+                      onChange={(e) => setOtpEmail(e.target.value)}
                       required
                     />
                   </div>
-                  <div className="mb-3">
+                  <button type="submit" style={styles.button}>
+                    Send OTP
+                  </button>
+                </form>
+              ) : !passwordReset ? (
+                <form onSubmit={handleOtpSubmit}>
+                  <div style={styles.inputGroup}>
+                    <input
+                      type="text"
+                      style={styles.input}
+                      placeholder="Enter OTP"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <button type="submit" style={styles.button}>
+                    Verify OTP
+                  </button>
+                </form>
+              ) : (
+                <form onSubmit={handlePasswordReset}>
+                  <div style={styles.inputGroup}>
                     <input
                       type="password"
-                      className="form-control"
-                      placeholder="Password"
-                      value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      style={styles.input}
+                      placeholder="New Password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
                       required
                     />
                   </div>
-                  <button type="submit" className="btn btn-primary w-100">
-                    Sign In
+                  <div style={styles.inputGroup}>
+                    <input
+                      type="password"
+                      style={styles.input}
+                      placeholder="Confirm New Password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <button type="submit" style={styles.button}>
+                    Reset Password
                   </button>
-                  <p
-                    className="text-center mt-3 text-primary"
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => setShowForgotPassword(true)}
-                  >
-                    Forgot password?
-                  </p>
                 </form>
-                {message && <p className="text-center mt-3 text-success">{message}</p>}
-              {error && <p className="text-center mt-3 text-danger">{error}</p>}
-              </div>
+              )}
+              {message && <p style={styles.successMessage}>{message}</p>}
+              {error && <p style={styles.errorMessage}>{error}</p>}
             </div>
-
-          </>
-        ) : (
-          <>
-            <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
-              <div className="card p-4" style={{ maxWidth: '400px', width: '100%', border: '1px solid #0070f3' }}>
-                <h3 className="text-center mb-4">Forgot Password</h3>
-                {!otpSent ? (
-                  <form onSubmit={handleSendOtp}>
-                    <div className="mb-3">
-                      <input
-                        type="email"
-                        className="form-control"
-                        placeholder="Enter your email"
-                        value={otpEmail}
-                        onChange={(e) => setOtpEmail(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <button type="submit" className="btn btn-primary w-100">
-                      Send OTP
-                    </button>
-                  </form>
-                ) : !passwordReset ? (
-                  <form onSubmit={handleOtpSubmit}>
-                    <div className="mb-3">
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Enter OTP"
-                        value={otp}
-                        onChange={(e) => setOtp(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <button type="submit" className="btn btn-primary w-100">
-                      Verify OTP
-                    </button>
-                  </form>
-                ) : (
-                  <form onSubmit={handlePasswordReset}>
-                    <div className="mb-3">
-                      <input
-                        type="password"
-                        className="form-control"
-                        placeholder="New Password"
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <input
-                        type="password"
-                        className="form-control"
-                        placeholder="Confirm New Password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <button type="submit" className="btn btn-primary w-100">
-                      Reset Password
-                    </button>
-                  </form>
-                )}
-                {otpSent && (
-                  <p className="text-center mt-3 text-success">
-                    Use the 6-digit OTP to log in.
-                  </p>
-                )}
-                {message && <p className="text-center mt-3 text-success">{message}</p>}
-                {error && <p className="text-center mt-3 text-danger">{error}</p>}
-              </div>
-            </div>
-          </>
+          </div>
         )}
-        {/* {message && <p className="message success">{message}</p>}
-        {error && <p className="message error">{error}</p>} */}
       </div>
       <style jsx>{`
         .page {
@@ -383,4 +370,75 @@ export default function OrganizerLogin() {
       `}</style>
     </div>
   );
+
 }
+
+const styles = {
+  pageContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100%',
+  },
+  cardContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: '15px',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+    padding: '30px',
+    maxWidth: '400px',
+    width: '100%',
+    textAlign: 'center',
+  },
+  welcomeHeading: {
+    fontSize: '32px',
+    fontWeight: 'bold',
+    marginBottom: '15px',
+  },
+  description: {
+    fontSize: '18px',
+    lineHeight: '1.5',
+  },
+  heading: {
+    marginBottom: '20px',
+    fontSize: '24px',
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  inputGroup: {
+    marginBottom: '5px',
+  },
+  input: {
+    width: '100%',
+    padding: '10px',
+    fontSize: '16px',
+    border: '1px solid #ccc',
+    borderRadius: '10px',
+  },
+  button: {
+    width: '100%',
+    padding: '10px',
+    fontSize: '16px',
+    color: '#fff',
+    backgroundColor: '#007bff',
+    border: 'none',
+    borderRadius: '10px',
+    cursor: 'pointer',
+  },
+  forgotPassword: {
+    marginTop: '15px',
+    fontSize: '14px',
+    color: '#007bff',
+    cursor: 'pointer',
+  },
+  successMessage: {
+    marginTop: '10px',
+    color: '#28a745',
+  },
+  errorMessage: {
+    marginTop: '10px',
+    color: '#dc3545',
+  },
+};
