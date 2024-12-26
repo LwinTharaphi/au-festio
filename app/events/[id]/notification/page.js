@@ -191,7 +191,7 @@ export default function NotificationPage() {
                         </div>
     
                         <h2>Registered Students</h2>
-                        <Table striped bordered hover>
+                        <Table hover responsive style={{ fontSize: '0.8rem' }}>
                             <thead>
                                 <tr>
                                     <th>

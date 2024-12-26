@@ -438,7 +438,7 @@ export default function StaffPage() {
                 />
               </div>
   
-              <Table striped bordered hover>
+              <Table hover responsive style={{ fontSize: '0.8rem' }}>
                 <thead>
                   <tr>
                     <th>ID</th>
