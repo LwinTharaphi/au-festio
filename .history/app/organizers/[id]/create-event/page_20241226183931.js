@@ -104,6 +104,9 @@ function EventForm() {
       if (type === 'poster') {
         setPoster(file);
         setPosterName(file.name);
+      } else if (type === 'qr') {
+        setQr(file);
+        setQrName(file.name);
       }
     }
   };
@@ -113,6 +116,9 @@ function EventForm() {
     if (type === 'poster') {
       setPoster(null);
       setPosterName('');
+    } else if (type === 'qr') {
+      setQr(null);
+      setQrName('');
     }
   };
 
@@ -156,6 +162,9 @@ function EventForm() {
     events.forEach((event, index) => {
       const registrationDate = moment(event.registerationDate);
       const eventDate = moment(event.eventDate);
+      // console.log(`Event: ${event.eventName}`);
+      // console.log("Registration Date:", registrationDate.format("DD/MM/YYYY"));
+      // console.log("Event Date:", eventDate.format("DD/MM/YYYY"));
 
       let categories = "";
       if (today.isBetween(registrationDate, eventDate, "day", "[]")) {
@@ -209,7 +218,7 @@ function EventForm() {
 
     if (isPaid) {
       formData.append('price', price || '');
-      formData.append('phone', phone || '');
+      formData.append('qrName', qrName || '');
       formData.append("refundPolicy", JSON.stringify(refundPolicy || []));
       if (hasDiscount) formData.append('discount', discount || '');
     }
@@ -224,6 +233,10 @@ function EventForm() {
     // Append the file data (poster and QR code, if present)
     if (poster) {
       formData.append('poster', poster); // Assuming 'poster' is the file data
+    }
+
+    if (qr) {
+      formData.append('qr', qr);
     }
     formData.append('hasSeatLimitation', hasSeatLimitation);
     if (hasSeatLimitation) {
@@ -285,12 +298,13 @@ function EventForm() {
     setLongitude('');
     setPoster(null);
     setPosterName('');
+    setQr(null);
+    setQrName('');
     setIsArEnabled(false);
     setIsPaid(false);
     setPrice('');
     setHasDiscount(false);
     setDiscount('');
-    setPhone('');
     setRefundPolicy([]);
     setSelectedEventIndex(null);
     setIsEditing(false);
@@ -343,10 +357,10 @@ function EventForm() {
     setLatitude(eventToEdit.latitude || '');
     setLongitude(eventToEdit.longitude || '');
     setPosterName(eventToEdit.posterName || '');
+    setQrName(eventToEdit.qrName || '');
     setIsArEnabled(Boolean(eventToEdit.venueName));
     setIsPaid(eventToEdit.isPaid || false);
     setPrice(eventToEdit.price || '');
-    setPhone(eventToEdit.phone || '');
     setHasDiscount(Boolean(eventToEdit.discount && eventToEdit.discount > 0))
     setDiscount(eventToEdit.discount || '');
     setRefundPolicy(Array.isArray(eventToEdit.refundPolicy) ? eventToEdit.refundPolicy : []);

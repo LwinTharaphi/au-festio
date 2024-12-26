@@ -39,8 +39,13 @@ export async function PUT(request, { params }) {
     const discount = isPaid && formData.has('discount') 
       ? parseFloat(formData.get('discount')) 
       : 0;
-    const isEarlyBirdValidFlag = isPaid && formData.has('discount') && isEarlyBirdValid(registerationDate);
+    const isEarlyBirdValidFlag = isPaid && formData.has(discount) && isEarlyBirdValid(registerationDate);
     const discountPrice = isEarlyBirdValidFlag ? price - (price * discount)/100 : 0;
+    console.log('Is Early Bird Valid:', isEarlyBirdValidFlag);
+    console.log('Discount Price:', discountPrice);
+    console.log('Is Early Bird Valid:', isEarlyBirdValid(registerationDate));
+    console.log('Has Discount:', formData.has(discount));
+    console.log('Discount Percentage:', discount);
     const amount = isEarlyBirdValidFlag ? discountPrice : price;
     console.log('Amount:', amount);
     let refundPolicy = [];

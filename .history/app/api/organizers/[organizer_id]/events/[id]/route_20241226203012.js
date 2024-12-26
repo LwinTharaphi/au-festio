@@ -39,9 +39,9 @@ export async function PUT(request, { params }) {
     const discount = isPaid && formData.has('discount') 
       ? parseFloat(formData.get('discount')) 
       : 0;
-    const isEarlyBirdValidFlag = isPaid && formData.has('discount') && isEarlyBirdValid(registerationDate);
-    const discountPrice = isEarlyBirdValidFlag ? price - (price * discount)/100 : 0;
-    const amount = isEarlyBirdValidFlag ? discountPrice : price;
+    const isEarlyBirdValid = isPaid && formData.get(discount) && isEarlyBirdValid(registerationDate);
+    const discountPrice = isEarlyBirdValid ? price - (price * discount)/100 : 0;
+    const amount = isEarlyBirdValid ? discountPrice : price;
     console.log('Amount:', amount);
     let refundPolicy = [];
     if (isPaid && formData.has("refundPolicy")) {
@@ -89,7 +89,6 @@ export async function PUT(request, { params }) {
       posterName,
       qrName: qrPath ? path.basename(qrPath) : null,
       qr: qrPath ? qrPath : null,
-      phone,
     };
 
     if (poster) {

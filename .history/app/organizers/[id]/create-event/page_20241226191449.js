@@ -290,7 +290,6 @@ function EventForm() {
     setPrice('');
     setHasDiscount(false);
     setDiscount('');
-    setPhone('');
     setRefundPolicy([]);
     setSelectedEventIndex(null);
     setIsEditing(false);
@@ -346,7 +345,6 @@ function EventForm() {
     setIsArEnabled(Boolean(eventToEdit.venueName));
     setIsPaid(eventToEdit.isPaid || false);
     setPrice(eventToEdit.price || '');
-    setPhone(eventToEdit.phone || '');
     setHasDiscount(Boolean(eventToEdit.discount && eventToEdit.discount > 0))
     setDiscount(eventToEdit.discount || '');
     setRefundPolicy(Array.isArray(eventToEdit.refundPolicy) ? eventToEdit.refundPolicy : []);

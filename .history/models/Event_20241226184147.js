@@ -10,7 +10,7 @@ const EventSchema = new mongoose.Schema({
   endTime: { type: String, required: true },
   location : { type: String, required: true },
   isPaid: {type: Boolean},
-  phone: {type: String, required: function () { return this.isPaid; }},
+  phone: {type: String},
   posterName: {type: String},
   poster: {type: Buffer, required: true},
   qrName: {type: String},

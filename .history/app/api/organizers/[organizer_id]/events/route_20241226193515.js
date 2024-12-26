@@ -78,10 +78,9 @@ export async function POST(req,{ params}) {
     const discount = isPaid && formData.has('discount') 
       ? parseFloat(formData.get('discount')) 
       : 0;
-    const isEarlyBirdValid = isPaid && formData.has('discount') && isEarlyBirdValid(registerationDate);
+    const isEarlyBirdValid = isPaid && formData.get(discount) && isEarlyBirdValid(registerationDate);
     const discountPrice = isEarlyBirdValid ? price - (price * discount)/100 : 0;
     const amount = isEarlyBirdValid ? discountPrice : price;
-    console.log('Amount:', amount);
     let refundPolicy = [];
     if (isPaid && formData.has("refundPolicy")) {
       try {
@@ -145,7 +144,6 @@ export async function POST(req,{ params}) {
       qr: qrPath,
       qrName: qrPath ? path.basename(qrPath) : null,
       seats,
-      phone,
     };
     const event = new Event(newEvent);
     await event.save();
@@ -190,7 +188,7 @@ export async function uploadFile(file, folder) {
     }
 
     // Return the relative path (you can later use this for URLs or DB storage)
-    return `uploads/${folder}/${fileName}`;
+    return `uploads/${folder}/${file.name}`;
   } catch (error) {
     console.error('Error uploading file:', error);
     return null; // Or handle the error appropriately

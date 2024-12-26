@@ -4,7 +4,6 @@ import { uploadFile } from "../route";
 import { NextResponse } from 'next/server';
 import generatePayload from "promptpay-qr";
 import qrcode from 'qrcode';
-import path from 'path';
 
 export async function GET(request, { params }) {
   await dbConnect();
@@ -34,15 +33,13 @@ export async function PUT(request, { params }) {
     const endTime = formData.get("endTime");
     const location = formData.get("location");
     const isPaid = formData.get("isPaid") === "true";
-    const phone = isPaid? formData.get("phone"): null;
     const price = isPaid ? parseFloat(formData.get('price')) : null; // Parse price only if paid
     const discount = isPaid && formData.has('discount') 
       ? parseFloat(formData.get('discount')) 
       : 0;
-    const isEarlyBirdValidFlag = isPaid && formData.has('discount') && isEarlyBirdValid(registerationDate);
-    const discountPrice = isEarlyBirdValidFlag ? price - (price * discount)/100 : 0;
-    const amount = isEarlyBirdValidFlag ? discountPrice : price;
-    console.log('Amount:', amount);
+    const isEarlyBirdValid = isPaid && formData.get(discount) && isEarlyBirdValid(registerationDate);
+    const discountPrice = isEarlyBirdValid ? price - (price * discount)/100 : 0;
+    const amount = isEarlyBirdValid ? discountPrice : price;
     let refundPolicy = [];
     if (isPaid && formData.has("refundPolicy")) {
       try {
@@ -87,9 +84,8 @@ export async function PUT(request, { params }) {
       longitude,
       seats,
       posterName,
-      qrName: qrPath ? path.basename(qrPath) : null,
+      qrName: qrPath ? `qr-${id}.svg` : null,
       qr: qrPath ? qrPath : null,
-      phone,
     };
 
     if (poster) {
