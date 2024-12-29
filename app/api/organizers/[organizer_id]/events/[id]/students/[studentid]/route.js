@@ -14,6 +14,48 @@ export async function GET(request, { params }) {
   return new Response(JSON.stringify(student), { status: 200 });
 }
 
+export async function POST(request, { params }) {
+  await dbConnect(); // Connect to the database
+
+  const { id: eventId, studentid: studentId } = params;
+
+  try {
+    // Find the student by ID
+    const student = await Student.findOne({ _id: studentId, eventId: eventId });
+
+    if (!student) {
+      return new Response(
+        JSON.stringify({ message: 'Student not found for this event' }),
+        { status: 404 }
+      );
+    }
+
+    // Check if the student has already checked in
+    if (student.checkInStatus === 'checked-in') {
+      return new Response(
+        JSON.stringify({ message: 'This student has already checked in.' }),
+        { status: 400 }
+      );
+    }
+
+    // Update the student's check-in status
+    student.checkInStatus = 'checked-in';
+    await student.save();
+
+    // Return success response
+    return new Response(
+      JSON.stringify({ success: true, message: 'Student checked-in successfully.' }),
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error('Error updating check-in status:', error);
+    return new Response(
+      JSON.stringify({ message: 'Internal Server Error' }),
+      { status: 500 }
+    );
+  }
+}
+
 // PUT: Update an existing student
 export async function PUT(request, { params }) {
   await dbConnect();
