@@ -45,34 +45,43 @@ export default function ScanQRPage() {
   }, [status, isScanning, session, router]);
 
   const handleScan = (result) => {
-    if (!result || !result.data) {
-      setScanStatus("Invalid QR");
-      setScanResult("");
-      resetProcessing();
-      return;
+    console.log("QR Scanner Result:", result); // Debug: Log the result object
+
+    // Validate that result is a string and not undefined or null
+    if (!result) {
+        console.error("No result in QR scan.");
+        setScanStatus("Invalid QR");
+        setScanResult("");
+        resetProcessing();
+        return;
     }
 
-    const qrData = result.data;
-    const qrParts = qrData.split(",");
+    // Process the raw QR data
+    const qrData = result.trim(); // Trim to remove any unexpected whitespace
+    const qrParts = qrData.split(","); // Split by the comma delimiter
 
+    // Ensure the QR code contains exactly two parts
     if (qrParts.length !== 2) {
-      setScanStatus("Invalid QR");
-      setScanResult("");
-      resetProcessing();
-      return;
+        setScanStatus("Invalid QR");
+        setScanResult("");
+        resetProcessing();
+        return;
     }
 
     const [eventIdFromQR, studentIdFromQR] = qrParts;
 
+    // Check if the scanned Event ID matches the current Event ID
     if (eventIdFromQR !== eventId) {
-      setScanStatus("Invalid QR");
-      setScanResult("");
-      resetProcessing();
-      return;
+        console.warn(`Event ID mismatch: Expected ${eventId}, got ${eventIdFromQR}`);
+        setScanStatus("Invalid Event ID");
+        setScanResult("");
+        resetProcessing();
+        return;
     }
 
+    console.log(`Valid QR Data: Event ID: ${eventIdFromQR}, Student ID: ${studentIdFromQR}`);
     checkStudentCheckIn(studentIdFromQR, eventIdFromQR);
-  };
+};
 
   const checkStudentCheckIn = async (studentId, eventId) => {
     try {
