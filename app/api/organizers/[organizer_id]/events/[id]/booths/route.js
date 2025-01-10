@@ -1,5 +1,3 @@
-import formidable from "formidable";
-import { promises as fs } from "fs";
 import Booth from "@/models/Booth";
 import dbConnect from "@/lib/db";
 import { nanoid } from "nanoid"; // Import nanoid for unique boothId
@@ -7,7 +5,7 @@ import { nanoid } from "nanoid"; // Import nanoid for unique boothId
 // GET: Fetch all booths for a specific event
 export async function GET(req, { params }) {
   await dbConnect();
-  const { id } = params; // Event ID
+  const { id } = await params; // Event ID
   try {
     const booths = await Booth.find({ eventId: id });
     return new Response(JSON.stringify(booths), { status: 200 });
@@ -17,48 +15,20 @@ export async function GET(req, { params }) {
   }
 }
 
-// POST: Create a new booth for a specific event with image upload
+// POST: Create a new booth for a specific event
 export async function POST(req, { params }) {
   await dbConnect();
-  const { id } = params; // Event ID
-
-  // Initialize formidable for handling file uploads
-  const form = new formidable.IncomingForm({
-    multiples: false, // Single file upload
-    uploadDir: "./uploads", // Directory to save uploaded files
-    keepExtensions: true, // Keep file extensions
-  });
+  const { id } = await params; // Event ID
 
   try {
-    return new Promise((resolve, reject) => {
-      // Parse the incoming request
-      form.parse(req, async (err, fields, files) => {
-        if (err) {
-          console.error("Error parsing form:", err);
-          reject(new Response("Error uploading file", { status: 500 }));
-          return;
-        }
-
-        // Prepare the booth data
-        const newBoothData = {
-          ...fields,
-          eventId: id,
-          boothId: nanoid(10), // Generate a unique boothId
-          image: files.image ? `/uploads/${files.image.newFilename}` : undefined, // Save image path
-        };
-
-        if (files.image) {
-          const oldPath = files.image.filepath; // Temporary path
-          const newPath = `./uploads/${files.image.newFilename}`; // Final path
-          await fs.rename(oldPath, newPath); // Move file to the final destination
-        }
-
-        // Save the booth to the database
-        const newBooth = new Booth(newBoothData);
-        await newBooth.save();
-        resolve(new Response(JSON.stringify(newBooth), { status: 201 }));
-      });
+    const data = await req.json();
+    const newBooth = new Booth({
+      ...data,
+      eventId: id,
+      boothId: nanoid(10), // Automatically generate boothId
     });
+    await newBooth.save();
+    return new Response(JSON.stringify(newBooth), { status: 201 });
   } catch (error) {
     console.error("Error creating booth:", error);
     return new Response("Error creating booth", { status: 500 });
@@ -68,43 +38,17 @@ export async function POST(req, { params }) {
 // PUT: Update a specific booth
 export async function PUT(req, { params }) {
   await dbConnect();
-  const { id, boothid } = params; // Event ID and Booth ID
-
-  const form = new formidable.IncomingForm({
-    multiples: false,
-    uploadDir: "./uploads",
-    keepExtensions: true,
-  });
+  const { id, boothid } = await params; // Event ID and Booth ID
+  const data = await req.json();
 
   try {
-    const booth = await Booth.findOne({ boothId: boothid, eventId: id });
-    if (!booth) return new Response("Booth not found", { status: 404 });
-
-    return new Promise((resolve, reject) => {
-      form.parse(req, async (err, fields, files) => {
-        if (err) {
-          console.error("Error parsing form:", err);
-          reject(new Response("Error uploading file", { status: 500 }));
-          return;
-        }
-
-        const updatedData = fields;
-        if (files.image) {
-          const oldPath = files.image.filepath;
-          const newPath = `./uploads/${files.image.newFilename}`;
-          await fs.rename(oldPath, newPath);
-          updatedData.image = `/uploads/${files.image.newFilename}`;
-        }
-
-        const updatedBooth = await Booth.findOneAndUpdate(
-          { boothId: boothid, eventId: id },
-          updatedData,
-          { new: true }
-        );
-
-        resolve(new Response(JSON.stringify(updatedBooth), { status: 200 }));
-      });
-    });
+    const updatedBooth = await Booth.findOneAndUpdate(
+      { boothId: boothid, eventId: id },
+      data,
+      { new: true }
+    );
+    if (!updatedBooth) return new Response("Booth not found", { status: 404 });
+    return new Response(JSON.stringify(updatedBooth), { status: 200 });
   } catch (error) {
     console.error("Error updating booth:", error);
     return new Response("Error updating booth", { status: 500 });
@@ -114,7 +58,7 @@ export async function PUT(req, { params }) {
 // DELETE: Delete a specific booth
 export async function DELETE(req, { params }) {
   await dbConnect();
-  const { id, boothid } = params; // Event ID and Booth ID
+  const { id, boothid } = await params; // Event ID and Booth ID
   try {
     const deletedBooth = await Booth.findOneAndDelete({ boothId: boothid, eventId: id });
     if (!deletedBooth) return new Response("Booth not found", { status: 404 });
