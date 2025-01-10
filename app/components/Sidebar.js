@@ -81,7 +81,7 @@ export default function Sidebar({ event }) {
 
         {/* Scan QR */}
         <Nav.Link
-          onClick={() => router.push(`/events/${event._id}/scan`)}
+          onClick={() => router.push(`/events/${event._id}/scanQR`)}
           className={`sidebar-link my-2 ${isActive(`/events/${event._id}/scan`)}`}
         >
           <BsQrCodeScan className="me-2" /> Scan QR
