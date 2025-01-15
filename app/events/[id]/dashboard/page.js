@@ -124,8 +124,7 @@ export default function Dashboard() {
           {/* Main Content */}
           <Col xs={10} className="main-content p-4">
             <Breadcrumb>
-              <Breadcrumb.Item href="/organizers/[id]/create-event">Event List</Breadcrumb.Item>
-              <Breadcrumb.Item href="/events">Events</Breadcrumb.Item>
+              <Breadcrumb.Item href="/organizers/[id]/create-event">All Events</Breadcrumb.Item>
               <Breadcrumb.Item active>{event.eventName}</Breadcrumb.Item>
             </Breadcrumb>
             <div className="d-flex aligh-items-center justify-content-between">

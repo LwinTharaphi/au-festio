@@ -2,13 +2,13 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Container, Row, Col, Table, Button, Alert, Modal, Form, Dropdown, Spinner } from "react-bootstrap";
-import { FaTrash, FaEdit, FaEyeSlash, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { FaTrash, FaEdit, FaEyeSlash, FaRegCheckCircle, FaTimesCircle } from "react-icons/fa";
 import Sidebar from "../../../components/Sidebar";
 import "../../../components/Sidebar.css";
 import { useSession } from 'next-auth/react';
 
 export default function RegisteredStudentsPage() {
-  const {data: session, status} = useSession();
+  const { data: session, status } = useSession();
   const { id } = useParams(); // Use this as eventId
   const userId = session?.user?.id;
   const router = useRouter();
@@ -36,12 +36,12 @@ export default function RegisteredStudentsPage() {
 
   useEffect(() => {
     if (status === "loading") return;  // Don't redirect while loading
-    if (status === 'unauthenticated' || session?.user?.role !== "organizer"){
+    if (status === 'unauthenticated' || session?.user?.role !== "organizer") {
       router.push('/')
     }
-    if (status === 'authenticated' && session?.user && session.user.role === "organizer"){
+    if (status === 'authenticated' && session?.user && session.user.role === "organizer") {
       const userId = session.user.id
-      if(userId){
+      if (userId) {
         const fetchEventData = async () => {
           setError(null); // Clear previous errors before fetching data
           try {
@@ -50,17 +50,17 @@ export default function RegisteredStudentsPage() {
             if (!response.ok) {
               throw new Error("Failed to fetch event data.");
             }
-    
+
             const event = await response.json();
             setEventName(event.eventName);
             setEventData(event); // Store event data in the state
           } catch (err) {
             setError(err.message);
-          }finally {
+          } finally {
             setLoading(false);
           }
         };
-    
+
         const fetchStudents = async () => {
           try {
             const response = await fetch(`/api/organizers/${userId}/events/${id}/students`);
@@ -68,7 +68,7 @@ export default function RegisteredStudentsPage() {
               throw new Error("Failed to fetch registered students.");
             }
             const data = await response.json();
-    
+
             console.log("Fetched data:", data); // Log the fetched data for debugging
             setStudents(data);
             setFilteredStudents(data);
@@ -96,7 +96,7 @@ export default function RegisteredStudentsPage() {
         fetchEventsList();
       }
     }
-  }, [id,router,session,status]);
+  }, [id, router, session, status]);
 
   // const handleRowClick = (student) => {
   //   if (student.status === "refund requested") {
@@ -217,7 +217,7 @@ export default function RegisteredStudentsPage() {
     );
   };
 
-  if (status === 'loading'){
+  if (status === 'loading') {
     return (
       <div
         style={{
@@ -238,7 +238,7 @@ export default function RegisteredStudentsPage() {
     );
   }
 
-  if (status === 'authenticated' && session.user.role === "organizer"){
+  if (status === 'authenticated' && session.user.role === "organizer") {
     return (
       <Container fluid>
         <Row>
@@ -249,7 +249,7 @@ export default function RegisteredStudentsPage() {
             <Container>
               <div className="d-flex justify-content-between align-items-center mb-4 sticky-header">
                 <h4>Registered Students for {eventName}</h4>
-                
+
                 <Dropdown className="mb-4" style={{ textAlign: "right" }}>
                   <Dropdown.Toggle variant="secondary" id="dropdown-basic">
                     Select Event
@@ -267,7 +267,7 @@ export default function RegisteredStudentsPage() {
                   </Dropdown.Menu>
                 </Dropdown>
               </div>
-              <div className="d-flex justify-content-end align-items-center sticky-header">
+              <div className="d-flex justify-content-end align-items-center mb-4">
                 <div>
                   <Form.Control
                     type="text"
@@ -280,91 +280,107 @@ export default function RegisteredStudentsPage() {
               </div>
               {error && <Alert variant="danger">{error}</Alert>} {/* Show error if any */}
               {loading ? (
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  height: "100vh",
-                  flexDirection: "column",
-                }}
-              >
-                <Spinner animation="border" variant="primary" role="status" style={{ width: "2rem", height: "2rem" }}>
-                  <span className="visually-hidden">Loading...</span>
-                </Spinner>
-                <p style={{ marginTop: "1rem", fontSize: "1.2rem", fontWeight: "500", color: "#007bff" }}>
-                  Loading...
-                </p>
-              </div>
-            ) : (
-              <>
-                <Table hover responsive style={{ fontSize: '0.8rem' }}>
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Name</th>
-                      <th>Email</th>
-                      <th>Faculty</th>
-                      <th>Phone</th>
-                      <th>Status</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredStudents.length > 0 ? (
-                      filteredStudents.map(student => (
-                        <tr key={student._id} onClick={() => handleRowClick(student)} style={{ cursor: 'pointer' }}>
-                          <td>{student.sid}</td>
-                          <td>{student.name}</td>
-                          <td>{student.email}</td>
-                          <td>{student.faculty}</td>
-                          <td>{student.phone}</td>
-                          <td>{student.status}</td>
-                          <td>
-                            <div style={{ display: "flex", alignItems: "center" }}>
-                              <FaEdit
-                                style={{ cursor: "pointer", color: "blue", marginRight: "10px" }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedStudent(student);
-                                  setUpdatedStudent({
-                                    sid: student.sid,
-                                    name: student.name,
-                                    email: student.email,
-                                    faculty: student.faculty,
-                                    phone: student.phone,
-                                    status: student.status,
-                                  });
-                                  setShowEditModal(true); // Open edit modal
-                                }}
-                              />
-                              <FaTrash
-                                style={{ cursor: "pointer", color: "red" }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedStudent(student);
-                                  setShowDeleteModal(true);
-                                }}
-                              />
-                            </div>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "100vh",
+                    flexDirection: "column",
+                  }}
+                >
+                  <Spinner animation="border" variant="primary" role="status" style={{ width: "2rem", height: "2rem" }}>
+                    <span className="visually-hidden">Loading...</span>
+                  </Spinner>
+                  <p style={{ marginTop: "1rem", fontSize: "1.2rem", fontWeight: "500", color: "#007bff" }}>
+                    Loading...
+                  </p>
+                </div>
+              ) : (
+                <>                
+                  <Table hover responsive style={{ fontSize: '0.8rem' }}>
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Faculty</th>
+                        <th>Phone</th>
+                        <th>Status</th>
+                        <th>Check In</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredStudents.length > 0 ? (
+                        filteredStudents.map((student) => (
+                          <tr
+                            key={student._id}
+                            onClick={() => handleRowClick(student)}
+                            style={{ cursor: "pointer" }}
+                          >
+                            <td>{student.sid}</td>
+                            <td>{student.name}</td>
+                            <td>{student.email}</td>
+                            <td>{student.faculty}</td>
+                            <td>{student.phone}</td>
+                            <td>{student.status}</td>
+                            <td>
+                              {student.checkInStatus == "checked-in" ? (
+                                <FaRegCheckCircle style={{ fontSize: "15",color: "green" }} />
+                              ) : (
+                                "-"
+                              )}
+                            </td>
+                            <td>
+                              <div style={{ display: "flex", alignItems: "center" }}>
+                                <FaEdit
+                                  style={{
+                                    cursor: "pointer",
+                                    color: "blue",
+                                    marginRight: "10px",
+                                  }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedStudent(student);
+                                    setUpdatedStudent({
+                                      sid: student.sid,
+                                      name: student.name,
+                                      email: student.email,
+                                      faculty: student.faculty,
+                                      phone: student.phone,
+                                      status: student.status,
+                                    });
+                                    setShowEditModal(true); // Open edit modal
+                                  }}
+                                />
+                                <FaTrash
+                                  style={{ cursor: "pointer", color: "red" }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedStudent(student);
+                                    setShowDeleteModal(true);
+                                  }}
+                                />
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="8" className="text-center">
+                            No students registered yet.
                           </td>
                         </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="7" className="text-center">
-                          No students registered yet.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </Table>
-              </>
+                      )}
+                    </tbody>
+                  </Table>
+                </>
               )}
             </Container>
           </Col>
         </Row>
-  
+
         {/* Modal for student refund request
         {selectedStudent && (
           <Modal show={showRefundModal} onHide={() => setShowRefundModal(false)}>
@@ -386,8 +402,8 @@ export default function RegisteredStudentsPage() {
             </Modal.Footer>
           </Modal>
         )} */}
-  
-  
+
+
         {/* Modal for edit student */}
         {selectedStudent && (
           <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
@@ -448,7 +464,7 @@ export default function RegisteredStudentsPage() {
                     <option value="rejected">Rejected</option>
                   </Form.Control>
                 </Form.Group>
-  
+
               </Form>
             </Modal.Body>
             <Modal.Footer>
@@ -461,7 +477,7 @@ export default function RegisteredStudentsPage() {
             </Modal.Footer>
           </Modal>
         )}
-  
+
         {/* Confirmation Modal for delete */}
         {selectedStudent && (
           <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
@@ -481,7 +497,7 @@ export default function RegisteredStudentsPage() {
             </Modal.Footer>
           </Modal>
         )}
-  
+
         {/* Modal for student details */}
         {selectedStudent && (
           <Modal show={showModal} onHide={() => setShowModal(false)}>
