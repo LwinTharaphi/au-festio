@@ -118,6 +118,7 @@ export default function ScanQRPage() {
   };
 
   return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#F3EFFD' }}>  
     <div style={styles.container}>
       <h1 style={styles.title}>Scan QR Code for Event Check-in</h1>
       <div style={styles.videoWrapper}>
@@ -133,6 +134,7 @@ export default function ScanQRPage() {
       <button onClick={() => setIsScanning(!isScanning)} style={styles.button}>
         {isScanning ? "Stop Scanning" : "Start Scanning"}
       </button>
+    </div>
     </div>
   );
 }
@@ -177,7 +179,7 @@ const styles = {
     padding: "10px 20px",
     fontSize: "16px",
     color: "#fff",
-    backgroundColor: "#007bff",
+    backgroundColor: "#A67EEC",
     border: "none",
     borderRadius: "5px",
     cursor: "pointer",

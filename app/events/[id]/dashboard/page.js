@@ -40,7 +40,7 @@ ChartJS.register(
 import { useSession } from 'next-auth/react';
 
 export default function Dashboard() {
-  const {data: session, status} = useSession();
+  const { data: session, status } = useSession();
   const { id } = useParams(); // Get eventId from URL parameters
   const route = useRouter();
   const [data, setData] = useState(null);
@@ -49,12 +49,12 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (status === "loading") return;  // Don't redirect while loading
-    if (status === 'unauthenticated' || session?.user?.role !== "organizer"){
+    if (status === 'unauthenticated' || session?.user?.role !== "organizer") {
       route.push('/')
     }
-    if (status === 'authenticated' && session?.user && session.user.role === "organizer"){
+    if (status === 'authenticated' && session?.user && session.user.role === "organizer") {
       const userId = session.user.id
-      if(userId){
+      if (userId) {
         async function fetchData() {
           try {
             setLoading(true);
@@ -72,11 +72,11 @@ export default function Dashboard() {
         fetchData();
       }
     }
-  }, [id,route,session,status]);
+  }, [id, route, session, status]);
 
   const { stats, entryTimes, monthData, event, averageRating } = data || {};
 
-  if (status === 'loading' || !data){
+  if (status === 'loading' || !data) {
     return (
       <div
         style={{
@@ -85,6 +85,7 @@ export default function Dashboard() {
           alignItems: "center",
           height: "100vh",
           flexDirection: "column",
+          backgroundColor: '#F3EFFD'
         }}
       >
         <Spinner animation="border" variant="primary" role="status" style={{ width: "2rem", height: "2rem" }}>
@@ -112,17 +113,17 @@ export default function Dashboard() {
   );
   const monthCounts = Object.values(monthData);
 
-  if (status === 'authenticated' && session.user.role === "organizer"){
+  if (status === 'authenticated' && session.user.role === "organizer") {
     return (
       <Container fluid>
         <Row>
           {/* Sidebar */}
           <Col xs={3} md={2} className="sidebar">
-                      <Sidebar event={{ _id: id }} /> {/* Sidebar component */}
-                    </Col>
-  
+            <Sidebar event={{ _id: id }} /> {/* Sidebar component */}
+          </Col>
+
           {/* Main Content */}
-          <Col xs={10} className="main-content p-4">
+          <Col xs={10} className="main-content p-4" style={{ backgroundColor: "#F3EFFD" }}>
             <Breadcrumb>
               <Breadcrumb.Item href="/organizers/[id]/create-event">All Events</Breadcrumb.Item>
               <Breadcrumb.Item active>{event.eventName}</Breadcrumb.Item>
@@ -131,17 +132,20 @@ export default function Dashboard() {
               <h2 className="text-primary">
                 {event.eventName} Dashboard
               </h2>
-              <Button variant="primary"
+              <Button
+                style={{ backgroundColor: "#A67EEC" }} // Corrected the background color
                 className="ms-2"
-                onClick={() => route.push(`/events/${id}/feedbacks`)}>
-                View FeedBacks</Button>
+                onClick={() => route.push(`/events/${id}/feedbacks`)} // Fixed the router reference to `router.push`
+              >
+                View Feedbacks
+              </Button>
             </div>
             <p></p>
-  
+
             {/* Statistics Cards */}
             <Row className="mb-4 g-4">
               <Col md={3}>
-                <Card className="text-center shadow-sm">
+                <Card className="text-center shadow-sm" style={{ backgroundColor: "#FDE2E4" }}>
                   <Card.Body>
                     <BsPeopleFill size={30} className="mb-2 text-primary" />
                     <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
@@ -154,7 +158,7 @@ export default function Dashboard() {
                 </Card>
               </Col>
               <Col md={3}>
-                <Card className="text-center shadow-sm">
+                <Card className="text-center shadow-sm" style={{ backgroundColor: "#E2F0CB" }}>
                   <Card.Body>
                     <BsShop size={30} className="mb-2 text-success" />
                     <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
@@ -167,7 +171,7 @@ export default function Dashboard() {
                 </Card>
               </Col>
               <Col md={3}>
-                <Card className="text-center shadow-sm">
+                <Card className="text-center shadow-sm" style={{ backgroundColor: "#D7E3FC" }}>
                   <Card.Body>
                     <BsCheckCircle size={30} className="mb-2 text-info" />
                     <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
@@ -180,7 +184,7 @@ export default function Dashboard() {
                 </Card>
               </Col>
               <Col md={3}>
-                <Card className="text-center shadow-sm">
+                <Card className="text-center shadow-sm" style={{ backgroundColor: "#FFF4E6" }}>
                   <Card.Body>
                     {/* Centered Big Star */}
                     <BsStarFill size={30} className="mb-2 text-warning" />
@@ -188,7 +192,7 @@ export default function Dashboard() {
                     <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
                       Average Rating
                     </Card.Title>
-  
+
                     {/* Rating Value */}
                     <Card.Text style={{ fontSize: "1.5rem" }}>
                       {averageRating.toFixed(1)}
@@ -197,12 +201,12 @@ export default function Dashboard() {
                 </Card>
               </Col>
             </Row>
-  
-  
+
+
             {/* Charts Section */}
             <Row className="g-4">
               <Col md={6}>
-                <Card className="shadow-sm">
+                <Card className="shadow-sm" style={{ backgroundColor: "#F4F9F9" }}>
                   <Card.Body>
                     <h5 className="text-center">Entry Times</h5>
                     <Line
@@ -245,7 +249,7 @@ export default function Dashboard() {
                 </Card>
               </Col>
               <Col md={6}>
-                <Card className="shadow-sm">
+                <Card className="shadow-sm" style={{ backgroundColor: "#F4F9F9" }}>
                   <Card.Body>
                     <h5 className="text-center">Monthly Crowd Flow</h5>
                     <Bar
@@ -288,14 +292,14 @@ export default function Dashboard() {
               </Col>
             </Row>
             <Row>
-  
+
             </Row>
-  
+
           </Col>
         </Row>
       </Container>
     );
   }
   return null;
-  
+
 }

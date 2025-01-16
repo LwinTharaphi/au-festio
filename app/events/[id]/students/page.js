@@ -245,15 +245,19 @@ export default function RegisteredStudentsPage() {
           <Col xs={3} md={2} className="sidebar">
             <Sidebar event={{ _id: id }} />
           </Col>
-          <Col xs={9} md={10} className="main-content">
+          <Col xs={9} md={10} className="main-content" style={{ backgroundColor: "#F3EFFD" }}>
             <Container>
-              <div className="d-flex justify-content-between align-items-center mb-4 sticky-header">
+              <div className="d-flex justify-content-between align-items-center mb-4 sticky-header" style={{ backgroundColor: "#F3EFFD" }}>
                 <h4>Registered Students for {eventName}</h4>
 
                 <Dropdown className="mb-4" style={{ textAlign: "right" }}>
-                  <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+                  <Dropdown.Toggle
+                    style={{ backgroundColor: "#A67EEC", color: "#fff", border: "none" }} // Added inline style for background color
+                    id="dropdown-basic"
+                  >
                     Select Event
                   </Dropdown.Toggle>
+
                   <Dropdown.Menu>
                     {eventsList.length > 0 ? (
                       eventsList.map((event) => (
@@ -287,6 +291,7 @@ export default function RegisteredStudentsPage() {
                     alignItems: "center",
                     height: "100vh",
                     flexDirection: "column",
+                    backgroundColor: "#F3EFFD",
                   }}
                 >
                   <Spinner animation="border" variant="primary" role="status" style={{ width: "2rem", height: "2rem" }}>
@@ -297,9 +302,9 @@ export default function RegisteredStudentsPage() {
                   </p>
                 </div>
               ) : (
-                <>                
-                  <Table hover responsive style={{ fontSize: '0.8rem' }}>
-                    <thead>
+                <>
+                  <Table hover responsive style={{ fontSize: '0.8rem', backgroundColor: '#F3EFFD' }}>
+                    <thead style={{ backgroundColor: "#F3FFD" }}>
                       <tr>
                         <th>ID</th>
                         <th>Name</th>
@@ -327,7 +332,7 @@ export default function RegisteredStudentsPage() {
                             <td>{student.status}</td>
                             <td>
                               {student.checkInStatus == "checked-in" ? (
-                                <FaRegCheckCircle style={{ fontSize: "15",color: "green" }} />
+                                <FaRegCheckCircle style={{ fontSize: "15", color: "green" }} />
                               ) : (
                                 "-"
                               )}

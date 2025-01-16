@@ -102,7 +102,7 @@ export default function Profile() {
 
   if (status === 'authenticated' && session.user.role === "organizer") {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: '#F3EFFD' }}>
         <Sidebar />
         <div style={{ flex: 1, padding: "20px" }}>
           <Container>
@@ -110,25 +110,25 @@ export default function Profile() {
             {error && <Alert variant="danger">{error}</Alert>}
             {loading ? (
               <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        height: "100vh",
-                        flexDirection: "column",
-                      }}
-                    >
-                      <Spinner animation="border" variant="primary" role="status" style={{ width: "2rem", height: "2rem" }}>
-                        <span className="visually-hidden">Loading...</span>
-                      </Spinner>
-                      <p style={{ marginTop: "1rem", fontSize: "1.2rem", fontWeight: "500", color: "#007bff" }}>
-                        Loading...
-                      </p>
-                    </div>
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  height: "100vh",
+                  flexDirection: "column",
+                }}
+              >
+                <Spinner animation="border" variant="primary" role="status" style={{ width: "2rem", height: "2rem" }}>
+                  <span className="visually-hidden">Loading...</span>
+                </Spinner>
+                <p style={{ marginTop: "1rem", fontSize: "1.2rem", fontWeight: "500", color: "#007bff" }}>
+                  Loading...
+                </p>
+              </div>
             ) : (
               <Row>
                 <Col md={showChangePassword ? 6 : { span: 8, offset: 2 }}>
-                  <Card className="p-4 shadow-sm rounded">
+                <Card className="p-4 shadow-sm rounded" style={{ backgroundColor: "#F3EFFD" }}>
                     <Card.Body className="text-center">
                       <div className="rounded-circle mx-auto mb-5" style={{ width: "120px", height: "120px", overflow: "hidden", backgroundColor: "#007bff", display: "flex", justifyContent: "center", alignItems: "center" }}>
                         {organizer?.profilePicture ? (
@@ -143,7 +143,7 @@ export default function Profile() {
                       </div>
                       {organizer ? (
                         <>
-                          <h3>{organizer.name}</h3>
+                          <h3 className="mb-4">{organizer.name}</h3>
                           <p>
                             <FontAwesomeIcon icon={faEnvelope} className="me-2" /> {organizer.email}
                           </p>
@@ -155,9 +155,9 @@ export default function Profile() {
                         <p>Loading organizer details...</p>
                       )}
                       <Button
-                        variant="primary"
+                        style={{ backgroundColor: "#A67EEC", color: "#fff", border: "none" }}
+                        className="ms-2"
                         onClick={() => setShowChangePassword((prev) => !prev)}
-                        className="mt-3"
                       >
                         {showChangePassword ? "Cancel" : "Change Password"}
                       </Button>
@@ -166,7 +166,7 @@ export default function Profile() {
                 </Col>
                 {showChangePassword && (
                   <Col md={6}>
-                    <Card className="p-4 shadow-sm">
+                    <Card className="p-4 shadow-sm rounded" style={{ backgroundColor: "#F3EFFD" }}>
                       <Card.Body>
                         <h4 className="text-center mb-4">Change Password</h4>
                         {passwordChangeMessage && (
@@ -223,9 +223,33 @@ export default function Profile() {
                               required
                             />
                           </Form.Group>
-                          <Button variant="success" type="submit" className="w-100">
-                            Change Password
-                          </Button>
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "center", // Centers the button horizontally
+                              alignItems: "center", // Centers the button vertically (if needed)
+                              height: "100%", // Ensure it works in a full-height container
+                            }}
+                          >
+                            <Button
+                              style={{
+                                backgroundColor: "#A67EEC",
+                                color: "#fff",
+                                border: "none",
+                                padding: "8px 16px",
+                                borderRadius: "4px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                              className="ms-2"
+                              type="submit"
+                            >
+                              Change Password
+                            </Button>
+                          </div>
+
+
                         </Form>
                       </Card.Body>
                     </Card>

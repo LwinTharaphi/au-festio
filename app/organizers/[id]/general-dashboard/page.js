@@ -31,6 +31,12 @@ export default function Dashboard() {
     labels: [],
     datasets: [],
   });
+  const paleColors = [
+    "#FDE2E4", "#E2F0CB", "#D7E3FC", "#FCE1E4", "#FFF4E6",
+    "#E9F5DB", "#E2ECF5", "#FBE4E6", "#E8F4F8", "#FAF3E3",
+    "#F3E8E9", "#E4F0E2", "#FDF6EC", "#E2E6F0", "#FBE3E4",
+    "#F4F9F9", "#EDEEF0", "#FFF8E7", "#F4F1E4", "#EFF5E9",
+  ];
 
   useEffect(() => {
     if (status === "loading") return;  // Don't redirect while loading
@@ -144,216 +150,211 @@ export default function Dashboard() {
     const studentsCheckIn = events.map(event => event.studentsCheckIn);
     return (
       <div style={{ display: 'flex', flexDirection: 'column', minheight: '100vh' }}>
-      {/* Navbar at the top */}
-      <div className="navbar-container" style={{ position: 'sticky', top: 0, zIndex: 1050 }}>
-        <Sidebar /> {/* Sidebar component */}
-      </div>
+        {/* Navbar at the top */}
+        <div className="navbar-container" style={{ position: 'sticky', top: 0, zIndex: 1050 }}>
+          <Sidebar /> {/* Sidebar component */}
+        </div>
 
-      <div style={{ display: 'flex', flex: 1 }}>
-        
-        {/* Main content area */}
-        <div style={{ flex: 1, padding: '20px' }}>
-          <Container>
-            <div className="d-flex justify-content-between align-items-center mb-4">
-              <h3>Dashboard</h3>
-              <Button variant="primary"
-                className="ms-2"
-                onClick={() => router.push(`/organizers/${id}/history`)}>
-                View History
-              </Button>
-            </div>
-            <p>Welcome to the Dashboard!</p>
+        <div style={{ display: 'flex', flex: 1 }}>
 
-            <Row className="mb-4 g-4">
-              <Col md={4}>
-                <Card className="text-center shadow-sm">
-                  <Card.Body>
-                    <BsPeopleFill size={30} className="mb-2 text-primary" />
-                    <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
-                      Total Events
-                    </Card.Title>
-                    <Card.Text style={{ fontSize: "1.5rem" }}>
-                      {data.totalEvents}
-                    </Card.Text>
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col md={4}>
-                <Card className="text-center shadow-sm">
-                  <Card.Body>
-                    <BsShop size={30} className="mb-2 text-success" />
-                    <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
-                      Paid Events
-                    </Card.Title>
-                    <Card.Text style={{ fontSize: "1.5rem" }}>
-                      {data.paidEvents}
-                    </Card.Text>
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col md={4}>
-                <Card className="text-center shadow-sm">
-                  <Card.Body>
-                    <BsCheckCircle size={30} className="mb-2 text-info" />
-                    <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
-                      Free Events
-                    </Card.Title>
-                    <Card.Text style={{ fontSize: "1.5rem" }}>
-                      {data.freeEvents}
-                    </Card.Text>
-                  </Card.Body>
-                </Card>
-              </Col>
-            </Row>
-            <Row className="mb-4 g-4">
-              <Col md={4}>
-                <Card className="text-center shadow-sm">
-                  <Card.Body>
-                    <BsPeopleFill size={30} className="mb-2 text-primary" />
-                    <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
-                      Upcoming Events
-                    </Card.Title>
-                    <Card.Text style={{ fontSize: "1.5rem" }}>
-                      {data.upcomingEvent}
-                    </Card.Text>
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col md={4}>
-                <Card className="text-center shadow-sm">
-                  <Card.Body>
-                    <BsShop size={30} className="mb-2 text-success" />
-                    <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
-                      Ongoing Events
-                    </Card.Title>
-                    <Card.Text style={{ fontSize: "1.5rem" }}>
-                      {data.ongoingEvent}
-                    </Card.Text>
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col md={4}>
-                <Card className="text-center shadow-sm">
-                  <Card.Body>
-                    <BsCheckCircle size={30} className="mb-2 text-info" />
-                    <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
-                      Completed Events
-                    </Card.Title>
-                    <Card.Text style={{ fontSize: "1.5rem" }}>
-                      {data.completedEvent}
-                    </Card.Text>
-                  </Card.Body>
-                </Card>
-              </Col>
-            </Row>
-            {/* Charts Section */}
-            <Row className="g-4">
-              <Col md={6}>
-                <Card className="shadow-sm">
-                  <Card.Body>
-                    <h5 className="text-center">Students</h5>
-                    <Bar
-                      data={{
-                        labels: eventNames,
-                        datasets: [
-                          {
-                            label: "Students Registered",
-                            data: studentsRegistered,
-                            backgroundColor: "rgba(54, 162, 235, 0.2)",
-                            borderColor: "rgba(54, 162, 235, 1)",
-                            borderWidth: 1,
-                            tension: 0.4,
-                          },
-                          {
-                            label: "Students Checked In",
-                            data: studentsCheckIn,
-                            backgroundColor: "rgba(153, 102, 255, 0.2)", // Color for checked-in students bar
-                            borderColor: "rgba(153, 102, 255, 1)", // Border color for checked-in students bar
-                            borderWidth: 1,
-                          },
-                        ],
-                      }}
-                      options={{
-                        responsive: true,
-                        scales: {
-                          x: {
-                            beginAtZero: true,
-                          },
-                          y: {
-                            beginAtZero: true,
-                          },
-                        },
-                        plugins: {
-                          title: {
-                            display: true,
-                            text: "Event Registration and Check-In Data",
-                          },
-                        },
-                      }}
-                    />
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col md={6}>
-                <Card className="shadow-sm">
-                  <Card.Body>
-                    <Form.Select
-                      value={selectedEvent ? selectedEvent.eventName : ""}
-                      onChange={(e) => {
-                        const event = events.find(ev => ev.eventName === e.target.value);
-                        setSelectedEvent(event);
-                        updateStaffChart(event);
-                      }}
-                    >
-                      {events.map((event) => (
-                        <option key={event.eventName} value={event.eventName}>
-                          {event.eventName}
-                        </option>
-                      ))}
-                    </Form.Select>
+          {/* Main content area */}
+          <div style={{ flex: 1, padding: '20px', backgroundColor: '#F3EFFD' }}>
+            <Container>
+              <div className="d-flex justify-content-between align-items-center mb-4">
+                <h3>Dashboard</h3>
+              </div>
+              <p>Welcome to the Dashboard!</p>
 
-                    {/* Show the row and columns even if no event is selected */}
-                    <div style={{ marginTop: '20px' }}>
-                      <h5 className="text-center">Staff Overview</h5>
+              <Row className="mb-4 g-4">
+                <Col md={4}>
+                  <Card className="text-center shadow-sm" style={{ backgroundColor: "#FDE2E4" }}>
+                    <Card.Body>
+                      <BsPeopleFill size={30} className="mb-2 text-primary" />
+                      <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
+                        Total Events
+                      </Card.Title>
+                      <Card.Text style={{ fontSize: "1.5rem" }}>
+                        {data.totalEvents}
+                      </Card.Text>
+                    </Card.Body>
+                  </Card>
+                </Col>
+                <Col md={4}>
+                  <Card className="text-center shadow-sm" style={{ backgroundColor: "#E2F0CB" }}>
+                    <Card.Body>
+                      <BsShop size={30} className="mb-2 text-success" />
+                      <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
+                        Paid Events
+                      </Card.Title>
+                      <Card.Text style={{ fontSize: "1.5rem" }}>
+                        {data.paidEvents}
+                      </Card.Text>
+                    </Card.Body>
+                  </Card>
+                </Col>
+                <Col md={4}>
+                  <Card className="text-center shadow-sm" style={{ backgroundColor:  "#D7E3FC"}}>
+                    <Card.Body>
+                      <BsCheckCircle size={30} className="mb-2 text-info" />
+                      <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
+                        Free Events
+                      </Card.Title>
+                      <Card.Text style={{ fontSize: "1.5rem" }}>
+                        {data.freeEvents}
+                      </Card.Text>
+                    </Card.Body>
+                  </Card>
+                </Col>
+              </Row>
+              <Row className="mb-4 g-4">
+                <Col md={4}>
+                  <Card className="text-center shadow-sm" style={{ backgroundColor: "#FFF4E6"}}>
+                    <Card.Body>
+                      <BsPeopleFill size={30} className="mb-2 text-primary" />
+                      <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
+                        Upcoming Events
+                      </Card.Title>
+                      <Card.Text style={{ fontSize: "1.5rem" }}>
+                        {data.upcomingEvent}
+                      </Card.Text>
+                    </Card.Body>
+                  </Card>
+                </Col>
+                <Col md={4}>
+                  <Card className="text-center shadow-sm" style={{ backgroundColor: "#E2ECF5" }}>
+                    <Card.Body>
+                      <BsShop size={30} className="mb-2 text-success" />
+                      <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
+                        Ongoing Events
+                      </Card.Title>
+                      <Card.Text style={{ fontSize: "1.5rem" }}>
+                        {data.ongoingEvent}
+                      </Card.Text>
+                    </Card.Body>
+                  </Card>
+                </Col>
+                <Col md={4}>
+                  <Card className="text-center shadow-sm" style={{ backgroundColor: "#E4F0E2" }}>
+                    <Card.Body>
+                      <BsCheckCircle size={30} className="mb-2 text-info" />
+                      <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
+                        Completed Events
+                      </Card.Title>
+                      <Card.Text style={{ fontSize: "1.5rem" }}>
+                        {data.completedEvent}
+                      </Card.Text>
+                    </Card.Body>
+                  </Card>
+                </Col>
+              </Row>
+              {/* Charts Section */}
+              <Row className="g-4">
+                <Col md={6}>
+                  <Card className="shadow-sm" style={{ backgroundColor: "#F4F9F9" }}>
+                    <Card.Body>
+                      <h5 className="text-center mb-4 mt-4">Students</h5>
                       <Bar
-                        data={staffChartData}
+                        data={{
+                          labels: eventNames,
+                          datasets: [
+                            {
+                              label: "Students Registered",
+                              data: studentsRegistered,
+                              backgroundColor: "rgba(54, 162, 235, 0.2)",
+                              borderColor: "rgba(54, 162, 235, 1)",
+                              borderWidth: 1,
+                              tension: 0.4,
+                            },
+                            {
+                              label: "Students Checked In",
+                              data: studentsCheckIn,
+                              backgroundColor: "rgba(153, 102, 255, 0.2)", // Color for checked-in students bar
+                              borderColor: "rgba(153, 102, 255, 1)", // Border color for checked-in students bar
+                              borderWidth: 1,
+                            },
+                          ],
+                        }}
                         options={{
                           responsive: true,
                           scales: {
-                            x: { title: { display: true, text: "Roles" } },
-                            y: { title: { display: true, text: "Count" }, beginAtZero: true },
+                            x: {
+                              beginAtZero: true,
+                            },
+                            y: {
+                              beginAtZero: true,
+                            },
                           },
                           plugins: {
-                            tooltip: { enabled: false },
-                            legend: { display: true },
                             title: {
                               display: true,
-                              text: `Staff Overview for Event: ${selectedEvent?.eventName}`,
-                            },
-                            subtitle: {
-                              display: events.length === 0,
-                              text: "There is no event to select. Please add the event",
-                              color: 'red',
-                              font: {
-                                size: 12,
-                                weight: 'normal',
-                              },
-                              padding: {
-                                top: 10,
-                                bottom: 30
-                              }
+                              text: "Event Registration and Check-In Data",
                             },
                           },
                         }}
                       />
-                    </div>
-                  </Card.Body>
-                </Card>
-              </Col>
-            </Row>
-          </Container>
+                    </Card.Body>
+                  </Card>
+                </Col>
+                <Col md={6}>
+                  <Card className="shadow-sm" style={{ backgroundColor: "#F4F9F9" }}>
+                    <Card.Body>
+                      <Form.Select
+                        value={selectedEvent ? selectedEvent.eventName : ""}
+                        onChange={(e) => {
+                          const event = events.find(ev => ev.eventName === e.target.value);
+                          setSelectedEvent(event);
+                          updateStaffChart(event);
+                        }}
+                      >
+                        {events.map((event) => (
+                          <option key={event.eventName} value={event.eventName}>
+                            {event.eventName}
+                          </option>
+                        ))}
+                      </Form.Select>
+
+                      {/* Show the row and columns even if no event is selected */}
+                      <div style={{ marginTop: '20px' }}>
+                        <h5 className="text-center">Staff Overview</h5>
+                        <Bar
+                          data={staffChartData}
+                          options={{
+                            responsive: true,
+                            scales: {
+                              x: { title: { display: true, text: "Roles" } },
+                              y: { title: { display: true, text: "Count" }, beginAtZero: true },
+                            },
+                            plugins: {
+                              tooltip: { enabled: false },
+                              legend: { display: true },
+                              title: {
+                                display: true,
+                                text: `Staff Overview for Event: ${selectedEvent?.eventName}`,
+                              },
+                              subtitle: {
+                                display: events.length === 0,
+                                text: "There is no event to select. Please add the event",
+                                color: 'red',
+                                font: {
+                                  size: 12,
+                                  weight: 'normal',
+                                },
+                                padding: {
+                                  top: 10,
+                                  bottom: 30
+                                }
+                              },
+                            },
+                          }}
+                        />
+                      </div>
+                    </Card.Body>
+                  </Card>
+                </Col>
+              </Row>
+            </Container>
+          </div>
         </div>
-      </div>
       </div>
     );
   }

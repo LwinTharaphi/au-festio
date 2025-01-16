@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { Nav, Navbar } from "react-bootstrap";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Sidebar.css';
-import { BsGrid, BsPeople, BsPerson, BsBoxArrowRight } from "react-icons/bs"; // Add icons
+import { BsGrid, BsPeople, BsPerson, BsBoxArrowRight, BsClockHistory } from "react-icons/bs"; // Add icons
 
 import { signOut } from "next-auth/react";
 import { useSession } from "next-auth/react";
@@ -65,6 +65,13 @@ export default function Sidebar() {
             className={`navbar-link me-10 d-flex align-items-center ${isActive(`/organizers/${userId}/create-event`)}`} // Apply active class conditionally
           >
             <BsPeople className="me-2" /> Events
+          </Nav.Link>
+
+          <Nav.Link
+            onClick={() => router.push(`/organizers/${userId}/history`)}
+            className={`navbar-link me-10 d-flex align-items-center ${isActive(`/organizers/${userId}/history`)}`} // Apply active class conditionally
+          >
+            <BsClockHistory className="me-2" /> History
           </Nav.Link>
 
           <Nav.Link

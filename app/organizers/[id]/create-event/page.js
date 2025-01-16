@@ -419,7 +419,7 @@ function EventForm() {
         <div style={{ display: 'flex', flex: 1 }}>
 
           {/* Main Content */}
-          <div style={{ display: 'flex', flex: 1 }}>
+          <div style={{ display: 'flex', flex: 1,backgroundColor: '#F3EFFD' }}>
           <Box
             sx={{
               flex: 1, // Take up remaining space

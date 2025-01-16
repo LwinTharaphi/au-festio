@@ -7,6 +7,7 @@ import { Pie, Bar } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement } from 'chart.js';
 import html2canvas from 'html2canvas';
 import { AiFillDelete } from 'react-icons/ai';
+import Sidebar from "../../../components/general-sidebar";
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
 
@@ -159,6 +160,7 @@ export default function OrganizerHistoryPage() {
           alignItems: "center",
           height: "100vh",
           flexDirection: "column",
+          backgroundColor: '#F3EFFD'
         }}
       >
         <Spinner animation="border" variant="primary" role="status" style={{ width: "2rem", height: "2rem" }}>
@@ -173,8 +175,10 @@ export default function OrganizerHistoryPage() {
 
   if (status === "authenticated" && session.user.role === "organizer") {
     return (
-      <div className="container mt-5">
-        <h3 className="mb-4">History</h3>
+      <div style={{ backgroundColor: '#F3EFFD' }}>
+        <Sidebar />
+      <div className="container" style={{ backgroundColor: '#F3EFFD' }}>
+        <h3 className="mb-4 mt-4">History</h3>
         {completedEvents.length === 0 ? (
           <p>No completed events found.</p>
         ) : (
@@ -316,6 +320,7 @@ export default function OrganizerHistoryPage() {
             <Button variant="primary" onClick={handleSaveToDevice}>Save to Device</Button>
           </Modal.Footer>
         </Modal>
+      </div>
       </div>
     );
   }
