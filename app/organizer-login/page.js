@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
+import { text } from '@fortawesome/fontawesome-svg-core';
 
 export default function OrganizerLogin() {
   const router = useRouter();
@@ -182,8 +183,21 @@ export default function OrganizerLogin() {
   return (
     <div className="page">
       <div className="left-section">
-        <h1 style={styles.welcomeHeading}>Welcome to AU Festio</h1>
-        <p style={styles.description}>Your one-stop solution for managing events effortlessly.</p>
+        <div style={styles.logoContainer}>
+          <img
+            src="/logo.png"  // Replace with the correct path to your logo
+            alt="AU Festio Logo"
+            style={{
+              width: '180px',  // Adjust width as needed
+              height: 'auto',  // Maintain aspect ratio
+              marginBottom: '20px',  // Optional: space between logo and text
+              marginLeft: '130px',  // Optional: space to the left side
+              borderRadius: '15px',  // Adjust the value to make the corners more or less rounded
+            }}
+          />
+          <h1 style={styles.welcomeHeading}>Welcome to AU Festio</h1>
+          <p style={styles.description}>Your one-stop solution for managing events effortlessly.</p>
+        </div>
       </div>
       <div className="right-section">
         {!showForgotPassword ? (
@@ -301,7 +315,7 @@ export default function OrganizerLogin() {
         }
         .left-section {
           flex: 1;
-          background: linear-gradient(to bottom, #0070f3, #005bb5);
+          background: linear-gradient(to bottom,#A67EEC, #005bb5);
           color: white;
           display: flex;
           flex-direction: column;
@@ -396,6 +410,7 @@ const styles = {
     fontSize: '32px',
     fontWeight: 'bold',
     marginBottom: '15px',
+    textAlign: 'center',
   },
   description: {
     fontSize: '18px',

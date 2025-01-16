@@ -7,10 +7,23 @@ export default function Home() {
     return (
         <div style={styles.pageContainer}>
             <div style={styles.leftColumn}>
-                <h1 style={styles.welcomeHeading}>Welcome to AU Festio</h1>
-                <p style={styles.description}>
-                    Please choose your role to proceed.
-                </p>
+                <div style={styles.logoContainer}>
+                    <img
+                        src="/logo.png"  // Replace with the correct path to your logo
+                        alt="AU Festio Logo"
+                        style={{
+                            width: '180px',  // Adjust width as needed
+                            height: 'auto',  // Maintain aspect ratio
+                            marginBottom: '20px',  // Optional: space between logo and text
+                            marginLeft: '80px',  // Optional: space to the left side
+                            borderRadius: '15px',  // Adjust the value to make the corners more or less rounded
+                        }}
+                    />
+                    <h1 style={styles.welcomeHeading}>Welcome to AU Festio</h1>
+                    <p style={styles.description}>
+                        Please choose your role to proceed.
+                    </p>
+                </div>
             </div>
             <div style={styles.rightColumn}>
                 <div style={styles.cardContainer}>
@@ -49,7 +62,7 @@ const styles = {
         alignItems: 'center',
         justifyContent: 'center',
         padding: '20px',
-        background: 'linear-gradient(to bottom, #0070f3, #005bb5)', // Fixed syntax
+        background: 'linear-gradient(to bottom, #A67EEC, #005bb5)', // Fixed syntax
         color: '#fff',
         textAlign: 'center',
     },

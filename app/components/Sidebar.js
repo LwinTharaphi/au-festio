@@ -32,9 +32,13 @@ export default function Sidebar({ event }) {
         style={{ cursor: "pointer" }}
       >
         <img
-          src="/path/to/your-logo.png" // Replace with the actual path to your logo
+          src="/logo.png"
           alt="Project Logo"
-          className="logo-img"
+          style={{
+            width: '200px',  // Adjust width
+            height: 'auto',  // Maintain aspect ratio
+            marginLeft: '5px',  // Add space to the left side (adjust as needed)  
+          }}
         />
       </Navbar.Brand>
 

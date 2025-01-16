@@ -30,10 +30,23 @@ export default function AdminLogin() {
         <div style={styles.pageContainer}>
             {/* Left Column */}
             <div style={styles.leftColumn}>
+            <div style={styles.logoContainer}>
+                    <img
+                        src="/logo.png"  // Replace with the correct path to your logo
+                        alt="AU Festio Logo"
+                        style={{
+                            width: '180px',  // Adjust width as needed
+                            height: 'auto',  // Maintain aspect ratio
+                            marginBottom: '20px',  // Optional: space between logo and text
+                            marginLeft: '90px',  // Optional: space to the left side
+                            borderRadius: '15px',  // Adjust the value to make the corners more or less rounded
+                        }}
+                    />
                 <h1 style={styles.brandText}>Welcome Back, Admin</h1>
                 <p style={styles.subText}>
                     Manage your platform efficiently and securely.
                 </p>
+            </div>
             </div>
 
             {/* Right Column */}
@@ -79,7 +92,7 @@ const styles = {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        background: "linear-gradient(to bottom, #0070f3, #005bb5)",
+        background: "linear-gradient(to bottom, #A67EEC, #005bb5)",
         color: "#fff",
         padding: "20px",
         textAlign: "center",

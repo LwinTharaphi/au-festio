@@ -24,17 +24,22 @@ export default function Sidebar() {
   const isActive = (path) => pathname === path ? 'active' : ''; // Function to check if the link is active
 
   return (
-    <Navbar expand="lg" className="sticky-top navbar-light bg-light">
+    <Navbar expand="lg" className="sticky-top navbar-light bg-light"> 
       <Navbar.Brand
         className="logo"
         onClick={() => router.push(`/organizers/${userId}/general-dashboard`)} // Direct to dashboard
         style={{ cursor: "pointer" }}
       >
         <img
-          src="/path/to/your-logo.png" // Replace with the actual path to your logo
+          src="/logo2.png"
           alt="Project Logo"
-          className="logo-img"
+          style={{
+            width: '130px',  // Adjust width
+            height: '70px',  // Maintain aspect ratio
+            marginLeft: '30px',  // Add space to the left side (adjust as needed)
+          }}
         />
+
       </Navbar.Brand>
 
       <Navbar.Toggle aria-controls="navbar-nav" />
