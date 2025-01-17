@@ -63,6 +63,7 @@ export default function BoothPage() {
               throw new Error("Failed to fetch booth data.");
             }
             const boothsData = await boothsResponse.json();
+            console.log("Booths Data:", boothsData);
             setBooths(boothsData);
           } catch (err) {
             setError(err.message);

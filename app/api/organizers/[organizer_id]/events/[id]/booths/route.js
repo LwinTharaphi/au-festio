@@ -3,15 +3,33 @@ import dbConnect from "@/lib/db";
 import { nanoid } from "nanoid";
 import fs from "fs";
 import path from "path";
+import { S3Client, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { uploadFile } from "../../route";
 
+const s3 = new S3Client({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION,
+});
+const baseS3Url = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/`;
 // GET: Fetch all booths for a specific event
 export async function GET(req, { params }) {
   await dbConnect();
-  const { id } = params; // Event ID
+  const { id } = await params; // Event ID
 
   try {
     const booths = await Booth.find({ eventId: id });
-    return new Response(JSON.stringify(booths), { status: 200 });
+    const boothsWithImage = booths.map((booth) => {
+      const foodImageUrl = `${baseS3Url}${booth.imagePath}`;
+      // console.log('Food Image URL:', foodImageUrl);
+      // console.log("Image URL:", booth.imagePath);
+      return {
+        ...booth.toObject(),
+        imagePath: foodImageUrl,
+      };
+    })
+
+    return new Response(JSON.stringify(boothsWithImage), { status: 200 });
   } catch (error) {
     console.error("Error fetching booths:", error);
     return new Response("Error fetching booths", { status: 500 });
@@ -21,7 +39,7 @@ export async function GET(req, { params }) {
 // POST: Create a new booth for a specific event
 export async function POST(req, { params }) {
   await dbConnect();
-  const { id } = params; // Event ID
+  const { id } = await params; // Event ID
 
   try {
     const formData = await req.formData();
@@ -41,14 +59,7 @@ export async function POST(req, { params }) {
 
     // Handle file upload if an image is provided
     if (image) {
-      const uploadDir = path.join(process.cwd(), "public", "uploads", "booths");
-      await fs.promises.mkdir(uploadDir, { recursive: true });
-      const filePath = path.join(uploadDir, image.name);
-
-      const buffer = Buffer.from(await image.arrayBuffer());
-      await fs.promises.writeFile(filePath, buffer);
-
-      imagePath = `/uploads/booths/${image.name}`;
+      imagePath = await uploadFile(image, "booths");
     }
 
     // Create new booth
@@ -73,7 +84,7 @@ export async function POST(req, { params }) {
 // PUT: Update a specific booth
 export async function PUT(req, { params }) {
   await dbConnect();
-  const { id, boothid } = params; // Event ID and Booth ID
+  const { id, boothid } = await params; // Event ID and Booth ID
 
   try {
     const formData = await req.formData();
@@ -84,18 +95,16 @@ export async function PUT(req, { params }) {
     const image = formData.get("image");
 
     let imagePath = null;
+    const existingBooth = await Booth.findOne({ boothId: boothid, eventId: id });
 
     // Handle file upload if an image is provided
     if (image) {
-      const uploadDir = path.join(process.cwd(), "public", "uploads", "booths");
-      await fs.promises.mkdir(uploadDir, { recursive: true });
-      const filePath = path.join(uploadDir, image.name);
-
-      const buffer = Buffer.from(await image.arrayBuffer());
-      await fs.promises.writeFile(filePath, buffer);
-
-      imagePath = `/uploads/booths/${image.name}`;
+      if(existingBooth.imagePath) {
+        await deleteBoothFile(existingBooth.imagePath);
+      }
+      imagePath = await uploadFile(image, "booths");
     }
+    console.log("Image path in put:", imagePath);
 
     // Update booth in the database
     const updatedBooth = await Booth.findOneAndUpdate(
@@ -118,9 +127,16 @@ export async function PUT(req, { params }) {
 // DELETE: Delete a specific booth
 export async function DELETE(req, { params }) {
   await dbConnect();
-  const { id, boothid } = params; // Event ID and Booth ID
+  const { id, boothid } = await params; // Event ID and Booth ID
 
   try {
+    const deleteToBooth = await Booth.findOne({ boothId: boothid, eventId: id });
+    if (!deleteToBooth) {
+      return new Response("Booth not found", { status: 404 });
+    }
+    if(deleteToBooth.imagePath) {
+      await deleteBoothFile(deleteToBooth.imagePath);
+    }
     const deletedBooth = await Booth.findOneAndDelete({
       boothId: boothid,
       eventId: id,
@@ -134,5 +150,21 @@ export async function DELETE(req, { params }) {
   } catch (error) {
     console.error("Error deleting booth:", error);
     return new Response("Error deleting booth", { status: 500 });
+  }
+}
+
+export const deleteBoothFile = async (filePath) => {
+  // console.log('Deleting file:', posterPath);
+  const params = {
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: filePath,
+  };
+
+  try {
+    const command = new DeleteObjectCommand(params);
+    await s3.send(command);
+    console.log('File deleted successfully:', filePath);
+  } catch (error) {
+    console.error('Error deleting file:', error);
   }
 }
