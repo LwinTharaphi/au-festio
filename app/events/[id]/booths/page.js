@@ -91,31 +91,35 @@ export default function BoothPage() {
   }, [id, router, session, status]);
 
   const handleSaveBooth = async () => {
-    const formData = new FormData();
-    formData.append('boothNumber', formBooth.boothNumber);
-    formData.append('boothName', formBooth.boothName);
-    formData.append('vendorName', formBooth.vendorName);
-    if (formBooth.image) {
-      formData.append('image', formBooth.image);
+    if (!formBooth.boothNumber || !formBooth.vendorName) {
+      setError("Booth Number and Vendor Name are required.");
+      return;
     }
-
+  
+    const formData = new FormData();
+    formData.append("boothNumber", formBooth.boothNumber);
+    formData.append("boothName", formBooth.boothName);
+    formData.append("vendorName", formBooth.vendorName);
+    if (formBooth.image) formData.append("image", formBooth.image);
+  
     try {
       const url = editMode
         ? `/api/organizers/${session.user.id}/events/${id}/booths/${currentBooth.boothId}`
         : `/api/organizers/${session.user.id}/events/${id}/booths`;
       const method = editMode ? "PUT" : "POST";
-
+  
       const response = await fetch(url, {
         method,
         body: formData,
       });
-
+  
       if (!response.ok) {
-        throw new Error(editMode ? "Failed to update booth." : "Failed to add booth.");
+        const errorText = await response.text();
+        throw new Error(editMode ? `Failed to update booth: ${errorText}` : `Failed to add booth: ${errorText}`);
       }
-
+  
       const booth = await response.json();
-
+  
       if (editMode) {
         setBooths((prevBooths) =>
           prevBooths.map((b) => (b.boothId === booth.boothId ? booth : b))
@@ -123,7 +127,8 @@ export default function BoothPage() {
       } else {
         setBooths((prevBooths) => [...prevBooths, booth]);
       }
-
+  
+      setSelectedBooth(booth); // Automatically update selected booth details
       setShowModal(false);
       setFormBooth({ boothNumber: "", boothName: "", vendorName: "", image: null });
       setEditMode(false);
@@ -131,6 +136,7 @@ export default function BoothPage() {
       setError(err.message);
     }
   };
+  
 
   const handleFileChange = (e) => {
     setFormBooth({ ...formBooth, image: e.target.files[0] });
