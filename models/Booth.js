@@ -6,6 +6,7 @@ const boothSchema = new mongoose.Schema({
   boothNumber: { type: String, required: true },
   boothName: { type: String, required: false },
   vendorName: { type: String, required: true },
+  imagePath: { type: String, required: false }, // Add this line for image storage
   registerationTime: { type: Date, default: Date.now },
 }, { timestamps: true });
 
