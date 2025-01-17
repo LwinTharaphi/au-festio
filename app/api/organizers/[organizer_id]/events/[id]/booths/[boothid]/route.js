@@ -70,37 +70,66 @@ export async function GET(request, { params }) {
 // PUT: Update a specific booth
 export async function PUT(request, { params }) {
   await dbConnect();
-  const { id, boothid } = params;
-
-  const formData = await request.formData();
-  const boothNumber = formData.get('boothNumber');
-  const boothName = formData.get('boothName');
-  const vendorName = formData.get('vendorName');
-  const image = formData.get('image');
-
-  let imagePath = null;
-  if (image) {
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'booths');
-    await fs.promises.mkdir(uploadDir, { recursive: true });
-    const filePath = path.join(uploadDir, image.name);
-    const buffer = Buffer.from(await image.arrayBuffer());
-    await fs.promises.writeFile(filePath, buffer);
-    imagePath = `/uploads/booths/${image.name}`;
-  }
+  const { id, boothid } = params; // Event ID and Booth ID
 
   try {
+    const formData = await request.formData();
+
+    // Extract fields
+    const boothNumber = formData.get("boothNumber");
+    const boothName = formData.get("boothName");
+    const vendorName = formData.get("vendorName");
+    const image = formData.get("image");
+
+    // Validation
+    if (!boothNumber || !vendorName) {
+      return new Response("Booth number and vendor name are required.", {
+        status: 400,
+      });
+    }
+
+    let imagePath = null;
+
+    // Handle file upload if an image is provided
+    if (image) {
+      const uploadDir = path.join(process.cwd(), "public", "uploads", "booths");
+      await fs.promises.mkdir(uploadDir, { recursive: true });
+      const filePath = path.join(uploadDir, image.name);
+
+      const buffer = Buffer.from(await image.arrayBuffer());
+      await fs.promises.writeFile(filePath, buffer);
+
+      imagePath = `/uploads/booths/${image.name}`;
+    }
+
+    // Update booth data
+    const updateData = {
+      boothNumber,
+      boothName,
+      vendorName,
+    };
+
+    if (imagePath) {
+      updateData.imagePath = imagePath; // Only update imagePath if a new image is uploaded
+    }
+
     const updatedBooth = await Booth.findOneAndUpdate(
       { boothId: boothid, eventId: id },
-      { boothNumber, boothName, vendorName, imagePath },
+      updateData,
       { new: true }
     );
-    if (!updatedBooth) return new Response("Booth not found", { status: 404 });
+
+    if (!updatedBooth) {
+      return new Response("Booth not found", { status: 404 });
+    }
+
     return new Response(JSON.stringify(updatedBooth), { status: 200 });
   } catch (error) {
     console.error("Error updating booth:", error);
     return new Response("Error updating booth", { status: 500 });
   }
 }
+
 
 // DELETE: Delete a specific booth
 export async function DELETE(request, { params }) {
