@@ -5,6 +5,14 @@ import { NextResponse } from 'next/server';
 import generatePayload from "promptpay-qr";
 import qrcode from 'qrcode';
 import path from 'path';
+import { S3Client, DeleteObjectCommand } from "@aws-sdk/client-s3";
+
+const s3 = new S3Client({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION,
+});
+const baseS3Url = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/`;
 
 export async function GET(request, { params }) {
   await dbConnect();
@@ -15,7 +23,9 @@ export async function GET(request, { params }) {
     if (!event) {
       return new Response(JSON.stringify({ error: "Event not found" }), { status: 404 });
     }
-    return new Response(JSON.stringify(event), { status: 200 });
+    const posterPath = Buffer.from(event.poster, 'base64').toString('utf-8');
+    const posterUrl = `${baseS3Url}${posterPath}`;
+    return new Response(JSON.stringify({ ...event.toObject(), poster: posterUrl }), { status: 200 });
   } catch (error) {
     return new Response(JSON.stringify({ error: "Server error" }), { status: 500 });
   }
@@ -70,7 +80,7 @@ export async function PUT(request, { params }) {
 
     // // Upload the QR code if it was generated
     // const qrPath = qrBuffer ? await uploadFile(qrBuffer, "qrcodes") : null;
-
+    const existingEvent = await Event.findById(id);
     const updatedData = {
       eventName,
       registerationDate,
@@ -93,6 +103,9 @@ export async function PUT(request, { params }) {
     };
 
     if (poster) {
+      if(existingEvent.poster) {
+        await deleteFile(existingEvent.poster);
+      }
       updatedData.poster = await uploadFile(poster, "posters");
     }
 
@@ -124,12 +137,36 @@ export async function DELETE(request, { params }) {
   const { id } = await params; // Await params here
 
   try {
+    const eventToDelete = await Event.findById(id);
+    if (!eventToDelete) {
+      return new Response(JSON.stringify({ error: "Event not found" }), { status: 404 });
+    }
+    if(eventToDelete.poster) {
+      await deleteFile(eventToDelete.poster);
+    }
     const deletedEvent = await Event.findByIdAndDelete(id);
     if (!deletedEvent) {
-      return new Response(JSON.stringify({ error: "Event not found" }), { status: 404 });
+      return new Response(JSON.stringify({ error: "Failed to delete event" }), { status: 500 });
     }
     return new Response("Event deleted successfully", { status: 200 });
   } catch (error) {
     return new Response(JSON.stringify({ error: "Server error" }), { status: 500 });
+  }
+}
+
+const deleteFile = async (filePath) => {
+  const posterPath = Buffer.from(filePath, 'base64').toString('utf-8');
+  // console.log('Deleting file:', posterPath);
+  const params = {
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: posterPath,
+  };
+
+  try {
+    const command = new DeleteObjectCommand(params);
+    await s3.send(command);
+    console.log('File deleted successfully:', filePath);
+  } catch (error) {
+    console.error('Error deleting file:', error);
   }
 }

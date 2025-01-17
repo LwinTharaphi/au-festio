@@ -5,12 +5,21 @@ import { NextResponse } from 'next/server';
 import path from 'path';
 import generatePayload from "promptpay-qr";
 import qrcode from 'qrcode';
+import { S3Client, DeleteObjectCommand, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 // Set `config` to disable body parsing, as formidable handles it
 export const config = {
   api: {
     bodyParser: false,
   },
 };
+
+const s3 = new S3Client({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION,
+});
+
+const baseS3Url = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/`;
 
 export async function GET(request,{ params }) {
   await dbConnect();
@@ -23,7 +32,7 @@ export async function GET(request,{ params }) {
     // console.log('Event:', event);
 
      // Check if 'poster' exists in the event
-     const posterPath = event.poster; // The relative path stored in the database
+     const posterPath = Buffer.from(event.poster,'base64').toString('utf-8'); // The relative path stored in the database
      if (!posterPath) {
        console.log('No poster found for event:', event._id);
      } else {
@@ -38,7 +47,7 @@ export async function GET(request,{ params }) {
     //  }
  
      // Construct the full URL based on the relative path stored in the database
-     const posterUrl = `/${posterPath}`; // Use your server URL here
+     const posterUrl = `${baseS3Url}${posterPath}`; // Use your server URL here
  
     //  console.log('Poster URL:', posterUrl);
 
@@ -101,6 +110,7 @@ export async function POST(req,{ params}) {
 
     // Handle file uploads (adjust to your specific storage strategy)
     const posterPath = poster ? await uploadFile(poster, 'posters') : null;
+    // console.log('Poster Path:', posterPath);
     const seats = formData.get('seats')? Number(formData.get('seats')): undefined;
 
     // Validation for paid events
@@ -163,38 +173,60 @@ export async function uploadFile(file, folder) {
     return null;
   }
 
-  try {
-    // Define the directory where the file will be stored
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', folder);
+  const fileName = `${Date.now()}-${file.name}`;
+  const filePath = path.join(folder, fileName).replace(/\\/g, '/'); // Replace backslashes with forward slashes
+  const params = {
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: filePath,
+    Body: file instanceof Buffer ? file: Buffer.from(await file.arrayBuffer()),
+    ContentType: file.type || 'application/octet-stream',
+    CacheControl: 'max-age=31536000',
+  };
 
-    // Ensure the directory exists, create it if necessary
-    await fs.promises.mkdir(uploadDir, { recursive: true });
-
-    let fileName;
-    let filePath;
-
-    // Handle user-uploaded files (posters) which come with .name
-    if (file instanceof Buffer) {
-      // For the QR code or other raw data, generate a unique name and path
-      fileName = `qr-code-${Date.now()}.svg`; // Example for QR code
-      filePath = path.join(uploadDir, fileName);
-      await fs.promises.writeFile(filePath, file);
-    } else {
-      // For user-uploaded files (e.g., poster), use the file's original name
-      fileName = file.name;
-      filePath = path.join(uploadDir, fileName);
-
-      // If the file is a user-uploaded file, move it from temp storage to final location
-      const buffer = Buffer.from(await file.arrayBuffer()); // Convert Blob to Buffer
-      await fs.promises.writeFile(filePath, buffer); // Write the content to the final destination
-    }
-
-    // Return the relative path (you can later use this for URLs or DB storage)
-    return `uploads/${folder}/${fileName}`;
-  } catch (error) {
+  try{
+    const command = new PutObjectCommand(params);
+    await s3.send(command);
+    console.log('File uploaded successfully', fileName);
+    const fileUrl = `${filePath}`;
+    // console.log('File URL:', fileUrl);
+    return fileUrl;
+  } catch (error){
     console.error('Error uploading file:', error);
-    return null; // Or handle the error appropriately
+    return null;
   }
+
+  // try {
+  //   // Define the directory where the file will be stored
+  //   const uploadDir = path.join(process.cwd(), 'public', 'uploads', folder);
+
+  //   // Ensure the directory exists, create it if necessary
+  //   await fs.promises.mkdir(uploadDir, { recursive: true });
+
+  //   let fileName;
+  //   let filePath;
+
+  //   // Handle user-uploaded files (posters) which come with .name
+  //   if (file instanceof Buffer) {
+  //     // For the QR code or other raw data, generate a unique name and path
+  //     fileName = `qr-code-${Date.now()}.svg`; // Example for QR code
+  //     filePath = path.join(uploadDir, fileName);
+  //     await fs.promises.writeFile(filePath, file);
+  //   } else {
+  //     // For user-uploaded files (e.g., poster), use the file's original name
+  //     fileName = file.name;
+  //     filePath = path.join(uploadDir, fileName);
+
+  //     // If the file is a user-uploaded file, move it from temp storage to final location
+  //     const buffer = Buffer.from(await file.arrayBuffer()); // Convert Blob to Buffer
+  //     await fs.promises.writeFile(filePath, buffer); // Write the content to the final destination
+  //   }
+
+  //   // Return the relative path (you can later use this for URLs or DB storage)
+  //   return `uploads/${folder}/${fileName}`;
+  // } catch (error) {
+  //   console.error('Error uploading file:', error);
+  //   return null; // Or handle the error appropriately
+  // }
 }
 
 // const isEarlyBirdValid = (registrationTimestamp) => {
