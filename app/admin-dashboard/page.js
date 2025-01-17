@@ -147,6 +147,7 @@ export default function AdminDashboard() {
           alignItems: "center",
           height: "100vh",
           flexDirection: "column",
+          backgroundColor: "#F3EFFD",
         }}
       >
         <Spinner animation="border" variant="primary" role="status" style={{ width: "2rem", height: "2rem" }}>
@@ -173,14 +174,15 @@ export default function AdminDashboard() {
     const studentsRegistered = events.map(event => event.studentsRegistered);
     const studentsCheckIn = events.map(event => event.studentsCheckIn);
     return (
-      <div style={{ display: 'flex' }}>
+      <div style={{ display: 'flex', backgroundColor: '#F3EFFD' }}>
         {/* Sidebar */}
         <Sidebar />
         
         {/* Main content area */}
         <div style={{ flex: 1, padding: '20px' }}>
           <Container>
-            <h1 className="mb-4">Admin Dashboard</h1>
+          <div className="d-flex justify-content-between align-items-center mb-3" style={{ backgroundColor: "#F3EFFD" }}>
+            <h3 className="mb-4">Admin Dashboard</h3>
             <DropdownButton
               id="dropdown-basic-button"
               title={selectedOrganizer ? organizers.find(org => org._id === selectedOrganizer)?.name : "Select Organizer"}
@@ -192,7 +194,7 @@ export default function AdminDashboard() {
                 </Dropdown.Item>
               ))}
             </DropdownButton>
-
+            </div>
             {(selectedEvent || events.length === 0) && (
               <>
                 <Row className="mb-4 g-4">

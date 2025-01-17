@@ -3,12 +3,15 @@ import { useRouter } from "next/navigation"; // Fix: use correct Next.js router 
 import { Nav, Navbar } from "react-bootstrap";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Sidebar.css';
-import { BsPeople, BsPerson, BsBoxArrowRight, BsBell, BsLock } from "react-icons/bs"; // Add icons
+import { BsPeople, BsGrid, BsBoxArrowRight, BsBell, BsLock } from "react-icons/bs"; // Add icons
 import { signOut } from "next-auth/react";
+import { usePathname } from "next/navigation";
 
 export default function Sidebar() {
 
   const router = useRouter();
+  const pathname = usePathname();
+  const isActive = (path) => pathname === path ? 'active' : '';
 
   return (
     <Navbar expand="lg" className="flex-column sidebar">
@@ -18,24 +21,28 @@ export default function Sidebar() {
         style={{ cursor: "pointer" }}
       >
         <img
-          src="/path/to/your-logo.png" // Replace with the actual path to your logo
+          src="/logo2.png"
           alt="Project Logo"
-          className="logo-img"
+          style={{
+            width: '130px',  // Adjust width
+            height: '70px',  // Maintain aspect ratio
+            marginLeft: '30px',  // Add space to the left side (adjust as needed)
+          }}
         />
       </Navbar.Brand>
 
       <Nav className="flex-column">
         <Nav.Link
           onClick={() => router.push(`/admin-dashboard`)}
-          className="sidebar-link my-2"
+          className={`sidebar-link my-2 ${isActive(`/admin-dashboard`)}`}
         >
-          <BsPerson className="me-2" /> Dashboard
+          <BsGrid className="me-2" /> Dashboard
         </Nav.Link>
 
         {/* Events */}
         <Nav.Link
           onClick={() => router.push(`/event-organizers`)}
-          className="sidebar-link my-2"
+          className={`sidebar-link my-2 ${isActive(`/event-organizers`)}`}
         >
           <BsPeople className="me-2" /> EventOrganizer
         </Nav.Link>

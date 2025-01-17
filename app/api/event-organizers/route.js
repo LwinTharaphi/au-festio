@@ -27,10 +27,11 @@ export async function GET() {
 
 export async function POST(req) {
     try {
-      const { name, email, password, phone } = await req.json();
+      const { name, email, password, phone, lifetime } = await req.json();
+      console.log({ name, email, password, phone, lifetime });
   
       // Check for missing fields
-      if (!name || !email || !password) {
+      if (!name || !email || !password || !phone || !lifetime) {
         return new Response(
           JSON.stringify({ error: 'All fields are required' }),
           { status: 400 }
@@ -56,6 +57,7 @@ export async function POST(req) {
       const newUser = new EventOrganizer({
         name,
         email,
+        lifetime,
         // hashedpassword: hashedPassword,
         password: encryptedPassword.split(":")[1],
         iv: encryptedPassword.split(":")[0],
@@ -63,7 +65,8 @@ export async function POST(req) {
       });
   
       await newUser.save();
-  
+      console.log('New User:', newUser);
+ 
       return new Response(
         JSON.stringify({ message: 'Account created successfully' }),
         { status: 201 }

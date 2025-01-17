@@ -6,9 +6,10 @@ import { FaTrash, FaEdit, FaEye, FaEyeSlash, FaPlus } from "react-icons/fa";
 import Sidebar from "../components/admin_sidebar";
 import FormField from "../components/FormField";
 import { useSession } from 'next-auth/react'
+import { set } from "mongoose";
 
 export default function EventOrganizersPage() {
-  const {data: session, status} = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [organizers, setOrganizers] = useState([]);
   const [error, setError] = useState("");
@@ -18,6 +19,7 @@ export default function EventOrganizersPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
+  const [lifetime, setLifetime] = useState("");
   const [editOrganizerId, setEditOrganizerId] = useState(null);
   const [refresh, setRefresh] = useState(false); // Trigger re-fetch
   const [showFormModal, setShowFormModal] = useState(false);
@@ -30,8 +32,8 @@ export default function EventOrganizersPage() {
   // Fetch organizers data
   useEffect(() => {
     if (status === "loading") return;  // Don't redirect while loading
-    if (status === 'unauthenticated' || session?.user?.role !== "admin"){
-          router.push('/')
+    if (status === 'unauthenticated' || session?.user?.role !== "admin") {
+      router.push('/')
     }
 
     if (status === "authenticated" && session.user.role === "admin") {
@@ -51,7 +53,7 @@ export default function EventOrganizersPage() {
       };
       fetchOrganizers();
     }
-  }, [refresh,status,router,session]);
+  }, [refresh, status, router, session]);
 
   const refreshEvents = () => setRefresh(!refresh);
 
@@ -60,12 +62,12 @@ export default function EventOrganizersPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!name || !email || !password || !phone) {
+    if (!name || !email || !password || !phone || !lifetime) {
       setError("Please fill in all fields.");
       return;
     }
 
-    const organizerData = { name, email, password, phone };
+    const organizerData = { name, email, password, phone, lifetime };
 
     try {
       let response;
@@ -109,6 +111,63 @@ export default function EventOrganizersPage() {
     }
   };
 
+  // Function to calculate expiration date based on the lifetime string
+  const calculateExpirationDate = (lifetime) => {
+    const currentDate = new Date();
+    const regex = /(\d+)\s*(month|year|day)s?/i; // Added "day" as a possible unit
+    const match = lifetime.match(regex);
+
+    if (match) {
+      const amount = parseInt(match[1]);
+      const unit = match[2].toLowerCase();
+
+      if (unit === "month") {
+        currentDate.setMonth(currentDate.getMonth() + amount);
+      } else if (unit === "year") {
+        currentDate.setFullYear(currentDate.getFullYear() + amount);
+      } else if (unit === "day") {
+        currentDate.setDate(currentDate.getDate() + amount); // Add days
+      }
+    }
+
+    return currentDate;
+  };
+
+
+  // Function to check if the lifetime has expired
+  const isLifetimeExpired = (lifetime) => {
+    const expirationDate = calculateExpirationDate(lifetime);
+    const currentDate = new Date();
+    return expirationDate < currentDate; // Returns true if expired
+  };
+
+  const generateRandomPassword = () => {
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let password = "";
+    for (let i = 0; i < 10; i++) {
+      password += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return password;
+  };
+
+  // Generate a new password and update it in the backend
+  const generateNewPassword = async (organizerId) => {
+    const newPassword = generateRandomPassword();
+    try {
+      await fetch(`/api/event-organizers/${organizerId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ password: newPassword }),
+      });
+    } catch (error) {
+      console.error("Error updating password:", error);
+    }
+    return newPassword;
+  };
+
+
   const handleShowDeleteModal = (organizerId) => {
     setOrganizerToDelete(organizerId);
     setShowDeleteModal(true);
@@ -119,6 +178,7 @@ export default function EventOrganizersPage() {
     setEmail(organizer.email);
     setPassword(organizer.password);
     setPhone(organizer.phone);
+    setLifetime(organizer.lifetime);
     setEditOrganizerId(organizer._id);
     setShowFormModal(true);
   };
@@ -128,6 +188,7 @@ export default function EventOrganizersPage() {
     setEmail("");
     setPassword("");
     setPhone("");
+    setLifetime("");
     setEditOrganizerId(null);
     setShowPassword(false);
   };
@@ -137,10 +198,11 @@ export default function EventOrganizersPage() {
     setEmail("");
     setPassword("");
     setPhone("");
+    setLifetime("");
     setEditOrganizerId(null); // Ensure no organizer is being edited
     setShowFormModal(true);
   };
-  
+
 
   const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
 
@@ -161,7 +223,7 @@ export default function EventOrganizersPage() {
     }
   };
 
-  if (status === 'loading'){
+  if (status === 'loading') {
     return (
       <div
         style={{
@@ -182,152 +244,192 @@ export default function EventOrganizersPage() {
     );
   }
 
-  if(status === 'authenticated' && session.user.role === "admin"){
+  if (status === 'authenticated' && session.user.role === "admin") {
     return (
-      <Container fluid>
+      <Container fluid style={{ backgroundColor: "#F3EFFD" }}>
         <Row>
           <Col xs={3} md={2} className="sidebar">
             <Sidebar />
           </Col>
           <Col xs={9} md={10} className="main-content">
-            <Container className="my-5">
-              <h4>Event Organizers</h4>
+            <Container className="my-5" style={{ backgroundColor: "#F3EFFD" }}>              
               {error && <Alert variant="danger">{error}</Alert>}
               {loading ? (
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  height: "100vh",
-                  flexDirection: "column",
-                }}
-              >
-                <Spinner animation="border" variant="primary" role="status" style={{ width: "2rem", height: "2rem" }}>
-                  <span className="visually-hidden">Loading...</span>
-                </Spinner>
-                <p style={{ marginTop: "1rem", fontSize: "1.2rem", fontWeight: "500", color: "#007bff" }}>
-                  Loading...
-                </p>
-              </div>
-            ) : (
-              <>
-              {/* Reset All Passwords Button */}
-              <div className="d-flex justify-content-between align-items-center mb-3">
-                <Button variant="warning" onClick={() => setShowResetAllModal(true)}>
-                  Reset All Passwords
-                </Button>
-              </div>
-              <Table striped bordered hover>
-                <thead>
-                  <tr>
-                    <th>No.</th>
-                    <th>Organizer Name</th>
-                    <th>Email</th>
-                    <th>Password</th>
-                    <th>Phone Number</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {organizers.length > 0 ? (
-                    organizers.map((organizer, index) => (
-                      <tr key={index}>
-                        <td>{index + 1}</td>
-                        <td>{organizer.name}</td>
-                        <td>{organizer.email}</td>
-                        <td>{maskPassword(organizer.password)}</td>
-                        <td>{organizer.phone}</td>
-                        <td>
-                          <div style={{ display: "flex", alignItems: "center" }}>
-                            <FaEdit
-                              style={{ cursor: "pointer", color: "blue", marginRight: "10px" }}
-                              onClick={() => handleEdit(organizer)}
-                            />
-                            <FaTrash
-                              style={{ cursor: "pointer", color: "red" }}
-                              onClick={() => handleShowDeleteModal(organizer._id)}
-                            />
-                          </div>
-                        </td>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "100vh",
+                    flexDirection: "column",
+                  }}
+                >
+                  <Spinner animation="border" variant="primary" role="status" style={{ width: "2rem", height: "2rem" }}>
+                    <span className="visually-hidden">Loading...</span>
+                  </Spinner>
+                  <p style={{ marginTop: "1rem", fontSize: "1.2rem", fontWeight: "500", color: "#007bff" }}>
+                    Loading...
+                  </p>
+                </div>
+              ) : (
+                <>
+                  {/* Reset All Passwords Button */}
+                  <div className="d-flex justify-content-between align-items-center mb-3" style={{ backgroundColor: "#F3EFFD" }}>
+                  <h4>Event Organizers</h4>
+                    <Button
+                      style={{ backgroundColor: "#A67EEC" }} // Corrected the background color
+                      className="ms-2"
+                      onClick={() => setShowResetAllModal(true)}>
+                      Reset All Passwords
+                    </Button>
+                  </div>
+                  <Table hover responsive style={{ fontSize: '0.8rem' }}>
+                    <thead>
+                      <tr>
+                        <th>No.</th>
+                        <th>Organizer Name</th>
+                        <th>Email</th>
+                        <th>Lifetime</th>
+                        <th>Password</th>
+                        <th>Phone Number</th>
+                        <th>Actions</th>
                       </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="6">No organizers found.</td>
-                    </tr>
-                  )}
-                </tbody>
-              </Table>
-  
-              {/* FAB Button */}
-              <Button
-                variant="primary"
-                className="fab"
-                onClick={handleShowFormModal}
-                style={{
-                  position: "fixed",
-                  bottom: "20px",
-                  right: "20px",
-                  borderRadius: "50%",
-                  width: "60px",
-                  height: "60px",
-                  fontSize: "24px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <FaPlus />
-              </Button>
-              </>
+                    </thead>
+                    <tbody>
+                      {organizers.length > 0 ? (
+                        organizers.map((organizer, index) => (
+                          <tr key={index}>
+                            <td>{index + 1}</td>
+                            <td>{organizer.name}</td>
+                            <td>{organizer.email}</td>
+                            <td>
+                              {isLifetimeExpired(organizer.lifetime) ? "Terminated" : organizer.lifetime}
+                            </td>
+                            <td>
+                              {isLifetimeExpired(organizer.lifetime)
+                                ? maskPassword(generateNewPassword(organizer._id))
+                                : maskPassword(organizer.password)}
+                            </td>
+                            <td>{organizer.phone}</td>
+                            <td>
+                              <div style={{ display: "flex", alignItems: "center" }}>
+                                <FaEdit
+                                  style={{ cursor: "pointer", color: "blue", marginRight: "10px" }}
+                                  onClick={() => handleEdit(organizer)}
+                                />
+                                <FaTrash
+                                  style={{ cursor: "pointer", color: "red" }}
+                                  onClick={() => handleShowDeleteModal(organizer._id)}
+                                />
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="6">No organizers found.</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </Table>
+
+                  {/* FAB Button */}
+                  <Button
+                    variant="primary"
+                    className="fab"
+                    onClick={handleShowFormModal}
+                    style={{
+                      position: "fixed",
+                      bottom: "20px",
+                      right: "20px",
+                      borderRadius: "50%",
+                      width: "60px",
+                      height: "60px",
+                      fontSize: "24px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <FaPlus />
+                  </Button>
+                </>
               )}
             </Container>
           </Col>
         </Row>
-  
+
         {/* Form Modal */}
         <Modal show={showFormModal} onHide={() => setShowFormModal(false)}>
           <Modal.Header closeButton>
             <Modal.Title>{editOrganizerId ? "Edit Organizer" : "Add Organizer"}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <Form onSubmit={handleSubmit}>
-              <FormField
-                title="Organizer Name"
-                type="text"
-                placeholder="Enter name"
-                value={name}
-                onChange={setName}
-              />
-              <FormField
-                title="Email"
-                type="text"
-                placeholder="Enter email"
-                value={email}
-                onChange={setEmail}
-              />
-              <FormField
-                title="Password"
-                type={showPassword ? "text" : "password"}
-                placeholder="Enter password"
-                value={password}
-                onChange={setPassword}
-              />
-              <FormField
-                title="Phone Number"
-                type="text"
-                placeholder="Enter phone number"
-                value={phone}
-                onChange={setPhone}
-              />
-              <Button variant="primary" type="submit">
-                {editOrganizerId ? "Update Organizer" : "Add Organizer"}
-              </Button>
+            <Form onSubmit={handleSubmit} className="p-4 shadow-sm rounded bg-light">
+              <Form.Group className="mb-3" controlId="organizerName">
+                <Form.Label>Organizer Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3" controlId="organizerEmail">
+                <Form.Label>Email</Form.Label>
+                <Form.Control
+                  type="email"
+                  placeholder="Enter email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3" controlId="organizerLifetime">
+                <Form.Label>Lifetime</Form.Label>
+                <Form.Select
+                  value={lifetime}
+                  onChange={(e) => setLifetime(e.target.value)}
+                >
+                  <option value="1-day">1 Day</option>
+                  <option value="1-month">1 Month</option>
+                  <option value="3-months">3 Months</option>
+                  <option value="6-months">6 Months</option>
+                  <option value="1-year">1 Year</option>
+                  <option value="permanent">Permanent</option>
+                </Form.Select>
+              </Form.Group>
+
+              <Form.Group className="mb-3" controlId="organizerPassword">
+                <Form.Label>Password</Form.Label>
+                <Form.Control
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3" controlId="organizerPhone">
+                <Form.Label>Phone Number</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter phone number"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
+              </Form.Group>
+
+              <div className="d-grid">
+                <Button variant="primary" type="submit">
+                  {editOrganizerId ? "Update Organizer" : "Add Organizer"}
+                </Button>
+              </div>
             </Form>
           </Modal.Body>
         </Modal>
-  
+
         {/* Delete Confirmation Modal */}
         <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
           <Modal.Header closeButton>
@@ -345,23 +447,23 @@ export default function EventOrganizersPage() {
             </Button>
           </Modal.Footer>
         </Modal>
-         {/* Reset All Passwords Confirmation Modal */}
-      <Modal show={showResetAllModal} onHide={() => setShowResetAllModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Reset All Passwords</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          Are you sure you want to reset all organizers&apos; passwords to <strong>12345</strong>? This action will also notify them via email.
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowResetAllModal(false)}>
-            Cancel
-          </Button>
-          <Button variant="warning" onClick={handleResetAllPasswords}>
-            Reset Passwords
-          </Button>
-        </Modal.Footer>
-      </Modal>
+        {/* Reset All Passwords Confirmation Modal */}
+        <Modal show={showResetAllModal} onHide={() => setShowResetAllModal(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>Confirm Reset All Passwords</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            Are you sure you want to reset all organizers&apos; passwords to <strong>12345</strong>? This action will also notify them via email.
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowResetAllModal(false)}>
+              Cancel
+            </Button>
+            <Button variant="warning" onClick={handleResetAllPasswords}>
+              Reset Passwords
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </Container>
     );
   }
