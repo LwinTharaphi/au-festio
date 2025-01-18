@@ -9,33 +9,43 @@
   left: 0;
   z-index: 100;
   border-right: 1px solid #e9ecef; /* Subtle border */
+  width: 250px; /* Width of the sidebar */
+  transition: width 0.3s ease; /* Sidebar transition */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
-/* Logo */
 .sidebar .logo {
   text-align: center;
-  margin-bottom: 20px;
+  margin: 0;
+  padding: 15px 0;
 }
 
-.sidebar .logo-img {
-  width: 120px; /* Adjust size for a polished look */
+.sidebar .logo img {
+  width: 180px; /* Logo width */
+  height: auto; /* Logo height */
+  object-fit: contain; /* Maintain aspect ratio */
 }
 
 /* Nav Link Styles */
 .sidebar .sidebar-link {
-  font-size: 0.9rem; /* Standard size */
+  font-size: 16px; /* Font size for the links */
   font-weight: 500;
   color: #495057; /* Soft gray */
-  padding: 10px;
-  border-radius: 8px;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  padding: 10px 20px; /* Adjust padding */
   display: flex;
   align-items: center; /* Align icons and text */
+  text-align: left; /* Force left alignment of the text */
+  justify-content: flex-start; /* Align text and icon to the left */
+  width: 100%; /* Ensure link takes the full width */
+  transition: background-color 0.3s ease, color 0.3s ease; /* Hover transition */
 }
 
 .sidebar .sidebar-link:hover {
   background-color: #A67EEC; /* Blue hover background */
   color: white;
+  border-radius: 5px; /* Rounded corners */
 }
 
 .sidebar .sidebar-link.text-danger {
@@ -51,6 +61,9 @@
 .sidebar .sidebar-link.active {
   background-color: #A67EEC;
   color: white;
+  border-radius: 5px;
+  /* padding: 0; */
+  /* margin: 0; */
 }
 
 /* Loading State */
@@ -64,67 +77,72 @@
 /* Sidebar Responsiveness */
 @media (max-width: 768px) {
   .sidebar {
-    min-height: auto;
+    /* min-height: auto; */
+    width: 250px; /* Adjust width for smaller screens */
     border-right: none;
     padding: 10px;
   }
 
   .sidebar .logo-img {
-    width: 80px; /* Smaller logo for mobile */
+    width: 200px; /* Adjust margin for smaller screens */
   }
 
   .sidebar .sidebar-link {
     font-size: 0.9rem; /* Slightly smaller links */
+    padding: 8px 15px; /* Adjust padding for smaller screens */
+  }
+  .sidebar .sidebar-link .me-2 {
+    font-size: 18px; /* Adjust icon size for mobile */
   }
 }
 
-.sticky-header {
-  position: sticky;
-  top: 0;
-  background-color: #fff; /* Optional: to avoid transparency issues */
-  z-index: 1000; /* Ensures it stays above other content */
-  padding: 10px 0; /* Optional: adjust spacing as needed */
-  border-bottom: 1px solid #ddd; /* Optional: adds a subtle border */
+/* Ensure text and icons align properly on smaller screens */
+@media (max-width: 767px) {
+  .sidebar .sidebar-link {
+    font-size: 14px; /* Adjust font size for mobile */
+    padding: 8px 15px; /* Adjust padding for mobile */
+  }
 }
 
-/* Sidebar.css */
-.sticky-top {
-  z-index: 1050;
+@media (max-width: 480px) {
+  .sidebar {
+    width: 100px; /* Even smaller sidebar for very small screens */
+  }
+
+  .sidebar .logo-img {
+    width: 120px; /* Further smaller logo */
+  }
+
+  .sidebar .sidebar-link {
+    font-size: 12px; /* Further reduce font size */
+    padding: 6px 10px; /* Further reduce padding */
+  }
+
+  .sidebar .sidebar-link .me-2 {
+    font-size: 16px; /* Smaller icons */
+  }
 }
 
+.navbar-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0 20px;
+}
 .navbar-link {
-  font-size: 16px;
-  font-weight: 500;
-  color: #333;
+  margin-right: 1rem;
 }
-
 .navbar-link:hover {
   color: #A67EEC;
 }
 
-.logo-img {
-  height: 40px;
-  width: auto;
-  margin-left: 30px;
-}
-/* Sidebar.css */
 .navbar-link.active {
-  color: #A67EEC; /* Change the color of the active link */
-  border: 2px solid #A67EEC; /* Add a border to highlight the active link */
-  border-radius: 18px; /* Slightly rounded corners for a smooth look */
-  padding: 6px 14px; /* Adjust padding to maintain a balanced design */
-  transition: all 0.3s ease; /* Smooth transition effect */
-}
-/* Ensure the Navbar and Nav items are displayed in a row and space out */
-.navbar-nav {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-}
-
-/* Add spacing between the Nav items */
-.navbar-link {
-  margin-right: 1rem;
+  color: #A67EEC;
+  border: 2px solid #A67EEC;
+  border-radius: 18px;
+  padding: 6px 14px;
+  transition: all 0.3s ease;
 }
 
 /* Media query for smaller screens */
@@ -143,5 +161,3 @@
     width: 100px;  /* Adjust logo size for smaller screens */
   }
 }
-
-

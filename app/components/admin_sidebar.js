@@ -27,6 +27,7 @@ export default function Sidebar() {
             width: '130px',  // Adjust width
             height: '70px',  // Maintain aspect ratio
             marginLeft: '30px',  // Add space to the left side (adjust as needed)
+            objectFit: 'contain'  // Maintain aspect ratio
           }}
         />
       </Navbar.Brand>
@@ -34,7 +35,7 @@ export default function Sidebar() {
       <Nav className="flex-column">
         <Nav.Link
           onClick={() => router.push(`/admin-dashboard`)}
-          className={`sidebar-link my-2 ${isActive(`/admin-dashboard`)}`}
+          className={`sidebar-link my-2 text-start ${isActive(`/admin-dashboard`)}`}
         >
           <BsGrid className="me-2" /> Dashboard
         </Nav.Link>
@@ -42,7 +43,7 @@ export default function Sidebar() {
         {/* Events */}
         <Nav.Link
           onClick={() => router.push(`/event-organizers`)}
-          className={`sidebar-link my-2 ${isActive(`/event-organizers`)}`}
+          className={`sidebar-link my-2 text-start ${isActive(`/event-organizers`)}`}
         >
           <BsPeople className="me-2" /> EventOrganizer
         </Nav.Link>
@@ -50,7 +51,7 @@ export default function Sidebar() {
         {/* Logout */}
         <Nav.Link
           onClick={() => signOut()}// Log out user
-          className="sidebar-link my-2 text-danger"
+          className="sidebar-link my-2 text-start text-danger"
         >
           <BsBoxArrowRight className="me-2" /> Logout
         </Nav.Link>

@@ -35,9 +35,10 @@ export default function Sidebar({ event }) {
           src="/logo.png"
           alt="Project Logo"
           style={{
-            width: '200px',  // Adjust width
-            height: 'auto',  // Maintain aspect ratio
-            marginLeft: '5px',  // Add space to the left side (adjust as needed)  
+            width: '130px',  // Adjust width
+            height: '70px',  // Maintain aspect ratio
+            marginLeft: '30px',  // Add space to the left side (adjust as needed)  
+            objectFit: 'contain'  // Fit the image inside the container
           }}
         />
       </Navbar.Brand>
@@ -46,7 +47,7 @@ export default function Sidebar({ event }) {
         {/* Dashboard */}
         <Nav.Link
           onClick={() => router.push(`/events/${event._id}/dashboard`)}
-          className={`sidebar-link my-2 ${isActive(`/events/${event._id}/dashboard`)}`}
+          className={`sidebar-link my-2 text-start ${isActive(`/events/${event._id}/dashboard`)}`}
         >
           <BsGrid className="me-2" /> Dashboard
         </Nav.Link>
@@ -54,7 +55,7 @@ export default function Sidebar({ event }) {
         {/* Performance Schedule */}
         <Nav.Link
           onClick={() => router.push(`/events/${event._id}/performance-schedule`)}
-          className={`sidebar-link my-2 ${isActive(`/events/${event._id}/performance-schedule`)}`}
+          className={`sidebar-link my-2 text-start ${isActive(`/events/${event._id}/performance-schedule`)}`}
         >
           <BsClock className="me-2" /> Performance Schedule
         </Nav.Link>
@@ -62,7 +63,7 @@ export default function Sidebar({ event }) {
         {/* Registered Students */}
         <Nav.Link
           onClick={() => router.push(`/events/${event._id}/students`)}
-          className={`sidebar-link my-2 ${isActive(`/events/${event._id}/students`)}`}
+          className={`sidebar-link my-2 text-start ${isActive(`/events/${event._id}/students`)}`}
         >
           <BsPeople className="me-2" /> Registered Students
         </Nav.Link>
@@ -70,7 +71,7 @@ export default function Sidebar({ event }) {
         {/* Booths */}
         <Nav.Link
           onClick={() => router.push(`/events/${event._id}/booths`)}
-          className={`sidebar-link my-2 ${isActive(`/events/${event._id}/booths`)}`}
+          className={`sidebar-link my-2 text-start ${isActive(`/events/${event._id}/booths`)}`}
         >
           <BsShop className="me-2" /> Booths
         </Nav.Link>
@@ -78,7 +79,7 @@ export default function Sidebar({ event }) {
         {/* Staffs */}
         <Nav.Link
           onClick={() => router.push(`/events/${event._id}/staffs`)}
-          className={`sidebar-link my-2 ${isActive(`/events/${event._id}/staffs`)}`}
+          className={`sidebar-link my-2 text-start ${isActive(`/events/${event._id}/staffs`)}`}
         >
           <BsPerson className="me-2" /> Staffs
         </Nav.Link>
@@ -86,7 +87,7 @@ export default function Sidebar({ event }) {
         {/* Scan QR */}
         <Nav.Link
           onClick={() => router.push(`/events/${event._id}/scanQR`)}
-          className={`sidebar-link my-2 ${isActive(`/events/${event._id}/scan`)}`}
+          className={`sidebar-link my-2sidebar-link my-2 text-start ${isActive(`/events/${event._id}/scan`)}`}
         >
           <BsQrCodeScan className="me-2" /> Scan QR
         </Nav.Link>
@@ -94,7 +95,7 @@ export default function Sidebar({ event }) {
         {/* Notifications */}
         <Nav.Link
           onClick={() => router.push(`/events/${event._id}/notification`)}
-          className={`sidebar-link my-2 ${isActive(`/events/${event._id}/notification`)}`}
+          className={`sidebar-link my-2 text-start ${isActive(`/events/${event._id}/notification`)}`}
         >
           <BsBell className="me-2" /> Notification
         </Nav.Link>
