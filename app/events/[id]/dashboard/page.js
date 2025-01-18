@@ -18,6 +18,7 @@ import {
   Row,
   Col,
   Card,
+  Table,
   Spinner,
   Alert,
   Breadcrumb,
@@ -74,7 +75,7 @@ export default function Dashboard() {
     }
   }, [id, route, session, status]);
 
-  const { stats, entryTimes, monthData, event, averageRating } = data || {};
+  const { stats, entryTimes, monthData, event, averageRating, performanceDetails } = data || {};
 
   if (status === 'loading' || !data) {
     return (
@@ -108,10 +109,10 @@ export default function Dashboard() {
   );
 
   // Formatting Monthly Crowd Flow Data
-  const monthLabels = Object.keys(monthData).map(
-    (month) => `Month ${+month + 1}`
-  );
-  const monthCounts = Object.values(monthData);
+  // const monthLabels = Object.keys(monthData).map(
+  //   (month) => `Month ${+month + 1}`
+  // );
+  // const monthCounts = Object.values(monthData);
 
   if (status === 'authenticated' && session.user.role === "organizer") {
     return (
@@ -206,7 +207,7 @@ export default function Dashboard() {
             {/* Charts Section */}
             <Row className="g-4">
               <Col md={6}>
-                <Card className="shadow-sm" style={{ backgroundColor: "#F4F9F9" }}>
+                <Card className="shadow-sm" style={{ backgroundColor: "#F4F9F9", minHeight: "300px" }}>
                   <Card.Body>
                     <h5 className="text-center">Entry Times</h5>
                     <Line
@@ -249,47 +250,52 @@ export default function Dashboard() {
                 </Card>
               </Col>
               <Col md={6}>
-                <Card className="shadow-sm" style={{ backgroundColor: "#F4F9F9" }}>
+                <Card className="text-center shadow-sm" style={{ backgroundColor: "#F4F9F9", minHeight: "300px" }}>
                   <Card.Body>
-                    <h5 className="text-center">Monthly Crowd Flow</h5>
-                    <Bar
-                      data={{
-                        labels: monthLabels,
-                        datasets: [
-                          {
-                            label: "Monthly Entries",
-                            data: monthCounts,
-                            backgroundColor: "rgba(255, 159, 64, 0.2)",
-                            borderColor: "rgba(255, 159, 64, 1)",
-                            borderWidth: 1,
-                          },
-                        ],
+                    <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>Performance Details</Card.Title>
+                    <table
+                      style={{
+                        width: "100%",
+                        backgroundColor: "#F4F9F9",
+                        borderCollapse: "collapse",
+                        fontSize: "0.9rem",
+                        marginTop: "10px",
                       }}
-                      options={{
-                        responsive: true,
-                        plugins: {
-                          legend: { display: false },
-                          tooltip: {
-                            callbacks: {
-                              label: (tooltipItem) =>
-                                `${tooltipItem.raw} entries`,
-                            },
-                          },
-                        },
-                        scales: {
-                          x: {
-                            title: { display: true, text: "Month" },
-                          },
-                          y: {
-                            title: { display: true, text: "Number of Entries" },
-                            beginAtZero: true,
-                          },
-                        },
-                      }}
-                    />
+                    >
+                      <thead>
+                        <tr style={{ borderBottom: "1px solid #ccc", textAlign: "center" }}>
+                          <th style={{ padding: "8px 12px" }}>Performance Name</th>
+                          <th style={{ padding: "8px 12px" }}>Time</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {performanceDetails && performanceDetails.length > 0 ? (
+                          performanceDetails.map((performance, index) => {
+                            const startTime = new Date(performance.startTime);
+                            const endTime = new Date(performance.endTime);
+                            return (
+                              <tr key={index} style={{ borderBottom: "1px solid #ddd" }}>
+                                <td style={{ padding: "8px 12px" }}>{performance.name}</td>
+                                <td style={{ padding: "8px 12px" }}>
+                                  {startTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} -{" "}
+                                  {endTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                </td>
+                              </tr>
+                            );
+                          })
+                        ) : (
+                          <tr>
+                            <td colSpan="2" style={{ textAlign: "center", padding: "8px 12px" }}>
+                              No performances available.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
                   </Card.Body>
                 </Card>
               </Col>
+
             </Row>
             <Row>
 

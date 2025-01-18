@@ -3,6 +3,7 @@ import Event from "@/models/Event";
 import Registeration from "@/models/Registeration";
 import Booth from "@/models/Booth";
 import Feedback from "@/models/Feedback";
+import Performance from "@/models/Performance";
 
 export async function GET(req, { params }) {
   const { id } = await params; // Get dynamic ID from the request parameters
@@ -23,6 +24,14 @@ export async function GET(req, { params }) {
     const registrations = await Registeration.find({ eventId: id });
     const booths = await Booth.find({ eventId: id });
     const feedbacks = await Feedback.find({eventId: id});
+    const performances = await Performance.find({eventId: id});
+
+    // Extract performance details (name, startTime, endTime)
+    const performanceDetails = performances.map((performance) => ({
+      name: performance.name,
+      startTime: performance.startTime,
+      endTime: performance.endTime,
+    }));
 
     // average reating
     const totalRatings = feedbacks.length;
@@ -59,6 +68,7 @@ export async function GET(req, { params }) {
         entryTimes,
         monthData,
         averageRating,
+        performanceDetails,
       }),
       {
         status: 200,
