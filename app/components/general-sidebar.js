@@ -24,7 +24,7 @@ export default function Sidebar() {
   const isActive = (path) => pathname === path ? 'active' : ''; // Function to check if the link is active
 
   return (
-    <Navbar expand="lg" className="sticky-top navbar-light bg-light"> 
+    <Navbar className="sticky-top navbar-light bg-light" style={{width: '100%'}}> 
       <Navbar.Brand
         className="logo"
         onClick={() => router.push(`/organizers/${userId}/general-dashboard`)} // Direct to dashboard
@@ -37,19 +37,21 @@ export default function Sidebar() {
             width: '130px',  // Adjust width
             height: '70px',  // Maintain aspect ratio
             marginLeft: '30px',  // Add space to the left side (adjust as needed)
+            objectFit: 'contain',  // Maintain image aspect ratio
           }}
         />
 
       </Navbar.Brand>
 
-      <Navbar.Toggle aria-controls="navbar-nav" />
-      <Navbar.Collapse id="navbar-nav" className="justify-content-end"> {/* Align items to the right */}
-        <Nav>
+      {/* <Navbar.Toggle aria-controls="navbar-nav" /> */}
+      {/* <Navbar.Collapse id="navbar-nav" className="justify-content-end"> Align items to the right */}
+      <div className="navbar-container" style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap' }}>
+        <Nav className="ml-auto navbar-nav">
           <Nav.Link
             onClick={() => userId && router.push(`/organizers/${userId}/general-dashboard`)}
             className={`navbar-link me-10 d-flex align-items-center ${isActive(`/organizers/${userId}/general-dashboard`)}`} // Apply active class conditionally
           >
-            <BsGrid className="me-2" /> {/* Icon */}
+            <BsGrid className="me-2" />
             Dashboard {/* Text */}
           </Nav.Link>
 
@@ -81,7 +83,8 @@ export default function Sidebar() {
             <BsBoxArrowRight className="me-2 " /> Logout
           </Nav.Link>
         </Nav>
-      </Navbar.Collapse>
+      </div>
+      {/* </Navbar.Collapse> */}
     </Navbar>
   );
 }

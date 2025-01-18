@@ -115,5 +115,33 @@
   padding: 6px 14px; /* Adjust padding to maintain a balanced design */
   transition: all 0.3s ease; /* Smooth transition effect */
 }
+/* Ensure the Navbar and Nav items are displayed in a row and space out */
+.navbar-nav {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+/* Add spacing between the Nav items */
+.navbar-link {
+  margin-right: 1rem;
+}
+
+/* Media query for smaller screens */
+@media (max-width: 767px) {
+  .navbar-nav {
+    display: block; /* Stack the links vertically on small screens */
+    text-align: center;
+  }
+  
+  .navbar-link {
+    margin-right: 0; /* Remove right margin when links are stacked */
+    margin-bottom: 1rem; /* Add space between stacked links */
+  }
+  
+  .logo img {
+    width: 100px;  /* Adjust logo size for smaller screens */
+  }
+}
 
 
