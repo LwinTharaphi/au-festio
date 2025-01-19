@@ -7,6 +7,8 @@ import Sidebar from "../../../components/Sidebar";
 import "../../../components/Sidebar.css";
 import moment from 'moment';
 import { useSession } from 'next-auth/react';
+import { set } from "mongoose";
+
 
 export default function EventPerformancesPage() {
   const { data: session, status } = useSession();
@@ -75,7 +77,15 @@ export default function EventPerformancesPage() {
               throw new Error("Failed to fetch events list.");
             }
             const data = await response.json();
-            setEventsList(data);
+            const today = moment();
+            const nonCompletedEvents = data.filter((event) => {
+              const registrationDate = moment(event.registerationDate);
+              const eventDate = moment(event.eventDate);
+      
+              // Include events where today is between registration and event date or before registration
+              return today.isBetween(registrationDate, eventDate, "day", "[]") || today.isBefore(registrationDate, "day");
+            });
+            setEventsList(nonCompletedEvents);
             console.log("Fetched events:", data); // Log the fetched events
           } catch (err) {
             setError(err.message);
@@ -180,6 +190,8 @@ export default function EventPerformancesPage() {
   const handleEventChange = (id) => {
     router.push(`/events/${id}/performance-schedule`);
   };
+
+  
 
   if (status === 'loading') {
     return (

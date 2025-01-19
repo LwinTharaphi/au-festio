@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Dropdown, Spinner } from "react-bootstrap";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useSession } from 'next-auth/react';
+import moment from "moment";
 
 // Function to render stars
 const renderStars = (rating) => {
@@ -79,7 +80,15 @@ export default function FeedbackPage() {
               throw new Error("Failed to fetch events list.");
             }
             const data = await response.json();
-            setEventsList(data);
+            const today = moment();
+            const nonCompletedEvents = data.filter((event) => {
+              const registrationDate = moment(event.registerationDate);
+              const eventDate = moment(event.eventDate);
+      
+              // Include events where today is between registration and event date or before registration
+              return today.isBetween(registrationDate, eventDate, "day", "[]") || today.isBefore(registrationDate, "day");
+            });
+            setEventsList(nonCompletedEvents);
             console.log("Fetched events:", data); // Log the fetched events
           } catch (err) {
             setError(err.message);
