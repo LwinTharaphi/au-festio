@@ -2,7 +2,6 @@
 
 import Student from "@/models/Student"; // Import the Student model
 import dbConnect from "@/lib/db"; // Import the database connection
-import { getAuth } from "firebase-admin/auth";
 
 // GET: Fetch students for a specific event
 export async function GET(request, { params }) {
@@ -17,14 +16,7 @@ export async function GET(request, { params }) {
 export async function POST(request) {
   await dbConnect(); // Ensure the database is connected
 
-  const {firebaseUID, sid, name, email, faculty, phone, eventId } = await request.json(); // Parse the incoming JSON data from the request
-
   try {
-    const user = await getAuth().getUser(firebaseUID);
-    if(!user) {
-      return new Response(JSON.stringify({ message: "User not found" }), { status: 404 });
-    }
-    
     const data = await request.json(); // Parse the incoming JSON data from the request
     const newStudent = new Student(data); // Create a new Student instance with the provided data
     await newStudent.save(); // Save the student to the database
