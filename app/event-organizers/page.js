@@ -111,62 +111,104 @@ export default function EventOrganizersPage() {
     }
   };
 
-  // Function to calculate expiration date based on the lifetime string
-  const calculateExpirationDate = (lifetime) => {
-    const currentDate = new Date();
-    const regex = /(\d+)\s*(month|year|day)s?/i; // Added "day" as a possible unit
-    const match = lifetime.match(regex);
+  // Function to determine the organizer's status based on lifetime
+  const getOrganizerStatus = (lifetime, createdAt) => {
+    if (lifetime.toLowerCase() === "permanent") {
+      return "active"; // Permanent organizers are always active
+    }
 
+    // Check if the lifetime has expired using the createdAt date
+    if (isLifetimeExpired(lifetime, createdAt)) {
+      return "terminated"; // Expired lifetimes transition to terminated
+    }
+
+    return "active"; // All other non-expired lifetimes are active
+  };
+
+  // Function to calculate expiration date based on the lifetime string and createdAt
+  const calculateExpirationDate = (lifetime, createdAt) => {
+    const startDate = new Date(createdAt);
+
+    if (lifetime === "permanent") {
+      // Return a date far in the future for permanent
+      return new Date(9999, 11, 31); // December 31, 9999
+    }
+
+    const regex = /(\d+)-?(day|month|year)s?/i;
+
+    const match = lifetime.match(regex);
     if (match) {
-      const amount = parseInt(match[1]);
+      const amount = parseInt(match[1], 10);
       const unit = match[2].toLowerCase();
 
       if (unit === "month") {
-        currentDate.setMonth(currentDate.getMonth() + amount);
+        startDate.setMonth(startDate.getMonth() + amount);
       } else if (unit === "year") {
-        currentDate.setFullYear(currentDate.getFullYear() + amount);
+        startDate.setFullYear(startDate.getFullYear() + amount);
       } else if (unit === "day") {
-        currentDate.setDate(currentDate.getDate() + amount); // Add days
+        startDate.setDate(startDate.getDate() + amount);
       }
     }
 
-    return currentDate;
+    return startDate;
   };
 
-
   // Function to check if the lifetime has expired
-  const isLifetimeExpired = (lifetime) => {
-    const expirationDate = calculateExpirationDate(lifetime);
+  const isLifetimeExpired = (lifetime, createdAt) => {
+    const expirationDate = calculateExpirationDate(lifetime, createdAt);
     const currentDate = new Date();
     return expirationDate < currentDate; // Returns true if expired
   };
 
-  const generateRandomPassword = () => {
+  // Function to generate a random email
+  const generateRandomEmail = () => {
     const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let password = "";
+    const domain = "@terminated.com"; // You can change this to any domain you prefer
+    let email = "";
+
+    // Generate a random email name
     for (let i = 0; i < 10; i++) {
-      password += characters.charAt(Math.floor(Math.random() * characters.length));
+      email += characters.charAt(Math.floor(Math.random() * characters.length));
     }
-    return password;
+
+    // Append the domain to form the full email address
+    email += domain;
+    return email;
   };
 
-  // Generate a new password and update it in the backend
-  const generateNewPassword = async (organizerId) => {
-    const newPassword = generateRandomPassword();
-    try {
-      await fetch(`/api/event-organizers/${organizerId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ password: newPassword }),
-      });
-    } catch (error) {
-      console.error("Error updating password:", error);
-    }
-    return newPassword;
-  };
+  const GenerateEmailComponent = ({ organizerId }) => {
+    const [newEmail, setNewEmail] = useState(null);
+    const [error, setError] = useState(null);
 
+    // Function to update email for the organizer
+    const generateNewEmail = async () => {
+      const newEmail = generateRandomEmail();
+      try {
+        const response = await fetch(`/api/event-organizers/${organizerId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email: newEmail }), // Send the random email
+        });
+        if (!response.ok) throw new Error("Failed to update email.");
+        setNewEmail(newEmail); // Set the new email if the request is successful
+      } catch (error) {
+        setError("Error updating email: " + error.message); // Set the error message
+      }
+    };
+
+    // Trigger the email generation when the component mounts
+    useEffect(() => {
+      generateNewEmail();
+    }, [organizerId]); // Run the effect when organizerId changes
+    return (
+      <>
+        {error && <span>{error}</span>}
+        {newEmail && <span>{newEmail}</span>}
+      </>
+    );
+  };
 
   const handleShowDeleteModal = (organizerId) => {
     setOrganizerToDelete(organizerId);
@@ -252,7 +294,7 @@ export default function EventOrganizersPage() {
             <Sidebar />
           </Col>
           <Col xs={9} md={10} className="main-content">
-            <Container className="my-5" style={{ backgroundColor: "#F3EFFD" }}>              
+            <Container className="my-5" style={{ backgroundColor: "#F3EFFD" }}>
               {error && <Alert variant="danger">{error}</Alert>}
               {loading ? (
                 <div
@@ -275,7 +317,7 @@ export default function EventOrganizersPage() {
                 <>
                   {/* Reset All Passwords Button */}
                   <div className="d-flex justify-content-between align-items-center mb-3" style={{ backgroundColor: "#F3EFFD" }}>
-                  <h4>Event Organizers</h4>
+                    <h4>Event Organizers</h4>
                     <Button
                       style={{ backgroundColor: "#A67EEC" }} // Corrected the background color
                       className="ms-2"
@@ -292,6 +334,7 @@ export default function EventOrganizersPage() {
                         <th>Lifetime</th>
                         <th>Password</th>
                         <th>Phone Number</th>
+                        <th>Status</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
@@ -301,16 +344,18 @@ export default function EventOrganizersPage() {
                           <tr key={index}>
                             <td>{index + 1}</td>
                             <td>{organizer.name}</td>
-                            <td>{organizer.email}</td>
                             <td>
-                              {isLifetimeExpired(organizer.lifetime) ? "Terminated" : organizer.lifetime}
+                              {isLifetimeExpired(organizer.lifetime, organizer.createdAt)
+                                ? <GenerateEmailComponent organizerId={organizer._id} />
+                                : organizer.email}
                             </td>
+                            <td>{organizer.lifetime}</td>
                             <td>
-                              {isLifetimeExpired(organizer.lifetime)
-                                ? maskPassword(generateNewPassword(organizer._id))
-                                : maskPassword(organizer.password)}
+                              {maskPassword(organizer.password)}
                             </td>
                             <td>{organizer.phone}</td>
+                            <td>
+                              {getOrganizerStatus(organizer.lifetime, organizer.createdAt)} </td>
                             <td>
                               <div style={{ display: "flex", alignItems: "center" }}>
                                 <FaEdit
