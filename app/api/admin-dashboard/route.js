@@ -30,7 +30,7 @@ export async function GET(request) {
     let completedEvent = 0;
 
     // Prepare the staff counts data
-    const Events = await Promise.all(events.map(async (event) => {
+    const nonCompletedEvents = await Promise.all(events.map(async (event) => {
         const registrationDate = moment(event.registerationDate);
         const eventDate = moment(event.eventDate);
 
@@ -40,6 +40,7 @@ export async function GET(request) {
             upcomingEvent++;
         } else if (today.isAfter(eventDate, "day")) {
             completedEvent++;
+            return null;
         }
 
         // Get all staff and roles
@@ -74,6 +75,8 @@ export async function GET(request) {
         };
     }));
 
+    const filteredEvents = nonCompletedEvents.filter(event => event !== null);
+
     // Prepare the response data
     const result = {
         Organizer: {
@@ -83,7 +86,7 @@ export async function GET(request) {
             ongoingEvent,
             upcomingEvent,
             completedEvent,
-            Events,
+            Events: filteredEvents,
           },
           organizers,
     };
