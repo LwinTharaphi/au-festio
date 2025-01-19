@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { unique } from 'next/dist/build/utils';
 
 const StudentSchema = new mongoose.Schema({
   firebaseUID: { type: String, required: true },
