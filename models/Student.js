@@ -13,11 +13,18 @@ const StudentSchema = new mongoose.Schema({
     enum: ['not viewed', 'paid', 'rejected'], 
     default: 'not viewed' 
   },
+  refundStatus: { 
+    type: String, 
+    enum: ['none', 'requested', 'refunded'], 
+    default: 'none',
+    required: true,
+  },
   checkInStatus: {
     type: String,
     enum: ['not checked-in', 'checked-in'],  // Add your custom statuses for check-in
     default: 'not checked-in',
   },
+  refundQRCode: { type: String },
   paymentScreenshotUrl: { type: String },
 }, {
   timestamps: true, // Adds createdAt and updatedAt timestamps

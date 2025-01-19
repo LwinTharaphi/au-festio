@@ -21,7 +21,7 @@ export default function RegisteredStudentsPage() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  // const [showRefundModal, setShowRefundModal] = useState(false);
+  const [showRefundModal, setShowRefundModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -32,6 +32,7 @@ export default function RegisteredStudentsPage() {
     faculty: "",
     phone: "",
     status: "",
+    refundStatus: "",
   });
 
   useEffect(() => {
@@ -155,23 +156,27 @@ export default function RegisteredStudentsPage() {
     }
   };
 
+  const handleShowRefundModal = (student) => {
+    setSelectedStudent(student);
+    setShowRefundModal(true);
+  };
 
-  // const handleRefundRequest = async () => {
-  //   try {
-  //     await fetch(`/api/events/${id}/students/${selectedStudent._id}`, {
-  //       method: "PUT",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({ status: "refunded" }),
-  //     });
-  //     setStudents(students.map(student =>
-  //       student._id === selectedStudent._id ? { ...student, status: "refunded" } : student
-  //     ));
+  const handleRefundRequest = async () => {
+    try {
+      await fetch(`/api/events/${id}/students/${selectedStudent._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refundStatus: "refunded" }),
+      });
+      setStudents(students.map(student =>
+        student._id === selectedStudent._id ? { ...student, refundStatus: "refunded" } : student
+      ));
 
-  //     setShowRefundModal(false);
-  //   } catch (error) {
-  //     setError("Failed to process refund request.");
-  //   }
-  // };
+      setShowRefundModal(false);
+    } catch (error) {
+      setError("Failed to process refund request.");
+    }
+  };
 
   const handleUpdateStudent = async () => {
     try {
@@ -311,7 +316,8 @@ export default function RegisteredStudentsPage() {
                         <th>Email</th>
                         <th>Faculty</th>
                         <th>Phone</th>
-                        <th>Status</th>
+                        <th>Payment</th>
+                        <th>Refund</th>
                         <th>Check In</th>
                         <th>Actions</th>
                       </tr>
@@ -329,7 +335,34 @@ export default function RegisteredStudentsPage() {
                             <td>{student.email}</td>
                             <td>{student.faculty}</td>
                             <td>{student.phone}</td>
-                            <td>{student.status}</td>
+                            <td>
+                              {student.status === "not viewed" ? (
+                                <FaEyeSlash style={{ fontSize: "15", color: "gray" }} />
+                              ) : student.status === "paid" ? (
+                                <FaRegCheckCircle style={{ fontSize: "15", color: "green" }} />
+                              ) : student.status === "rejected" ? (
+                                <FaTimesCircle style={{ fontSize: "15", color: "red" }} />
+                              ) : (
+                                "-"
+                              )}
+                            </td>
+                            <td>
+                              {student.refundStatus === "refunded" ? (
+                                <FaTimesCircle style={{ fontSize: "15", color: "red" }} />
+                              ) : student.refundStatus === "requested" ? (
+                                <span
+                                  style={{ color: "blue", textDecoration: "underline", cursor: "pointer" }}
+                                  onClick={(e) => {
+                                    e.stopPropagation(); // Stop row click
+                                    handleShowRefundModal(student); // Show the refund modal
+                                  }}
+                                >
+                                  requested
+                                </span>
+                              ) : (
+                                "-"
+                              )}
+                            </td>
                             <td>
                               {student.checkInStatus == "checked-in" ? (
                                 <FaRegCheckCircle style={{ fontSize: "15", color: "green" }} />
@@ -355,6 +388,7 @@ export default function RegisteredStudentsPage() {
                                       faculty: student.faculty,
                                       phone: student.phone,
                                       status: student.status,
+                                      refundStatus: student.refundStatus,
                                     });
                                     setShowEditModal(true); // Open edit modal
                                   }}
@@ -386,7 +420,7 @@ export default function RegisteredStudentsPage() {
           </Col>
         </Row>
 
-        {/* Modal for student refund request
+        Modal for student refund request
         {selectedStudent && (
           <Modal show={showRefundModal} onHide={() => setShowRefundModal(false)}>
             <Modal.Header closeButton>
@@ -396,6 +430,14 @@ export default function RegisteredStudentsPage() {
               <p>ID: {selectedStudent.sid}</p>
               <p>Name: {selectedStudent.name}</p>
               <p>Are you sure you want to process the refund for this student?</p>
+              <div>
+                <strong>Refund QR</strong>
+                <img
+                  src={selectedStudent.refundQRCode}
+                  alt="Refund QR Code"
+                  style={{ width: "100%", marginTop: "10px" }}
+                />
+              </div>
             </Modal.Body>
             <Modal.Footer>
               <Button variant="secondary" onClick={() => setShowRefundModal(false)}>
@@ -406,7 +448,7 @@ export default function RegisteredStudentsPage() {
               </Button>
             </Modal.Footer>
           </Modal>
-        )} */}
+        )}
 
 
         {/* Modal for edit student */}
