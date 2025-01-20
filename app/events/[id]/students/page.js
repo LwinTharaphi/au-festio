@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Container, Row, Col, Table, Button, Alert, Modal, Form, Dropdown, Spinner } from "react-bootstrap";
-import { FaTrash, FaEdit, FaEyeSlash, FaRegCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { FaTrash, FaEdit, FaEyeSlash, FaRegCheckCircle, FaRegTimesCircle } from "react-icons/fa";
 import Sidebar from "../../../components/Sidebar";
 import "../../../components/Sidebar.css";
 import { useSession } from 'next-auth/react';
@@ -172,20 +172,27 @@ export default function RegisteredStudentsPage() {
 
   const handleRefundRequest = async () => {
     try {
-      await fetch(`/api/events/${id}/students/${selectedStudent._id}`, {
+      // Send PUT request to update the refund status
+      await fetch(`/api/organizers/${userId}/events/${id}/students/${selectedStudent._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refundStatus: "refunded" }),
       });
-      setStudents(students.map(student =>
-        student._id === selectedStudent._id ? { ...student, refundStatus: "refunded" } : student
-      ));
-
+  
+      // Fetch the updated list of students from the server
+      const response = await fetch(`/api/organizers/${userId}/events/${id}/students`);
+      const updatedStudents = await response.json();
+  
+      // Update local state with the latest data
+      setStudents(updatedStudents);
+      setFilteredStudents(updatedStudents); // If you are using a filtered list
+  
       setShowRefundModal(false);
     } catch (error) {
       setError("Failed to process refund request.");
     }
   };
+  
 
   const handleUpdateStudent = async () => {
     try {
@@ -350,14 +357,14 @@ export default function RegisteredStudentsPage() {
                               ) : student.status === "paid" ? (
                                 <FaRegCheckCircle style={{ fontSize: "15", color: "green" }} />
                               ) : student.status === "rejected" ? (
-                                <FaTimesCircle style={{ fontSize: "15", color: "red" }} />
+                                <FaRegTimesCircle style={{ fontSize: "15", color: "red" }} />
                               ) : (
                                 "-"
                               )}
                             </td>
                             <td>
                               {student.refundStatus === "refunded" ? (
-                                <FaTimesCircle style={{ fontSize: "15", color: "red" }} />
+                                <FaRegCheckCircle style={{ fontSize: "15", color: "green" }} />
                               ) : student.refundStatus === "requested" ? (
                                 <span
                                   style={{ color: "blue", textDecoration: "underline", cursor: "pointer" }}
@@ -429,7 +436,7 @@ export default function RegisteredStudentsPage() {
           </Col>
         </Row>
 
-        Modal for student refund request
+        {/* Modal for student refund request */}
         {selectedStudent && (
           <Modal show={showRefundModal} onHide={() => setShowRefundModal(false)}>
             <Modal.Header closeButton>
@@ -572,17 +579,7 @@ export default function RegisteredStudentsPage() {
                 />
               </div>
             </Modal.Body>
-            <Modal.Footer>
-              <Button
-                variant="success"
-                onClick={() => {
-                  updateStatus(selectedStudent._id, "paid");
-                  setShowModal(false);
-                }}
-                disabled={selectedStudent.status === "paid"}
-              >
-                Approve
-              </Button>
+            <Modal.Footer>            
               <Button
                 variant="danger"
                 onClick={() => {
@@ -592,6 +589,16 @@ export default function RegisteredStudentsPage() {
                 disabled={selectedStudent.status === "rejected"}
               >
                 Deny
+              </Button>
+              <Button
+                variant="success"
+                onClick={() => {
+                  updateStatus(selectedStudent._id, "paid");
+                  setShowModal(false);
+                }}
+                disabled={selectedStudent.status === "paid"}
+              >
+                Approve
               </Button>
             </Modal.Footer>
           </Modal>
