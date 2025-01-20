@@ -37,11 +37,11 @@ export default function OrganizerHistoryPage() {
           if (!response.ok) {
             throw new Error("Failed to fetch events.");
           }
-          const events = await response.json();
+          const data = await response.json();
 
           // Check if events are completed based on `eventDate`
           const today = new Date();
-          const filteredEvents = events.filter((event) => {
+          const filteredEvents = data.events.filter((event) => {
             const eventDate = new Date(event.eventDate); // Parse eventDate
             return eventDate < today; // Completed if eventDate is in the past
           });

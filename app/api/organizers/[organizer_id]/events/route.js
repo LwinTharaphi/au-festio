@@ -22,9 +22,17 @@ const s3 = new S3Client({
 const baseS3Url = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/`;
 
 export async function GET(request,{ params }) {
-  await dbConnect();
+  const db = await dbConnect();
   const { organizer_id } = await params;
-  const events = await Event.find({organizer: organizer_id});
+  const { searchParams } = new URL(request.url);
+  const page = parseInt(searchParams.get('page')) || 1;
+  const limit = parseInt(searchParams.get('limit')) || 10;
+
+  const skip = (page - 1) * limit;
+
+  const events = await Event.find({organizer: organizer_id})
+        .sort({eventDate: 1}).skip(skip).limit(limit);
+  const totalEvents = await Event.countDocuments({organizer: organizer_id});
 
   // Map through events to process the poster field
   const eventsWithPoster = events.map(event => {
@@ -49,18 +57,23 @@ export async function GET(request,{ params }) {
      // Construct the full URL based on the relative path stored in the database
      const posterUrl = `${baseS3Url}${posterPath}`; // Use your server URL here
  
-    //  console.log('Poster URL:', posterUrl);
-
-    //  const qrUrl = `/${qrPath}`;
- 
      return {
        ...event.toObject(),
        poster: posterUrl, // Attach the URL to the poster field
       //  qr: qrUrl,
      };
   });
+  const totalPages = Math.ceil(totalEvents / limit);
+  const metadata = {
+    totalEvents,
+    totalPages,
+    currentPage: page,
+    hasNextPage: page < totalPages,
+    hasPreviousPage: page > 1,
+    limit,
+  };
 
-  return new Response(JSON.stringify(eventsWithPoster), { status: 200 });
+  return new Response(JSON.stringify({events: eventsWithPoster,metadata}), { status: 200 });
 }
 
 

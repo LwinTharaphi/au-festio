@@ -86,7 +86,7 @@ export default function RegisteredStudentsPage() {
             }
             const data = await response.json();
             const today = moment();
-            const nonCompletedEvents = data.filter((event) => {
+            const nonCompletedEvents = data.events.filter((event) => {
               const registrationDate = moment(event.registerationDate);
               const eventDate = moment(event.eventDate);
       
