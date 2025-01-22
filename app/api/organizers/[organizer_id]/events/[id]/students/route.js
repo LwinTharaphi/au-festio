@@ -15,8 +15,23 @@ const baseS3Url = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_R
 export async function GET(request, { params }) {
   await dbConnect();
   const { id } = await params; // Event ID from URL parameters
-  const students = await Student.find({ eventId: id }); // Fetch students by event ID
-  return new Response(JSON.stringify(students), { status: 200 });
+  try {
+    const students = await Student.find({ eventId: id }); // Fetch students by event ID
+
+    // Map through students to process the payment screenshot URL
+    const studentsWithScreenshotUrl = students.map(student => {
+      const paymentScreenshotUrl = `${baseS3Url}${student.paymentScreenshotUrl}`;
+      return {
+        ...student.toObject(),
+        paymentScreenshotUrl: paymentScreenshotUrl,
+      };
+    });
+
+    return new Response(JSON.stringify(studentsWithScreenshotUrl), { status: 200 });
+  } catch (error) {
+    console.error("Error fetching students:", error);
+    return new Response(JSON.stringify({ error: "Server error" }), { status: 500 });
+  }
 }
 
 
@@ -42,24 +57,5 @@ export async function POST(request) {
       JSON.stringify({ message: "Error registering student" }),
       { status: 500 }
     ); // Return an error response if the student creation fails
-  }
-}
-
-async function uploadFileToS3(fileUri, fileName) {
-  const fileStream = fs.createReadStream(fileUri);
-  
-  const uploadParams = {
-    Bucket: process.env.AWS_BUCKET_NAME,
-    Key: `payment-screenshots/${fileName}`,
-    Body: fileStream,
-    ContentType: 'image/png', // Adjust this based on your file type
-  };
-
-  try {
-    const data = await s3.send(new PutObjectCommand(uploadParams));
-    return `payment-screenshots/${fileName}`; // Return the S3 URL of the uploaded file
-  } catch (err) {
-    console.error('Error uploading file to S3', err);
-    throw new Error('Error uploading file to S3');
   }
 }

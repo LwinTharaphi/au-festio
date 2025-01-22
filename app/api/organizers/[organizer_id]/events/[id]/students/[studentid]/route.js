@@ -1,6 +1,7 @@
 import Student from "@/models/Student";
 import dbConnect from "@/lib/db";
-
+import { deleteBoothFile } from "../../booths/route";
+const baseS3Url = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/`;
 // GET: Fetch a specific student by student ID and event ID
 export async function GET(request, { params }) {
   await dbConnect();
@@ -10,8 +11,8 @@ export async function GET(request, { params }) {
   if (!student) {
     return new Response("Student not found", { status: 404 });
   }
-
-  return new Response(JSON.stringify(student), { status: 200 });
+  const paymentScreenshotUrl = `${baseS3Url}${student.paymentScreenshotUrl}`;
+  return new Response(JSON.stringify({...student.toObject(), paymentScreenshotUrl: paymentScreenshotUrl}), { status: 200 });
 }
 
 export async function POST(request, { params }) {
@@ -80,6 +81,13 @@ export async function DELETE(request, { params }) {
   await dbConnect();
   const { id, studentid } = await params; // Event ID and Student ID from URL parameters
   
+  const studentToDelete = await Student.findOne({ _id: studentid, eventId: id });
+  if(!studentToDelete) {
+    return new Response("Student not found", { status: 404 });
+  }
+  if(studentToDelete.paymentScreenshotUrl) {
+    await deleteBoothFile(studentToDelete.paymentScreenshotUrl);
+  }
   const deletedStudent = await Student.findOneAndDelete({ _id: studentid, eventId: id });
   
   if (!deletedStudent) {
