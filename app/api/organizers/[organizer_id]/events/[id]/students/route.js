@@ -27,12 +27,13 @@ export async function POST(request) {
   try {
     const data = await request.json(); // Parse the incoming JSON data from the request
     
-    let paymentScreenshotUrl = null; // Initialize the payment screenshot URL to null
-    if (data.paymentScreenshot && data.paymentScreenshot.uri) {
-      const { uri, fileName } = data.paymentScreenshot; // Extract the URI and file name from the payment screenshot
-      const paymentScreenshotUrl = await uploadFileToS3(uri, fileName); // Upload the payment screenshot to S3 
-    }
-    const newStudent = new Student({ ...data, paymentScreenshotUrl}); // Create a new Student instance with the provided data and the S3 URL
+    // let paymentScreenshotUrl = null; // Initialize the payment screenshot URL to null
+    // if (data.paymentScreenshot && data.paymentScreenshot.uri) {
+    //   const { uri, fileName } = data.paymentScreenshot; // Extract the URI and file name from the payment screenshot
+    //   const paymentScreenshotUrl = await uploadFileToS3(uri, fileName); // Upload the payment screenshot to S3 
+    // }
+    // const newStudent = new Student({ ...data, paymentScreenshotUrl}); // Create a new Student instance with the provided data and the S3 URL
+    const newStudent = new Student(data); // Create a new Student instance with the provided data
     await newStudent.save(); // Save the new student to the database
     return new Response(JSON.stringify(newStudent), { status: 201 }); // Return the newly created student
   } catch (error) {
