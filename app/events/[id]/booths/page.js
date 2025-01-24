@@ -145,7 +145,7 @@ export default function BoothPage() {
       setShowModal(false);
       setFormBooth({ boothNumber: "", boothName: "", vendorName: "", image: null });
       setEditMode(false);
-      router.reload();
+      window.location.reload(); // Reloads the page
     } catch (err) {
       setError(err.message);
     }
