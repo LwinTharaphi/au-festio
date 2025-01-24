@@ -259,12 +259,54 @@ export default function BoothPage() {
                     placeholder="Search Booths by Name or Vendor"
                     value={searchQuery}
                     onChange={handleSearchChange}
-                    className="mb-3 sticky-header"
-                    style={{ maxWidth: "300px", paddingLeft: "10px"}}
+                    className="mb-3"
+                    style={{ maxWidth: "300px", paddingLeft: "10px" }}
                   />
                   <Row>
-                    <Col md={8}>
+                    <Col md={12}>
                       <Row>
+                        <Col md={6} lg={4} className="mb-3">
+                          <Card
+                            onClick={() => {
+                              setEditMode(false);
+                              setFormBooth({
+                                boothNumber: "",
+                                boothName: "",
+                                vendorName: "",
+                                image: null,
+                              });
+                              setShowModal(true);
+                            }}
+                            style={{
+                              cursor: "pointer",
+                              textAlign: "center",
+                              height: "280px",
+                              display: "flex",
+                              justifyContent: "center",
+                              alignItems: "center",
+                            }}
+                          >
+                            <Card.Body
+                              style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                height: "100%",
+                                textAlign: "center",
+                              }}
+                            >
+                              <FontAwesomeIcon
+                                icon={faPlusCircle}
+                                style={{
+                                  fontSize: "3rem",
+                                  // Customize color as needed
+                                }}
+                              />
+                              <Card.Title style={{ marginTop: "10px" }}>Add New Booth</Card.Title>
+                            </Card.Body>
+                          </Card>
+                        </Col>
                         {filteredBooths.map((booth) => (
                           <Col md={6} lg={4} key={booth.boothId} className="mb-3">
                             <Card
@@ -324,11 +366,13 @@ export default function BoothPage() {
                                   }}
                                 >
                                   <Image
+                                    key={booth.imagePath + `?t=${new Date().getTime()}`} // Force re-render when image changes
                                     src={booth.imagePath}
                                     alt="Booth"
                                     layout="fill"
-                                    objectFit="cover" // Ensure the image fits the container
+                                    objectFit="cover"
                                   />
+
                                 </div>
                                 <Card.Text style={{ fontSize: "0.9rem", marginBottom: "0.3rem" }}>
                                   Name: {booth.boothName}
@@ -341,48 +385,7 @@ export default function BoothPage() {
                           </Col>
                         ))}
                         {/* Add New Booth Card */}
-                        <Col md={6} lg={4} className="mb-3">
-                          <Card
-                            onClick={() => {
-                              setEditMode(false);
-                              setFormBooth({
-                                boothNumber: "",
-                                boothName: "",
-                                vendorName: "",
-                                image: null,
-                              });
-                              setShowModal(true);
-                            }}
-                            style={{
-                              cursor: "pointer",
-                              textAlign: "center",
-                              height: "280px",
-                              display: "flex",
-                              justifyContent: "center",
-                              alignItems: "center",
-                            }}
-                          >
-                            <Card.Body
-                              style={{
-                                display: "flex",
-                                flexDirection: "column",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                height: "100%",
-                                textAlign: "center",
-                              }}
-                            >
-                              <FontAwesomeIcon
-                                icon={faPlusCircle}
-                                style={{
-                                  fontSize: "3rem",
-                                  // Customize color as needed
-                                }}
-                              />
-                              <Card.Title style={{ marginTop: "10px" }}>Add New Booth</Card.Title>
-                            </Card.Body>
-                          </Card>
-                        </Col>
+
                       </Row>
                     </Col>
                   </Row>
