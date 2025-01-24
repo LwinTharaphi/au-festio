@@ -17,6 +17,8 @@ import Image from "next/image";
 import Sidebar from "../../../components/Sidebar";
 import "../../../components/Sidebar.css";
 import { useSession } from 'next-auth/react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTrash, faEdit, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 import moment from "moment";
 
 export default function BoothPage() {
@@ -84,7 +86,7 @@ export default function BoothPage() {
             const nonCompletedEvents = data.events.filter((event) => {
               const registrationDate = moment(event.registerationDate);
               const eventDate = moment(event.eventDate);
-      
+
               // Include events where today is between registration and event date or before registration
               return today.isBetween(registrationDate, eventDate, "day", "[]") || today.isBefore(registrationDate, "day");
             });
@@ -105,31 +107,31 @@ export default function BoothPage() {
       setError("Booth Number and Vendor Name are required.");
       return;
     }
-  
+
     const formData = new FormData();
     formData.append("boothNumber", formBooth.boothNumber);
     formData.append("boothName", formBooth.boothName);
     formData.append("vendorName", formBooth.vendorName);
     if (formBooth.image) formData.append("image", formBooth.image);
-  
+
     try {
       const url = editMode
         ? `/api/organizers/${session.user.id}/events/${id}/booths/${currentBooth.boothId}`
         : `/api/organizers/${session.user.id}/events/${id}/booths`;
       const method = editMode ? "PUT" : "POST";
-  
+
       const response = await fetch(url, {
         method,
         body: formData,
       });
-  
+
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(editMode ? `Failed to update booth: ${errorText}` : `Failed to add booth: ${errorText}`);
       }
-  
+
       const booth = await response.json();
-  
+
       if (editMode) {
         setBooths((prevBooths) =>
           prevBooths.map((b) => (b.boothId === booth.boothId ? booth : b))
@@ -137,7 +139,7 @@ export default function BoothPage() {
       } else {
         setBooths((prevBooths) => [...prevBooths, booth]);
       }
-  
+
       setSelectedBooth(booth); // Automatically update selected booth details
       setShowModal(false);
       setFormBooth({ boothNumber: "", boothName: "", vendorName: "", image: null });
@@ -146,7 +148,7 @@ export default function BoothPage() {
       setError(err.message);
     }
   };
-  
+
 
   const handleFileChange = (e) => {
     setFormBooth({ ...formBooth, image: e.target.files[0] });
@@ -170,7 +172,7 @@ export default function BoothPage() {
 
   const handleDeleteBooth = async (boothId) => {
     try {
-      await fetch(`/api/events/${id}/booths/${boothId}`, { method: "DELETE" });
+      await fetch(`/api/organizers/${session.user.id}/events/${id}/booths/${boothId}`, { method: "DELETE" });
       setBooths((prevBooths) => prevBooths.filter((booth) => booth.boothId !== boothId));
     } catch (err) {
       setError("Failed to delete booth.");
@@ -219,11 +221,10 @@ export default function BoothPage() {
           <Col xs={3} md={2} className="sidebar">
             <Sidebar event={{ _id: id }} />
           </Col>
-
-          <Col xs={9} md={10} className="main-content">
+          <Col xs={9} md={10} className="main-content" style={{ backgroundColor: "#F3EFFD" }}>
             <Container>
               {error && <Alert variant="danger">{error}</Alert>}
-              <div className="d-flex justify-content-between align-items-center mb-4 sticky-header">
+              <div className="d-flex justify-content-between align-items-center mb-4 sticky-header" style={{ backgroundColor: "#F3EFFD" }}>
                 <h4>{eventName}: Booths</h4>
                 <Dropdown className="mb-4" style={{ textAlign: "right" }}>
                   <Dropdown.Toggle variant="secondary" id="dropdown-basic">
@@ -259,51 +260,89 @@ export default function BoothPage() {
                     value={searchQuery}
                     onChange={handleSearchChange}
                     className="mb-3 sticky-header"
-                    style={{ maxWidth: "300px" }}
+                    style={{ maxWidth: "300px", paddingLeft: "10px"}}
                   />
                   <Row>
                     <Col md={8}>
                       <Row>
                         {filteredBooths.map((booth) => (
-                          <Col md={6} key={booth.boothId}>
-                            <Card className="mb-3" onClick={() => handleBoothClick(booth)} style={{ cursor: "pointer" }}>
-                              <Card.Body>
-                                <Card.Title>Booth {booth.boothNumber}</Card.Title>
-                                <Card.Text>Vendor: {booth.vendorName}</Card.Text>
-                                <Image
-                                  src={booth.imagePath}
-                                  alt="Booth"
-                                  width={500}
-                                  height={300}
-                                  style={{ marginBottom: '10px', width: '100%', height: 'auto' }}
-                                />
-                                <Button
-                                  variant="primary"
-                                  size="sm"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleEditBooth(booth);
+                          <Col md={6} lg={4} key={booth.boothId} className="mb-3">
+                            <Card
+                              style={{
+                                height: "280px", // Ensure consistent card height
+                                display: "flex",
+                                flexDirection: "column",
+                              }}
+                              onClick={() => handleBoothClick(booth)}
+                            >
+                              {/* Card Header Section */}
+                              <Card.Header
+                                className="d-flex justify-content-between align-items-center"
+                                style={{ padding: "0.5rem 1rem" }}
+                              >
+                                <span style={{ fontSize: "1rem", fontWeight: "bold" }}>
+                                  Booth {booth.boothNumber}
+                                </span>
+                                <div style={{ display: "flex", alignItems: "center" }}>
+                                  <FontAwesomeIcon
+                                    icon={faEdit}
+                                    style={{
+                                      cursor: "pointer",
+                                      color: "blue",
+                                      marginRight: "10px",
+                                      fontSize: "1rem",
+                                    }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleEditBooth(booth);
+                                    }}
+                                  />
+                                  <FontAwesomeIcon
+                                    icon={faTrash}
+                                    style={{
+                                      cursor: "pointer",
+                                      color: "red",
+                                      marginRight: "10px",
+                                      fontSize: "1rem",
+                                    }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteBooth(booth.boothId);
+                                    }}
+                                  />
+                                </div>
+                              </Card.Header>
+
+                              {/* Card Body Section */}
+                              <Card.Body style={{ flex: 1, padding: "0.5rem" }}>
+                                <div
+                                  style={{
+                                    height: "150px",
+                                    position: "relative",
+                                    overflow: "hidden",
+                                    marginBottom: "0.5rem",
                                   }}
                                 >
-                                  Edit
-                                </Button>{" "}
-                                <Button
-                                  variant="danger"
-                                  size="sm"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDeleteBooth(booth.boothId);
-                                  }}
-                                >
-                                  Delete
-                                </Button>
+                                  <Image
+                                    src={booth.imagePath}
+                                    alt="Booth"
+                                    layout="fill"
+                                    objectFit="cover" // Ensure the image fits the container
+                                  />
+                                </div>
+                                <Card.Text style={{ fontSize: "0.9rem", marginBottom: "0.3rem" }}>
+                                  Name: {booth.boothName}
+                                </Card.Text>
+                                <Card.Text style={{ fontSize: "0.9rem" }}>
+                                  Vendor: {booth.vendorName}
+                                </Card.Text>
                               </Card.Body>
                             </Card>
                           </Col>
                         ))}
-                        <Col md={6}>
+                        {/* Add New Booth Card */}
+                        <Col md={6} lg={4} className="mb-3">
                           <Card
-                            className="mb-3"
                             onClick={() => {
                               setEditMode(false);
                               setFormBooth({
@@ -317,45 +356,34 @@ export default function BoothPage() {
                             style={{
                               cursor: "pointer",
                               textAlign: "center",
-                              height: "100%",
+                              height: "280px",
                               display: "flex",
                               justifyContent: "center",
                               alignItems: "center",
                             }}
                           >
-                            <Card.Body>
-                              <Card.Title>Add New Booth</Card.Title>
+                            <Card.Body
+                              style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                height: "100%",
+                                textAlign: "center",
+                              }}
+                            >
+                              <FontAwesomeIcon
+                                icon={faPlusCircle}
+                                style={{
+                                  fontSize: "3rem",
+                                  // Customize color as needed
+                                }}
+                              />
+                              <Card.Title style={{ marginTop: "10px" }}>Add New Booth</Card.Title>
                             </Card.Body>
                           </Card>
                         </Col>
                       </Row>
-                    </Col>
-
-                    <Col md={4}>
-                      {selectedBooth ? (
-                        <Card>
-                          <Card.Body>
-                            <Card.Title>Booth Details</Card.Title>
-                            <Card.Text>
-                              <strong>Booth Number:</strong> {selectedBooth.boothNumber}
-                              <br />
-                              <strong>Booth Name:</strong> {selectedBooth.boothName || "N/A"}
-                              <br />
-                              <strong>Vendor Name:</strong> {selectedBooth.vendorName}
-                              <br />
-                              <Image
-                                src={selectedBooth.imagePath}
-                                alt="Booth"
-                                width={500}
-                                height={300}
-                                style={{ marginBottom: '10px', width: '100%', height: 'auto' }}
-                              />
-                            </Card.Text>
-                          </Card.Body>
-                        </Card>
-                      ) : (
-                        <p>Select a booth to view details.</p>
-                      )}
                     </Col>
                   </Row>
                 </>
