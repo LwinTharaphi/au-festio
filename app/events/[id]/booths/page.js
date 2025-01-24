@@ -33,6 +33,7 @@ export default function BoothPage() {
   const [selectedBooth, setSelectedBooth] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [currentBooth, setCurrentBooth] = useState(null);
   const [formBooth, setFormBooth] = useState({
     boothNumber: "",
@@ -144,6 +145,7 @@ export default function BoothPage() {
       setShowModal(false);
       setFormBooth({ boothNumber: "", boothName: "", vendorName: "", image: null });
       setEditMode(false);
+      router.reload();
     } catch (err) {
       setError(err.message);
     }
