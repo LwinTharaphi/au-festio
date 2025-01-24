@@ -6,8 +6,8 @@ import { Container, Row, Col, Button, Card, Dropdown, DropdownButton, Form } fro
 import { useSession } from 'next-auth/react';
 import { Spinner } from 'reactstrap';
 import { BsPeopleFill, BsShop, BsCheckCircle, BsStarFill } from "react-icons/bs";
-import { Bar } from "react-chartjs-2";
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, SubTitle } from "chart.js";
+import { Bar, Pie } from "react-chartjs-2";
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, SubTitle, ArcElement } from "chart.js";
 // Register the components
 ChartJS.register(
   CategoryScale,
@@ -16,7 +16,7 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  SubTitle
+  SubTitle, ArcElement,
 );
 
 export default function Dashboard() {
@@ -31,12 +31,6 @@ export default function Dashboard() {
     labels: [],
     datasets: [],
   });
-  const paleColors = [
-    "#FDE2E4", "#E2F0CB", "#D7E3FC", "#FCE1E4", "#FFF4E6",
-    "#E9F5DB", "#E2ECF5", "#FBE4E6", "#E8F4F8", "#FAF3E3",
-    "#F3E8E9", "#E4F0E2", "#FDF6EC", "#E2E6F0", "#FBE3E4",
-    "#F4F9F9", "#EDEEF0", "#FFF8E7", "#F4F1E4", "#EFF5E9",
-  ];
 
   useEffect(() => {
     if (status === "loading") return;  // Don't redirect while loading
@@ -113,6 +107,27 @@ export default function Dashboard() {
     console.log("Staff Chart Data:", staffChartData);
   };
 
+  const PieChartCard = ({ data }) => {
+    const chartData = {
+      labels: ['Paid Events', 'Free Events'],
+      datasets: [
+        {
+          data: [data.paidEvents, data.freeEvents],
+          backgroundColor: ['#36A2EB', '#FF6384'], // Colors for paid and free events
+          borderColor: 'white',
+          borderWidth: 1,
+        },
+      ],
+    };
+
+    return (
+      <Card className="text-center shadow-sm" style={{ backgroundColor: "#F0F4F8", padding: "20px" }}>
+        <h5 style={{ fontWeight: "bold" }}>Free and Paid Events</h5>
+        <Pie data={chartData} />
+      </Card>
+    );
+  };
+
   if (status === 'loading') {
     return (
       <div
@@ -144,6 +159,7 @@ export default function Dashboard() {
 
   if (status === 'authenticated' && session.user.role === "organizer" && data) {
     // Prepare chart 
+    const userId = session.user.id;
     const events = data.Events;
     const eventNames = events.map(event => event.eventName);
     const studentsRegistered = events.map(event => event.studentsRegistered);
@@ -164,51 +180,13 @@ export default function Dashboard() {
                 <h3>Dashboard</h3>
               </div>
               <p>Welcome to the Dashboard!</p>
-
               <Row className="mb-4 g-4">
                 <Col md={4}>
-                  <Card className="text-center shadow-sm" style={{ backgroundColor: "#FDE2E4" }}>
-                    <Card.Body>
-                      <BsPeopleFill size={30} className="mb-2 text-primary" />
-                      <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
-                        Total Events
-                      </Card.Title>
-                      <Card.Text style={{ fontSize: "1.5rem" }}>
-                        {data.totalEvents}
-                      </Card.Text>
-                    </Card.Body>
-                  </Card>
-                </Col>
-                <Col md={4}>
-                  <Card className="text-center shadow-sm" style={{ backgroundColor: "#E2F0CB" }}>
-                    <Card.Body>
-                      <BsShop size={30} className="mb-2 text-success" />
-                      <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
-                        Paid Events
-                      </Card.Title>
-                      <Card.Text style={{ fontSize: "1.5rem" }}>
-                        {data.paidEvents}
-                      </Card.Text>
-                    </Card.Body>
-                  </Card>
-                </Col>
-                <Col md={4}>
-                  <Card className="text-center shadow-sm" style={{ backgroundColor:  "#D7E3FC"}}>
-                    <Card.Body>
-                      <BsCheckCircle size={30} className="mb-2 text-info" />
-                      <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
-                        Free Events
-                      </Card.Title>
-                      <Card.Text style={{ fontSize: "1.5rem" }}>
-                        {data.freeEvents}
-                      </Card.Text>
-                    </Card.Body>
-                  </Card>
-                </Col>
-              </Row>
-              <Row className="mb-4 g-4">
-                <Col md={4}>
-                  <Card className="text-center shadow-sm" style={{ backgroundColor: "#FFF4E6"}}>
+                  <Card
+                    className="text-center shadow-sm"
+                    style={{ backgroundColor: "#FFF4E6", cursor: "pointer" }} // Added cursor pointer to indicate it's clickable
+                    onClick={() => router.push(`/organizers/${userId}/create-event`)} // This will navigate to the create-event page
+                  >
                     <Card.Body>
                       <BsPeopleFill size={30} className="mb-2 text-primary" />
                       <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
@@ -221,7 +199,11 @@ export default function Dashboard() {
                   </Card>
                 </Col>
                 <Col md={4}>
-                  <Card className="text-center shadow-sm" style={{ backgroundColor: "#E2ECF5" }}>
+                  <Card 
+                    className="text-center shadow-sm" 
+                    style={{ backgroundColor: "#E2ECF5", cursor: "pointer" }}
+                    onClick={() => router.push(`/organizers/${userId}/create-event`)}
+                  >
                     <Card.Body>
                       <BsShop size={30} className="mb-2 text-success" />
                       <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
@@ -234,7 +216,11 @@ export default function Dashboard() {
                   </Card>
                 </Col>
                 <Col md={4}>
-                  <Card className="text-center shadow-sm" style={{ backgroundColor: "#E4F0E2" }}>
+                  <Card 
+                    className="text-center shadow-sm" 
+                    style={{ backgroundColor: "#E4F0E2", cursor: "pointer" }}
+                    onClick={() => router.push(`/organizers/${userId}/history`)}
+                  >
                     <Card.Body>
                       <BsCheckCircle size={30} className="mb-2 text-info" />
                       <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
@@ -248,9 +234,9 @@ export default function Dashboard() {
                 </Col>
               </Row>
               {/* Charts Section */}
-              <Row className="g-4">
+              <Row className="g-4 mb-4">
                 <Col md={6}>
-                  <Card className="shadow-sm" style={{ backgroundColor: "#F4F9F9" }}>
+                  <Card className="shadow-sm" style={{ backgroundColor: "#F4F9F9", height: '100%' }}>
                     <Card.Body>
                       <h5 className="text-center mb-4 mt-4">Students</h5>
                       <Bar
@@ -296,7 +282,7 @@ export default function Dashboard() {
                   </Card>
                 </Col>
                 <Col md={6}>
-                  <Card className="shadow-sm" style={{ backgroundColor: "#F4F9F9" }}>
+                  <Card className="shadow-sm" style={{ backgroundColor: "#F4F9F9", height: '100%' }}>
                     <Card.Body>
                       <Form.Select
                         value={selectedEvent ? selectedEvent.eventName : ""}
@@ -352,6 +338,14 @@ export default function Dashboard() {
                   </Card>
                 </Col>
               </Row>
+
+              <Row className="mb-4 g-4">
+                <Col md={4}>
+                  <PieChartCard data={{ paidEvents: data.paidEvents, freeEvents: data.freeEvents }} />
+                </Col>
+              </Row>
+
+
             </Container>
           </div>
         </div>
