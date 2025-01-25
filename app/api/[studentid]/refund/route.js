@@ -6,11 +6,11 @@ export async function POST(request) {
   try {
     await dbConnect(); // Connect to the database
 
-    const { studentId, eventId, refundPercentage, qrImage } = await request.json(); // Get data from the request body
+    const { studentId, refundPercentage } = await request.json(); // Get data from the request body
 
-    if (!studentId || !eventId || !refundPercentage || !qrImage) {
+    if (!studentId || !refundPercentage) {
       return new Response(
-        JSON.stringify({ message: "Missing required fields: studentId, eventId, refundPercentage, qrImage" }),
+        JSON.stringify({ message: "Missing required fields: studentId, eventId, refundPercentage" }),
         { status: 400 }
       );
     }
@@ -18,9 +18,7 @@ export async function POST(request) {
     // Create a new refund document
     const newRefund = new Refund({
       studentId,
-      eventId,
       refundPercentage,
-      qrImage,
     });
 
     // Save the refund record to the database
@@ -40,13 +38,17 @@ export async function POST(request) {
 }
 
 // GET: Retrieve refund details for a specific student and event
+// Assuming you're using Next.js API routes
 export async function GET(request, { params }) {
   try {
     await dbConnect(); // Connect to the database
 
-    const { studentid, eventid } = params; // Get studentId and eventId from URL parameters
+    // Destructure both studentid and eventid from params
+    const { studentid } = await params;
+    console.log(`Searching for refund with studentId: ${studentid}`); // Log query
 
-    const refund = await Refund.findOne({ studentId: studentid, eventId: eventid });
+    // Query for refund using both studentId and eventId
+    const refund = await Refund.findOne({ studentId: studentid });
 
     if (!refund) {
       return new Response(
@@ -58,7 +60,6 @@ export async function GET(request, { params }) {
     return new Response(
       JSON.stringify({
         refundPercentage: refund.refundPercentage,
-        qrImage: refund.qrImage,
       }), // Return refund details
       { status: 200 }
     );

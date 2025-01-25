@@ -15,6 +15,9 @@ export default function RegisteredStudentsPage() {
   const router = useRouter();
   const [eventData, setEventData] = useState(null);
   const [eventName, setEventName] = useState("");
+  const [refundPercentage, setRefundPercentage] = useState(0);
+  const [isPaid, setIsPaid] = useState(false);
+  const [price, setPrice] = useState(0);
   const [eventsList, setEventsList] = useState([]);
   const [students, setStudents] = useState([]);
   const [filteredStudents, setFilteredStudents] = useState([]);
@@ -56,6 +59,8 @@ export default function RegisteredStudentsPage() {
             const event = await response.json();
             setEventName(event.eventName);
             setEventData(event); // Store event data in the state
+            setIsPaid(event.isPaid);
+            setPrice(event.price);
           } catch (err) {
             setError(err.message);
           } finally {
@@ -89,7 +94,6 @@ export default function RegisteredStudentsPage() {
             const nonCompletedEvents = data.events.filter((event) => {
               const registrationDate = moment(event.registerationDate);
               const eventDate = moment(event.eventDate);
-      
               // Include events where today is between registration and event date or before registration
               return today.isBetween(registrationDate, eventDate, "day", "[]") || today.isBefore(registrationDate, "day");
             });
@@ -107,6 +111,46 @@ export default function RegisteredStudentsPage() {
       }
     }
   }, [id, router, session, status]);
+
+  // Fetch Refund Details function moved outside of useEffect
+  const fetchRefundDetails = async (studentId) => {
+    if (!studentId) return; // Ensure studentId is valid
+  
+    // Check if the refund has been requested for the student before making the fetch request
+    if (selectedStudent.refundStatus !== "requested") {
+      console.log("Refund not requested for this student, skipping fetch.");
+      setRefundPercentage(null); // Set refund percentage to null if refund hasn't been requested
+      return;
+    }
+  
+    try {
+      const response = await fetch(`/api/${studentId}/refund`);
+  
+      if (response.ok) {
+        const refundData = await response.json();
+        if (refundData && refundData.refundPercentage) {
+          console.log("Refund data for student:", refundData);
+          setRefundPercentage(refundData.refundPercentage); // Set the refund percentage in the state
+        } else {
+          console.log("No refund data available for this student.");
+          setRefundPercentage(null); // No refund data, set refund percentage to null
+        }
+      } else {
+        console.log("No refund data found for this student.");
+        setRefundPercentage(null); // No refund data, set refund percentage to null
+      }
+    } catch (err) {
+      console.error("Error fetching refund details:", err);
+      setRefundPercentage(null); // In case of any other error, set refund percentage to null
+    }
+  };
+  
+  useEffect(() => {
+    if (selectedStudent && selectedStudent._id) {
+      // Fetch refund details only when the selectedStudent changes and is valid
+      fetchRefundDetails(selectedStudent._id);
+    }
+  }, [selectedStudent]); // Trigger fetching only when selectedStudent changes
 
   // const handleRowClick = (student) => {
   //   if (student.status === "refund requested") {
@@ -178,21 +222,21 @@ export default function RegisteredStudentsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refundStatus: "refunded" }),
       });
-  
+
       // Fetch the updated list of students from the server
       const response = await fetch(`/api/organizers/${userId}/events/${id}/students`);
       const updatedStudents = await response.json();
-  
+
       // Update local state with the latest data
       setStudents(updatedStudents);
       setFilteredStudents(updatedStudents); // If you are using a filtered list
-  
+
       setShowRefundModal(false);
     } catch (error) {
       setError("Failed to process refund request.");
     }
   };
-  
+
 
   const handleUpdateStudent = async () => {
     try {
@@ -332,8 +376,9 @@ export default function RegisteredStudentsPage() {
                         <th>Email</th>
                         <th>Faculty</th>
                         <th>Phone</th>
-                        <th>Payment</th>
-                        <th>Refund</th>
+                        {/* Conditionally render Payment and Refund headers */}
+                        {isPaid && <th>Payment</th>}
+                        {isPaid && <th>Refund</th>}
                         <th>Check In</th>
                         <th>Actions</th>
                       </tr>
@@ -343,44 +388,49 @@ export default function RegisteredStudentsPage() {
                         filteredStudents.map((student) => (
                           <tr
                             key={student._id}
-                            onClick={() => handleRowClick(student)}
-                            style={{ cursor: "pointer" }}
+                            onClick={isPaid ? () => handleRowClick(student) : undefined} // Only attach onClick for paid events
+                            style={{ cursor: isPaid ? "pointer" : "default" }} // Show pointer cursor only for paid events
                           >
                             <td>{student.sid}</td>
                             <td>{student.name}</td>
                             <td>{student.email}</td>
                             <td>{student.faculty}</td>
                             <td>{student.phone}</td>
+                            {/* Conditionally render Payment and Refund cells */}
+                            {isPaid && (
+                              <td>
+                                {student.status === "not viewed" ? (
+                                  <FaEyeSlash style={{ fontSize: "15", color: "gray" }} />
+                                ) : student.status === "paid" ? (
+                                  <FaRegCheckCircle style={{ fontSize: "15", color: "green" }} />
+                                ) : student.status === "rejected" ? (
+                                  <FaRegTimesCircle style={{ fontSize: "15", color: "red" }} />
+                                ) : (
+                                  "-"
+                                )}
+                              </td>
+                            )}
+                            {isPaid && (
+                              <td>
+                                {student.refundStatus === "refunded" ? (
+                                  <FaRegCheckCircle style={{ fontSize: "15", color: "green" }} />
+                                ) : student.refundStatus === "requested" ? (
+                                  <span
+                                    style={{ color: "blue", textDecoration: "underline", cursor: "pointer" }}
+                                    onClick={(e) => {
+                                      e.stopPropagation(); // Stop row click
+                                      handleShowRefundModal(student); // Show the refund modal
+                                    }}
+                                  >
+                                    requested
+                                  </span>
+                                ) : (
+                                  "-"
+                                )}
+                              </td>
+                            )}
                             <td>
-                              {student.status === "not viewed" ? (
-                                <FaEyeSlash style={{ fontSize: "15", color: "gray" }} />
-                              ) : student.status === "paid" ? (
-                                <FaRegCheckCircle style={{ fontSize: "15", color: "green" }} />
-                              ) : student.status === "rejected" ? (
-                                <FaRegTimesCircle style={{ fontSize: "15", color: "red" }} />
-                              ) : (
-                                "-"
-                              )}
-                            </td>
-                            <td>
-                              {student.refundStatus === "refunded" ? (
-                                <FaRegCheckCircle style={{ fontSize: "15", color: "green" }} />
-                              ) : student.refundStatus === "requested" ? (
-                                <span
-                                  style={{ color: "blue", textDecoration: "underline", cursor: "pointer" }}
-                                  onClick={(e) => {
-                                    e.stopPropagation(); // Stop row click
-                                    handleShowRefundModal(student); // Show the refund modal
-                                  }}
-                                >
-                                  requested
-                                </span>
-                              ) : (
-                                "-"
-                              )}
-                            </td>
-                            <td>
-                              {student.checkInStatus == "checked-in" ? (
+                              {student.checkInStatus === "checked-in" ? (
                                 <FaRegCheckCircle style={{ fontSize: "15", color: "green" }} />
                               ) : (
                                 "-"
@@ -443,18 +493,52 @@ export default function RegisteredStudentsPage() {
               <Modal.Title>Refund Request for {selectedStudent.name}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              <p>ID: {selectedStudent.sid}</p>
-              <p>Name: {selectedStudent.name}</p>
-              <p>Are you sure you want to process the refund for this student?</p>
-              <div>
-                <strong>Refund QR</strong>
-                <img
-                  src={selectedStudent.refundQRCode}
-                  alt="Refund QR Code"
-                  style={{ width: "100%", marginTop: "10px" }}
-                />
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  gap: "20px",
+                }}
+              >
+                {/* Left Section: ID, Name, and Confirmation */}
+                <div style={{ flex: "1" }}>
+                  <p>
+                    <strong>ID:</strong> {selectedStudent.sid}
+                  </p>
+                  <p>
+                    <strong>Name:</strong> {selectedStudent.name}
+                  </p>
+                  {/* Display the refund percentage */}
+                  {refundPercentage !== undefined && (
+                    <p>
+                      <strong>Refund Percentage:</strong> {refundPercentage}% which is {price * (refundPercentage / 100)} THB
+                    </p>
+                  )}
+                  <p>Are you sure you want to process the refund for this student?</p>
+                  
+                </div>
+
+                {/* Right Section: Refund QR Code */}
+                <div style={{ flex: "1", textAlign: "center" }}>
+                  <strong>Refund QR:</strong>
+                  <img
+                    src={selectedStudent.refundQRCode}
+                    alt="Refund QR Code"
+                    style={{
+                      display: "block",
+                      margin: "10px auto",
+                      maxHeight: "320px", // Limits the height to fit within the modal
+                      maxWidth: "100%", // Ensures it scales properly
+                      objectFit: "contain", // Maintains aspect ratio
+                    }}
+                  />
+                </div>
               </div>
             </Modal.Body>
+
+
             <Modal.Footer>
               <Button variant="secondary" onClick={() => setShowRefundModal(false)}>
                 Close
@@ -568,18 +652,40 @@ export default function RegisteredStudentsPage() {
               <Modal.Title>Student Details</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              <p><strong>ID:</strong> {selectedStudent.sid}</p>
-              <p><strong>Name:</strong> {selectedStudent.name}</p>
-              <div>
-                <strong>Payment Screenshot:</strong>
-                <img
-                  src={selectedStudent.paymentScreenshotUrl}
-                  alt="Payment Screenshot"
-                  style={{ width: "100%", marginTop: "10px" }}
-                />
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  gap: "20px",
+                }}
+              >
+                {/* Left Section: ID and Name */}
+                <div style={{ flex: "1" }}>
+                  <p><strong>ID:</strong> {selectedStudent.sid}</p>
+                  <p><strong>Name:</strong> {selectedStudent.name}</p>
+                </div>
+
+                {/* Right Section: Payment Screenshot */}
+                <div style={{ flex: "1", textAlign: "center" }}>
+                  <strong>Payment Screenshot:</strong>
+                  <img
+                    src={selectedStudent.paymentScreenshotUrl}
+                    alt="Payment Screenshot"
+                    style={{
+                      display: "block",
+                      margin: "10px auto",
+                      maxHeight: "320px", // Limits the height to fit within the modal
+                      maxWidth: "100%", // Ensures it scales properly
+                      objectFit: "contain", // Maintains aspect ratio
+                    }}
+                  />
+                </div>
               </div>
             </Modal.Body>
-            <Modal.Footer>            
+
+            <Modal.Footer>
               <Button
                 variant="danger"
                 onClick={() => {
