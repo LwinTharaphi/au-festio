@@ -17,6 +17,8 @@ import moment from "moment";
 import Sidebar from '../../../components/general-sidebar';
 import { useSession } from 'next-auth/react';
 import { Spinner } from 'react-bootstrap';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 
 function EventForm() {
   const { data: session, status } = useSession();
@@ -63,6 +65,12 @@ function EventForm() {
 
   // State to manage refund policy array
   const [refundPolicy, setRefundPolicy] = useState([]);
+
+  const [expandedSection, setExpandedSection] = useState({}); // Expanded sections
+
+  const toggleSection = (section) => {
+    setExpandedSection((prev) => ({ ...prev, [section]: !prev[section] }));
+  };
 
   // Function to add a new policy
   const addRefundPolicy = () => {
@@ -446,100 +454,115 @@ function EventForm() {
                 ["ongoing", "upcoming"].map((status) => (
                   Object.keys(groupedEvents[status] || {}).length > 0 ? (
                     <Box key={status} sx={{ marginTop: 4 }}>
-                      <Typography variant="h5" sx={{ marginBottom: 3 }}>
-                        {status.charAt(0).toUpperCase() + status.slice(1)} Events
-                      </Typography>
-                      {Object.entries(groupedEvents[status]).map(([month, events], monthIndex) => (
-                        <Box key={monthIndex} sx={{ marginTop: 2 }}>
-                          <Typography variant="h6" sx={{ marginBottom: 2 }}>
-                            {month} Events
-                          </Typography>
-                          <Grid container spacing={4}>
-                            {events.map((event, eventIndex) => (
-                              <Grid item xs={12} sm={6} md={4} key={event._index}>
-                                <Card sx={{ position: "relative", marginBottom: 2 }}>
-                                  <CardActionArea onClick={() => router.push(`/events/${event._id}/dashboard`)}>
-                                    {event.posterName && (
-                                      <CardMedia
-                                        component="img"
-                                        height="140"
-                                        image={event.poster} // Ensure the correct URL is set for images
-                                        alt={event.posterName}
-                                      />
-                                    )}
-                                  </CardActionArea>
-                                  <CardContent>
-                                    <Typography variant="h6" align="center">
-                                      {event.eventName}
-                                    </Typography>
-                                  </CardContent>
-                                  {/* Delete Button */}
-                                  <Box
-                                    sx={{
-                                      position: "absolute",
-                                      top: 8,
-                                      right: 8,
-                                    }}
-                                  >
-                                    <IconButton
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        // console.log("menu click",event._index)
-                                        handleMenuClick(e, event._index);
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => toggleSection(status)}
+                      >
+                        <Typography variant="h5" sx={{ marginBottom: 3 }}>
+                          {status.charAt(0).toUpperCase() + status.slice(1)} Events
+                        </Typography>
+                        <IconButton>
+                          {expandedSection[status] ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                        </IconButton>
+                      </Box>
+                      {expandedSection[status] &&(
+                        Object.entries(groupedEvents[status]).map(([month, events], monthIndex) => (
+                          <Box key={monthIndex} sx={{ marginTop: 2 }}>
+                            <Typography variant="h6" sx={{ marginBottom: 2 }}>
+                              {month} Events
+                            </Typography>
+                            <Grid container spacing={4}>
+                              {events.map((event, eventIndex) => (
+                                <Grid item xs={12} sm={6} md={4} key={event._index}>
+                                  <Card sx={{ position: "relative", marginBottom: 2 }}>
+                                    <CardActionArea onClick={() => router.push(`/events/${event._id}/dashboard`)}>
+                                      {event.posterName && (
+                                        <CardMedia
+                                          component="img"
+                                          height="140"
+                                          image={event.poster} // Ensure the correct URL is set for images
+                                          alt={event.posterName}
+                                        />
+                                      )}
+                                    </CardActionArea>
+                                    <CardContent>
+                                      <Typography variant="h6" align="center">
+                                        {event.eventName}
+                                      </Typography>
+                                    </CardContent>
+                                    {/* Delete Button */}
+                                    <Box
+                                      sx={{
+                                        position: "absolute",
+                                        top: 8,
+                                        right: 8,
                                       }}
-                                      sx={{ color: "rgba(0, 0, 0, 0.54)" }}
                                     >
-                                      <MoreVertIcon />
-                                    </IconButton>
-                                  </Box>
+                                      <IconButton
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          // console.log("menu click",event._index)
+                                          handleMenuClick(e, event._index);
+                                        }}
+                                        sx={{ color: "rgba(0, 0, 0, 0.54)" }}
+                                      >
+                                        <MoreVertIcon />
+                                      </IconButton>
+                                    </Box>
 
-                                  {/* Menu with options for delete/edit */}
-                                  <Menu
-                                    anchorEl={anchorEl}
-                                    open={Boolean(anchorEl)}
-                                    onClose={handleCloseMenu}
-                                    anchorOrigin={{
-                                      vertical: "top",
-                                      horizontal: "right",
-                                    }}
-                                    transformOrigin={{
-                                      vertical: "top",
-                                      horizontal: "right",
-                                    }}
-                                  >
-                                    <MenuItem
-                                      onClick={() => {
-                                        // console.log("delete confirm",eventIndex)
-                                        confirmDelete();
+                                    {/* Menu with options for delete/edit */}
+                                    <Menu
+                                      anchorEl={anchorEl}
+                                      open={Boolean(anchorEl)}
+                                      onClose={handleCloseMenu}
+                                      anchorOrigin={{
+                                        vertical: "top",
+                                        horizontal: "right",
+                                      }}
+                                      transformOrigin={{
+                                        vertical: "top",
+                                        horizontal: "right",
                                       }}
                                     >
-                                      Delete
-                                    </MenuItem>
-                                    <MenuItem
-                                      onClick={(e) => {
-                                        // console.log("clicked edit",event._index)
-                                        handleEdit();
-                                      }}
-                                    >
-                                      Edit
-                                    </MenuItem>
-                                  </Menu>
-                                </Card>
-                                <Typography variant="h6" align="center">
-                                  Registeration Date: {event.registerationDate
-                                    ? new Date(event.registerationDate).toISOString().split('T')[0]
-                                    : "Invalid Date"}
-                                </Typography>
-                                <Typography variant="h6" align="center">
-                                  Event Date: {event.eventDate
-                                    ? new Date(event.eventDate).toISOString().split('T')[0]
-                                    : "Invalid Date"}
-                                </Typography>
-                              </Grid>
-                            ))}
-                          </Grid>
-                        </Box>
-                      ))}
+                                      <MenuItem
+                                        onClick={() => {
+                                          // console.log("delete confirm",eventIndex)
+                                          confirmDelete();
+                                        }}
+                                      >
+                                        Delete
+                                      </MenuItem>
+                                      <MenuItem
+                                        onClick={(e) => {
+                                          // console.log("clicked edit",event._index)
+                                          handleEdit();
+                                        }}
+                                      >
+                                        Edit
+                                      </MenuItem>
+                                    </Menu>
+                                  </Card>
+                                  <Typography variant="h6" align="center">
+                                    Registeration Date: {event.registerationDate
+                                      ? new Date(event.registerationDate).toISOString().split('T')[0]
+                                      : "Invalid Date"}
+                                  </Typography>
+                                  <Typography variant="h6" align="center">
+                                    Event Date: {event.eventDate
+                                      ? new Date(event.eventDate).toISOString().split('T')[0]
+                                      : "Invalid Date"}
+                                  </Typography>
+                                </Grid>
+                              ))}
+                            </Grid>
+                          </Box>
+                        ))
+                      )}
                     </Box>
                   ) : (
                     <Typography key={status} variant="body1" align="center" sx={{ marginTop: 3 }}>
