@@ -10,7 +10,7 @@ import {
 import FormField from '../../../components/FormField';
 import CloseIcon from '@mui/icons-material/Close';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import AddIcon from '@mui/icons-material/Add';
 // import dayjs from 'dayjs';
 import moment from "moment";
@@ -22,6 +22,7 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 
 function EventForm() {
   const { data: session, status } = useSession();
+  const searchParams = useSearchParams();
   const router = useRouter();
 
   const [isArEnabled, setIsArEnabled] = useState(false);
@@ -89,16 +90,12 @@ function EventForm() {
     });
   };
 
-
   // Function to remove a specific policy
   const removeRefundPolicy = (index) => {
     setRefundPolicy((prevPolicies) =>
       prevPolicies.filter((_, i) => i !== index)
     );
   };
-
-
-
 
   const handleFabClick = () => {
     resetForm();
@@ -115,7 +112,6 @@ function EventForm() {
       }
     }
   };
-
 
   const handleDeleteFile = (type) => {
     if (type === 'poster') {
@@ -151,10 +147,14 @@ function EventForm() {
             new Date(a.registerationDate) - new Date(b.registerationDate));
           setEvents(sortedEvents);
         };
+        const expandParam = searchParams.get('expand');
+        if (expandParam) {
+          setExpandedSection((prev) => ({ ...prev, [expandParam]: true }));
+        }
         fetchEvents();
       }
     }
-  }, [refresh, router, session, status]);
+  }, [refresh, router, session, status, searchParams]);
 
   const refreshEvents = () => setRefresh(!refresh);
 
