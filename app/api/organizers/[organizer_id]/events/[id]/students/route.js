@@ -21,9 +21,11 @@ export async function GET(request, { params }) {
     // Map through students to process the payment screenshot URL
     const studentsWithScreenshotUrl = students.map(student => {
       const paymentScreenshotUrl = `${baseS3Url}${student.paymentScreenshotUrl}`;
+      const refundQRCode = `${baseS3Url}${student.refundQRCode}`;
       return {
         ...student.toObject(),
         paymentScreenshotUrl: paymentScreenshotUrl,
+        refundQRCode: refundQRCode,
       };
     });
 
@@ -47,7 +49,7 @@ export async function POST(request) {
     //   const { uri, fileName } = data.paymentScreenshot; // Extract the URI and file name from the payment screenshot
     //   const paymentScreenshotUrl = await uploadFileToS3(uri, fileName); // Upload the payment screenshot to S3 
     // }
-    const newStudent = new Student({ ...data, paymentScreenshotUrl: data.paymentScreenshot}); // Create a new Student instance with the provided data and the S3 URL
+    const newStudent = new Student({ ...data, paymentScreenshotUrl: data.paymentScreenshot, refundQRCode: data.refundQRCode}); // Create a new Student instance with the provided data and the S3 URL
     // const newStudent = new Student(data);
     await newStudent.save(); // Save the new student to the database
     return new Response(JSON.stringify(newStudent), { status: 201 }); // Return the newly created student

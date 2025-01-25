@@ -12,7 +12,8 @@ export async function GET(request, { params }) {
     return new Response("Student not found", { status: 404 });
   }
   const paymentScreenshotUrl = `${baseS3Url}${student.paymentScreenshotUrl}`;
-  return new Response(JSON.stringify({...student.toObject(), paymentScreenshotUrl: paymentScreenshotUrl}), { status: 200 });
+  const refundQRCode = `${baseS3Url}${student.refundQRCode}`;
+  return new Response(JSON.stringify({...student.toObject(), paymentScreenshotUrl: paymentScreenshotUrl, refundQRCode: refundQRCode}), { status: 200 });
 }
 
 export async function POST(request, { params }) {
@@ -87,6 +88,7 @@ export async function DELETE(request, { params }) {
   }
   if(studentToDelete.paymentScreenshotUrl) {
     await deleteBoothFile(studentToDelete.paymentScreenshotUrl);
+    await deleteBoothFile(studentToDelete.refundQRCode);
   }
   const deletedStudent = await Student.findOneAndDelete({ _id: studentid, eventId: id });
   
