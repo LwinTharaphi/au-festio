@@ -1,9 +1,9 @@
 import dbConnect from "@/lib/db";
 import Event from "@/models/Event";
-import Registeration from "@/models/Registeration";
 import Booth from "@/models/Booth";
 import Feedback from "@/models/Feedback";
 import Performance from "@/models/Performance";
+import Student from "@/models/Student";
 
 export async function GET(req, { params }) {
   const { id } = await params; // Get dynamic ID from the request parameters
@@ -21,7 +21,7 @@ export async function GET(req, { params }) {
     }
 
     // Fetch related data
-    const registrations = await Registeration.find({ eventId: id });
+    const registrations =  await Student.find({ eventId: id });
     const booths = await Booth.find({ eventId: id });
     const feedbacks = await Feedback.find({eventId: id});
     const performances = await Performance.find({eventId: id});
@@ -40,7 +40,10 @@ export async function GET(req, { params }) {
     const averageRating = totalRatings > 0 ? sumRatings/totalRatings : 0;
 
     // Calculate stats
-    const checkInCount = registrations.filter((reg) => reg.checkInTime).length;
+    const checkInCount = await Student.countDocuments({
+      eventId: id,
+      checkInStatus: "checked-in",
+    });
 
     // Extract entry times
     const entryTimes = registrations

@@ -33,19 +33,18 @@ export default function Sidebar() {
       </Navbar.Brand>
 
       <Nav className="flex-column">
-        <Nav.Link
-          onClick={() => router.push(`/admin-dashboard`)}
-          className={`sidebar-link my-2 text-start ${isActive(`/admin-dashboard`)}`}
-        >
-          <BsGrid className="me-2" /> Dashboard
-        </Nav.Link>
-
         {/* Events */}
         <Nav.Link
           onClick={() => router.push(`/event-organizers`)}
           className={`sidebar-link my-2 text-start ${isActive(`/event-organizers`)}`}
         >
-          <BsPeople className="me-2" /> EventOrganizer
+          <BsPeople className="me-2" /> Event Organizers
+        </Nav.Link>
+        <Nav.Link
+          onClick={() => router.push(`/admin-dashboard`)}
+          className={`sidebar-link my-2 text-start ${isActive(`/admin-dashboard`)}`}
+        >
+          <BsGrid className="me-2" /> Statistics
         </Nav.Link>
 
         {/* Logout */}

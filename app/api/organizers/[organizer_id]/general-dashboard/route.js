@@ -68,7 +68,9 @@ export async function GET(request, { params }) {
         }));
 
         const studentsRegistered = students.filter(s => s.eventId.toString() === event._id.toString());
-        const studentsCheckIn = students.filter(s => s.checkInStatus === 'checked-in')
+        const studentsCheckIn = students.filter(
+            s => s.eventId.toString() === event._id.toString() && s.checkInStatus === 'checked-in'
+          );
 
         return {
             eventName: event.eventName,

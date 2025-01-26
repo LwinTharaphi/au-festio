@@ -346,7 +346,7 @@ export default function EventOrganizersPage() {
                             <td>{organizer.name}</td>
                             <td>
                               {isLifetimeExpired(organizer.lifetime, organizer.createdAt)
-                                ? <GenerateEmailComponent organizerId={organizer._id} />
+                                ? "Invalid Email"
                                 : organizer.email}
                             </td>
                             <td>{organizer.lifetime}</td>
