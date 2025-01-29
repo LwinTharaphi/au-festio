@@ -63,7 +63,7 @@ const authOptions = {
           throw new Error("Invalid role");
         } catch(error){
           console.error("Authentication error:",error.message);
-          throw new Error("Authentication failed;")
+          throw new Error("Authentication failed " + error.message)
         }
       }
     })

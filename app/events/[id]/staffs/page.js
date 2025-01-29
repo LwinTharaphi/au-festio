@@ -99,7 +99,7 @@ export default function StaffPage() {
             const nonCompletedEvents = data.events.filter((event) => {
               const registrationDate = moment(event.registerationDate);
               const eventDate = moment(event.eventDate);
-      
+
               // Include events where today is between registration and event date or before registration
               return today.isBetween(registrationDate, eventDate, "day", "[]") || today.isBefore(registrationDate, "day");
             });
@@ -189,8 +189,13 @@ export default function StaffPage() {
 
       if (!response.ok) throw new Error("Failed to update staff status.");
 
-      const updatedData = await response.json();
-      setStaff(staff.map((staffMember) => (staffMember._id === currentStaff._id ? updatedData : staffMember))); // Update staff in the state
+      // Re-fetch the staff data to ensure it's up to date
+      const staffResponse = await fetch(`/api/organizers/${userId}/events/${id}/staffs`);
+      if (!staffResponse.ok) throw new Error("Failed to fetch updated staff data.");
+
+      const staffData = await staffResponse.json();
+      setStaff(staffData); // Update the staff state with the latest data
+
       setShowApprovalModal(false); // Close the modal after saving
     } catch (err) {
       setError(err.message); // Show any errors if occurred
@@ -205,15 +210,23 @@ export default function StaffPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(newStaff),
         });
+
         if (!response.ok) throw new Error("Failed to update staff.");
-        const updatedStaff = await response.json();
-        setStaff(staff.map((s) => (s._id === editStaffId ? updatedStaff : s)));
+
+        // Re-fetch staff list to ensure the role and other data are up to date
+        const staffResponse = await fetch(`/api/organizers/${userId}/events/${id}/staffs`);
+        if (!staffResponse.ok) throw new Error("Failed to fetch updated staff data.");
+
+        const staffData = await staffResponse.json();
+        setStaff(staffData);  // Update the staff state with the latest data
       }
+
       handleCloseStaffModal();
     } catch (err) {
       setError(err.message);
     }
   };
+
 
   // Handle showing the modal for adding or editing a role
   const handleShowModal = (role = null) => {

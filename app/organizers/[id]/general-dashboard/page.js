@@ -113,7 +113,7 @@ export default function Dashboard() {
       datasets: [
         {
           data: [data.paidEvents, data.freeEvents],
-          backgroundColor: ['#36A2EB', '#FF6384'], // Colors for paid and free events
+          backgroundColor: ['#B8D8E3', '#F6A9B8'], // Colors for paid and free events
           borderColor: 'white',
           borderWidth: 1,
         },
@@ -148,6 +148,56 @@ export default function Dashboard() {
       </div>
     );
   }
+
+  const StudentRegistrationPieChart = ({ events }) => {
+    const eventNames = events.map(event => event.eventName);
+    const studentsRegistered = events.map(event => event.studentsRegistered);
+
+    const chartData = {
+      labels: eventNames,
+      datasets: [
+        {
+          data: studentsRegistered,
+          backgroundColor: ['#B8D8E3', '#F6A9B8', '#F9E2A6', '#A4D9D2', '#F8A8A2'],
+          hoverBackgroundColor: ['#B8D8E3', '#F6A9B8', '#F9E2A6', '#A4D9D2', '#F8A8A2'], // Hover colors
+        },
+      ],
+    };
+
+    return (
+      <Card className="shadow-sm" style={{ backgroundColor: "#F4F9F9", height: '100%', textAlign: 'center' }}>
+        <Card.Body>
+          <h5 style={{ fontWeight: "bold" }}>Registered Participants</h5>
+          <Pie data={chartData} />
+        </Card.Body>
+      </Card>
+    );
+  };
+
+  const CheckInPieChart = ({ events }) => {
+    const eventNames = events.map(event => event.eventName);
+    const studentsCheckIn = events.map(event => event.studentsCheckIn);
+
+    const chartData = {
+      labels: eventNames,
+      datasets: [
+        {
+          data: studentsCheckIn,
+          backgroundColor: ['#B8D8E3', '#F6A9B8', '#F9E2A6', '#A4D9D2', '#F8A8A2'], // Custom colors for each event
+          hoverBackgroundColor: ['#B8D8E3', '#F6A9B8', '#F9E2A6', '#A4D9D2', '#F8A8A2'], // Hover colors
+        },
+      ],
+    };
+
+    return (
+      <Card className="shadow-sm" style={{ backgroundColor: "#F4F9F9", height: '100%' }}>
+        <Card.Body>
+          <h5 style={{ fontWeight: "bold" }}>Participants checked in for Events</h5>
+          <Pie data={chartData} />
+        </Card.Body>
+      </Card>
+    );
+  };
 
   if (error) {
     return (
@@ -199,8 +249,8 @@ export default function Dashboard() {
                   </Card>
                 </Col>
                 <Col md={4}>
-                  <Card 
-                    className="text-center shadow-sm" 
+                  <Card
+                    className="text-center shadow-sm"
                     style={{ backgroundColor: "#E2ECF5", cursor: "pointer" }}
                     onClick={() => router.push(`/organizers/${userId}/create-event?expand=ongoing`)}
                   >
@@ -216,8 +266,8 @@ export default function Dashboard() {
                   </Card>
                 </Col>
                 <Col md={4}>
-                  <Card 
-                    className="text-center shadow-sm" 
+                  <Card
+                    className="text-center shadow-sm"
                     style={{ backgroundColor: "#E4F0E2", cursor: "pointer" }}
                     onClick={() => router.push(`/organizers/${userId}/history`)}
                   >
@@ -238,13 +288,13 @@ export default function Dashboard() {
                 <Col md={6}>
                   <Card className="shadow-sm" style={{ backgroundColor: "#F4F9F9", height: '100%' }}>
                     <Card.Body>
-                      <h5 className="text-center mb-4 mt-4">Students</h5>
+                      <h5 className="text-center mb-4 mt-4">Participants</h5>
                       <Bar
                         data={{
                           labels: eventNames,
                           datasets: [
                             {
-                              label: "Students Registered",
+                              label: "Participants Registered",
                               data: studentsRegistered,
                               backgroundColor: "rgba(54, 162, 235, 0.2)",
                               borderColor: "rgba(54, 162, 235, 1)",
@@ -252,7 +302,7 @@ export default function Dashboard() {
                               tension: 0.4,
                             },
                             {
-                              label: "Students Checked In",
+                              label: "Checked In",
                               data: studentsCheckIn,
                               backgroundColor: "rgba(153, 102, 255, 0.2)", // Color for checked-in students bar
                               borderColor: "rgba(153, 102, 255, 1)", // Border color for checked-in students bar
@@ -338,14 +388,17 @@ export default function Dashboard() {
                   </Card>
                 </Col>
               </Row>
-
               <Row className="mb-4 g-4">
                 <Col md={4}>
                   <PieChartCard data={{ paidEvents: data.paidEvents, freeEvents: data.freeEvents }} />
                 </Col>
+                <Col md={4}>
+                  <StudentRegistrationPieChart events={events} />
+                </Col>
+                <Col md={4}>
+                  <CheckInPieChart events={events} />
+                </Col>
               </Row>
-
-
             </Container>
           </div>
         </div>

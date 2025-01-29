@@ -313,7 +313,7 @@ export default function RegisteredStudentsPage() {
           <Col xs={9} md={10} className="main-content" style={{ backgroundColor: "#F3EFFD" }}>
             <Container>
               <div className="d-flex justify-content-between align-items-center mb-4 sticky-header" style={{ backgroundColor: "#F3EFFD" }}>
-                <h4>Registered Students for {eventName}</h4>
+                <h4>Registered Participants for {eventName}</h4>
 
                 <Dropdown className="mb-4" style={{ textAlign: "right" }}>
                   <Dropdown.Toggle

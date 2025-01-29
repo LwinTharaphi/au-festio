@@ -39,7 +39,11 @@ export default function OrganizerLogin() {
       });
 
       if (result.error) {
-        setError(result.error || 'Something went wrong');
+        if (result.error.toLowerCase().includes('password')) {
+          setError('Wrong password');
+        } else {
+          setError(result.error || 'Something went wrong');
+        }
         setMessage('');
         return;
       } else {

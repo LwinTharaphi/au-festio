@@ -1,9 +1,12 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Container, Row, Col } from "react-bootstrap";
 import QrScanner from "qr-scanner";
 import { useParams } from "next/navigation";
 import { useSession } from 'next-auth/react';
+import Sidebar from "../../../components/Sidebar";
+import "../../../components/Sidebar.css";
 
 export default function ScanQRPage() {
   const { data: session, status } = useSession();
@@ -49,11 +52,11 @@ export default function ScanQRPage() {
 
     // Validate that result is a string and not undefined or null
     if (!result) {
-        console.error("No result in QR scan.");
-        setScanStatus("Invalid QR");
-        setScanResult("");
-        resetProcessing();
-        return;
+      console.error("No result in QR scan.");
+      setScanStatus("Invalid QR");
+      setScanResult("");
+      resetProcessing();
+      return;
     }
 
     // Process the raw QR data
@@ -62,26 +65,26 @@ export default function ScanQRPage() {
 
     // Ensure the QR code contains exactly two parts
     if (qrParts.length !== 2) {
-        setScanStatus("Invalid QR");
-        setScanResult("");
-        resetProcessing();
-        return;
+      setScanStatus("Invalid QR");
+      setScanResult("");
+      resetProcessing();
+      return;
     }
 
     const [eventIdFromQR, studentIdFromQR] = qrParts;
 
     // Check if the scanned Event ID matches the current Event ID
     if (eventIdFromQR !== eventId) {
-        console.warn(`Event ID mismatch: Expected ${eventId}, got ${eventIdFromQR}`);
-        setScanStatus("Invalid Event ID");
-        setScanResult("");
-        resetProcessing();
-        return;
+      console.warn(`Event ID mismatch: Expected ${eventId}, got ${eventIdFromQR}`);
+      setScanStatus("Invalid Event ID");
+      setScanResult("");
+      resetProcessing();
+      return;
     }
 
     console.log(`Valid QR Data: Event ID: ${eventIdFromQR}, Student ID: ${studentIdFromQR}`);
     checkStudentCheckIn(studentIdFromQR, eventIdFromQR);
-};
+  };
 
   const checkStudentCheckIn = async (studentId, eventId) => {
     try {
@@ -118,24 +121,35 @@ export default function ScanQRPage() {
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#F3EFFD' }}>  
-    <div style={styles.container}>
-      <h1 style={styles.title}>Scan QR Code for Event Check-in</h1>
-      <div style={styles.videoWrapper}>
-        <video id="qr-video" style={styles.video}></video>
-        <div style={styles.line}></div>
-      </div>
-      <div style={styles.statusWrapper}>
-        <p style={{ color: scanStatus === "Successfully checked in!" ? "green" : "red" }}>
-          {scanStatus}
-        </p>
-        <p>{scanResult}</p>
-      </div>
-      <button onClick={() => setIsScanning(!isScanning)} style={styles.button}>
-        {isScanning ? "Stop Scanning" : "Start Scanning"}
-      </button>
-    </div>
-    </div>
+    <Container fluid>
+      <Row>
+        <Col xs={3} md={2} className="sidebar">
+          <Sidebar event={{ _id: eventId }} />
+        </Col>
+        <Col xs={9} md={10} className="main-content" style={{ backgroundColor: "#F3EFFD" }}>
+          <Container>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#F3EFFD' }}>
+              <div style={styles.container}>
+                <h1 style={styles.title}>Scan QR Code for Event Check-in</h1>
+                <div style={styles.videoWrapper}>
+                  <video id="qr-video" style={styles.video}></video>
+                  <div style={styles.line}></div>
+                </div>
+                <div style={styles.statusWrapper}>
+                  <p style={{ color: scanStatus === "Successfully checked in!" ? "green" : "red" }}>
+                    {scanStatus}
+                  </p>
+                  <p>{scanResult}</p>
+                </div>
+                <button onClick={() => setIsScanning(!isScanning)} style={styles.button}>
+                  {isScanning ? "Stop Scanning" : "Start Scanning"}
+                </button>
+              </div>
+            </div>
+          </Container>
+        </Col>
+      </Row>
+    </Container>
   );
 }
 

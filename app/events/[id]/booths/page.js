@@ -227,7 +227,7 @@ export default function BoothPage() {
             <Container>
               {error && <Alert variant="danger">{error}</Alert>}
               <div className="d-flex justify-content-between align-items-center mb-4 sticky-header" style={{ backgroundColor: "#F3EFFD" }}>
-                <h4>{eventName}: Booths</h4>
+                <h4>Booths for {eventName}</h4>
                 <Dropdown className="mb-4" style={{ textAlign: "right" }}>
                   <Dropdown.Toggle variant="secondary" id="dropdown-basic">
                     Select Event

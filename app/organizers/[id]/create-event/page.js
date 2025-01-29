@@ -463,7 +463,7 @@ function EventForm() {
                         }}
                         onClick={() => toggleSection(status)}
                       >
-                        <Typography variant="h5" sx={{ marginBottom: 3 }}>
+                        <Typography sx={{ fontSize: '1.2rem', marginBottom: 3 }}>
                           {status.charAt(0).toUpperCase() + status.slice(1)} Events
                         </Typography>
                         <IconButton>
@@ -473,7 +473,7 @@ function EventForm() {
                       {expandedSection[status] &&(
                         Object.entries(groupedEvents[status]).map(([month, events], monthIndex) => (
                           <Box key={monthIndex} sx={{ marginTop: 2 }}>
-                            <Typography variant="h6" sx={{ marginBottom: 2 }}>
+                            <Typography sx={{ fontSize: '1rem', marginBottom: 3 }}>
                               {month} Events
                             </Typography>
                             <Grid container spacing={4}>
@@ -491,7 +491,7 @@ function EventForm() {
                                       )}
                                     </CardActionArea>
                                     <CardContent>
-                                      <Typography variant="h6" align="center">
+                                    <Typography sx={{ fontSize: '1rem', textAlign: 'center', fontWeight: 'bold' }}>
                                         {event.eventName}
                                       </Typography>
                                     </CardContent>
@@ -547,12 +547,12 @@ function EventForm() {
                                       </MenuItem>
                                     </Menu>
                                   </Card>
-                                  <Typography variant="h6" align="center">
+                                  <Typography sx={{ fontSize: '1rem', textAlign: 'center' }}>
                                     Registeration Date: {event.registerationDate
                                       ? new Date(event.registerationDate).toISOString().split('T')[0]
                                       : "Invalid Date"}
                                   </Typography>
-                                  <Typography variant="h6" align="center">
+                                  <Typography sx={{ fontSize: '1rem', textAlign: 'center' }}>
                                     Event Date: {event.eventDate
                                       ? new Date(event.eventDate).toISOString().split('T')[0]
                                       : "Invalid Date"}
