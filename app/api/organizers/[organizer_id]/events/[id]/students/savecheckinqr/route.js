@@ -6,9 +6,9 @@ export async function POST(request) {
   try {
     await dbConnect(); // Connect to the database
 
-    const { studentId, eventId, qrCodeData } = await request.json(); // Get the data from the request body
+    const { studentId, eventId, firebaseUID, qrCodeData } = await request.json(); // Get the data from the request body
 
-    if (!studentId || !eventId || !qrCodeData) {
+    if (!studentId || !eventId || !qrCodeData || !firebaseUID) {
       return new Response(
         JSON.stringify({ message: 'Missing required fields: studentId, eventId, qrCodeData' }),
         { status: 400 }
@@ -18,6 +18,7 @@ export async function POST(request) {
     // Create a new QR code document
     const newQRCode = new QRCode({
       studentId,
+      firebaseUID,
       eventId,
       qrCodeData,
     });
