@@ -19,7 +19,7 @@ export async function POST(request, { params }) {
         }
 
         // Find the student
-        const student = await Student.findById(firebaseUID);
+        const student = await Student.findOne({ sid: studentId, eventId, firebaseUID });
         if (!student) {
             return new Response(
                 JSON.stringify({ message: 'Student not found' }),
