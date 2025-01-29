@@ -1,7 +1,6 @@
 import dbConnect from "@/lib/db";
 import QRCode from "@/models/QRcode";
 import Event from "@/models/Event";
-import Student from "@/models/Student";
 
 // GET: Retrieve the QR code for a specific event
 export async function GET(request, { params }) {
@@ -9,14 +8,6 @@ export async function GET(request, { params }) {
     await dbConnect(); // Connect to the database
 
     const { organizer_id, id } = params; // Get eventId from URL parameters
-    const { studentId, firebaseUID } = request.query; // Get studentId and firebaseUID from query parameters
-
-    if (!studentId || !firebaseUID) {
-      return new Response(
-        JSON.stringify({ message: 'Missing required parameters' }),
-        { status: 400 }
-      );
-    }
 
     const event = await Event.findOne({ _id: id, organizer: organizer_id });
 
@@ -27,16 +18,7 @@ export async function GET(request, { params }) {
       );
     }
 
-    const student = await Student.findOne({ _id: studentId, firebaseUID });
-
-    if (!student) {
-      return new Response(
-        JSON.stringify({ message: 'Student not found' }),
-        { status: 404 }
-      );
-    }
-
-    const qrCode = await QRCode.findOne({ studentId: studentId,eventId: id });
+    const qrCode = await QRCode.findOne({ eventId: id });
 
     if (!qrCode) {
       return new Response(
