@@ -7,7 +7,7 @@ export async function POST(request, { params }) {
 
     try {
         // Access dynamic route parameters
-        const { eventId, studentId } = await params;
+        const { eventId, studentId, firebaseUID } = await params;
 
         // Find the event
         const event = await Event.findById(eventId);
@@ -19,7 +19,7 @@ export async function POST(request, { params }) {
         }
 
         // Find the student
-        const student = await Student.findById(studentId);
+        const student = await Student.findById(firebaseUID);
         if (!student) {
             return new Response(
                 JSON.stringify({ message: 'Student not found' }),

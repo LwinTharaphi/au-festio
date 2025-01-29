@@ -7,6 +7,7 @@ const QRCodeSchema = new mongoose.Schema({
     ref: "Student",
     required: true,
   },
+  firebaseUID: { type: String, required: true },
   qrCodeData: {
     type: String,
     required: true,
