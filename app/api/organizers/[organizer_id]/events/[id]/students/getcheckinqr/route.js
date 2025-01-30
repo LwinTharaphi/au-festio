@@ -9,7 +9,10 @@ export async function GET(request, { params }) {
     await dbConnect(); // Connect to the database
 
     const { organizer_id, id } = params; // Get eventId from URL parameters
-    const { studentId, firebaseUID } = request.query; // Get studentId and firebaseUID from query parameters
+
+    const { searchParams } = new URL(request.url); // Get the search parameters from the request URL
+    const studentId = searchParams.get('studentId'); // Get studentId from the search parameters
+    const firebaseUID = searchParams.get('firebaseUID'); // Get firebaseUID from the search parameters
 
     if (!studentId || !firebaseUID) {
       return new Response(
