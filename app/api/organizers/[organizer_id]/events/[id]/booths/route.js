@@ -1,8 +1,6 @@
 import Booth from "@/models/Booth";
 import dbConnect from "@/lib/db";
 import { nanoid } from "nanoid";
-import fs from "fs";
-import path from "path";
 import { S3Client, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { uploadFile } from "../../route";
 
@@ -46,13 +44,15 @@ export async function POST(req, { params }) {
 
     const boothNumber = formData.get("boothNumber");
     const boothName = formData.get("boothName");
-    const vendorName = formData.get("vendorName");
+    const item = formData.get("item");
     const image = formData.get("image");
+    const location = formData.get("location");
+    const priceRange = formData.get("priceRange");
 
     // Validate required fields
-    if (!boothNumber || !vendorName) {
-      console.error("Booth number and vendor name are required.");
-      return new Response("Booth number and vendor name are required.", { status: 400 });
+    if (!boothNumber || !item) {
+      console.error("Booth number and item are required.");
+      return new Response("Booth number and item are required.", { status: 400 });
     }
 
     let imagePath = null;
@@ -66,8 +66,10 @@ export async function POST(req, { params }) {
     const newBooth = new Booth({
       boothNumber,
       boothName,
-      vendorName,
+      item,
       imagePath,
+      location,
+      priceRange,
       eventId: id,
       boothId: nanoid(10),
     });
@@ -91,7 +93,9 @@ export async function PUT(req, { params }) {
 
     const boothNumber = formData.get("boothNumber");
     const boothName = formData.get("boothName");
-    const vendorName = formData.get("vendorName");
+    const item = formData.get("item");
+    const location = formData.get("location");
+    const priceRange = formData.get("priceRange");
     const image = formData.get("image");
 
     let imagePath = null;
@@ -109,7 +113,7 @@ export async function PUT(req, { params }) {
     // Update booth in the database
     const updatedBooth = await Booth.findOneAndUpdate(
       { boothId: boothid, eventId: id },
-      { boothNumber, boothName, vendorName, imagePath },
+      { boothNumber, boothName, item, imagePath, location, priceRange },  
       { new: true }
     );
 

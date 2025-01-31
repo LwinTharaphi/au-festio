@@ -38,8 +38,10 @@ export default function BoothPage() {
   const [formBooth, setFormBooth] = useState({
     boothNumber: "",
     boothName: "",
-    vendorName: "",
+    item: "",
     image: null,
+    location: "",
+    priceRange: "",
   });
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -104,15 +106,17 @@ export default function BoothPage() {
   }, [id, router, session, status]);
 
   const handleSaveBooth = async () => {
-    if (!formBooth.boothNumber || !formBooth.vendorName) {
-      setError("Booth Number and Vendor Name are required.");
+    if (!formBooth.boothNumber || !formBooth.item) {
+      setError("Booth Number and item are required.");
       return;
     }
 
     const formData = new FormData();
     formData.append("boothNumber", formBooth.boothNumber);
     formData.append("boothName", formBooth.boothName);
-    formData.append("vendorName", formBooth.vendorName);
+    formData.append("item", formBooth.item);
+    formData.append("location", formBooth.location);
+    formData.append("priceRange", formBooth.priceRange);
     if (formBooth.image) formData.append("image", formBooth.image);
 
     try {
@@ -143,7 +147,7 @@ export default function BoothPage() {
 
       setSelectedBooth(booth); // Automatically update selected booth details
       setShowModal(false);
-      setFormBooth({ boothNumber: "", boothName: "", vendorName: "", image: null });
+      setFormBooth({ boothNumber: "", boothName: "", item: "", location: "", priceRange: "", image: null });
       setEditMode(false);
       window.location.reload(); // Reloads the page
     } catch (err) {
@@ -166,20 +170,27 @@ export default function BoothPage() {
     setFormBooth({
       boothNumber: booth.boothNumber,
       boothName: booth.boothName,
-      vendorName: booth.vendorName,
+      item: booth.item,
+      location: booth.location,
+      priceRange: booth.priceRange,
       image: null,
     });
     setShowModal(true);
   };
 
-  const handleDeleteBooth = async (boothId) => {
+  const handleDeleteBooth = async () => {
     try {
-      await fetch(`/api/organizers/${session.user.id}/events/${id}/booths/${boothId}`, { method: "DELETE" });
-      setBooths((prevBooths) => prevBooths.filter((booth) => booth.boothId !== boothId));
+      await fetch(`/api/organizers/${session.user.id}/events/${id}/booths/${selectedBooth}`, { 
+        method: "DELETE" 
+      });
+      setBooths((prevBooths) => prevBooths.filter((booth) => booth.boothId !== selectedBooth));
+      setShowDeleteModal(false);
+      setSelectedBooth(null); // Reset selected booth ID
     } catch (err) {
       setError("Failed to delete booth.");
     }
   };
+  
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -199,7 +210,7 @@ export default function BoothPage() {
     const query = searchQuery.toLowerCase();
     return (
       (booth.boothName && booth.boothName.toLowerCase().includes(query)) ||
-      (booth.vendorName && booth.vendorName.toLowerCase().includes(query))
+      (booth.item && booth.item.toLowerCase().includes(query))
     );
   });
 
@@ -274,7 +285,9 @@ export default function BoothPage() {
                               setFormBooth({
                                 boothNumber: "",
                                 boothName: "",
-                                vendorName: "",
+                                item: "",
+                                location: "",
+                                priceRange: "",
                                 image: null,
                               });
                               setShowModal(true);
@@ -351,7 +364,8 @@ export default function BoothPage() {
                                     }}
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      handleDeleteBooth(booth.boothId);
+                                      setShowDeleteModal(true);
+                                      setSelectedBooth(booth.boothId);                                     
                                     }}
                                   />
                                 </div>
@@ -374,20 +388,19 @@ export default function BoothPage() {
                                     layout="fill"
                                     objectFit="cover"
                                   />
-
                                 </div>
-                                <Card.Text style={{ fontSize: "0.9rem", marginBottom: "0.3rem" }}>
-                                  Name: {booth.boothName}
+                                <Card.Text style={{ fontSize: "0.9rem", marginBottom: "0.3rem", fontWeight: "bold" }} className="d-flex justify-content-between">
+                                  <span>{booth.boothName}</span>
+                                  <span> {booth.location}</span>
                                 </Card.Text>
-                                <Card.Text style={{ fontSize: "0.9rem" }}>
-                                  Vendor: {booth.vendorName}
+                                <Card.Text style={{ fontSize: "0.9rem" }} className="d-flex justify-content-between">
+                                  <span>{booth.item}</span>
+                                  <span>Price: {booth.priceRange} THB</span>
                                 </Card.Text>
                               </Card.Body>
                             </Card>
                           </Col>
                         ))}
-                        {/* Add New Booth Card */}
-
                       </Row>
                     </Col>
                   </Row>
@@ -396,7 +409,25 @@ export default function BoothPage() {
             </Container>
           </Col>
         </Row>
-
+        {/* Confirmation Modal for delete */}
+        {selectedBooth && (
+          <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
+            <Modal.Header closeButton>
+              <Modal.Title>Confirm Deletion</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              Are you sure you want to delete this booth?
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+                Cancel
+              </Button>
+              <Button variant="danger" onClick={handleDeleteBooth}>
+                Confirm Delete
+              </Button>
+            </Modal.Footer>
+          </Modal>
+        )}
         <Modal show={showModal} onHide={() => setShowModal(false)}>
           <Modal.Header closeButton>
             <Modal.Title>{editMode ? "Update Booth" : "Add New Booth"}</Modal.Title>
@@ -424,12 +455,32 @@ export default function BoothPage() {
                 />
               </Form.Group>
               <Form.Group>
-                <Form.Label>Vendor Name</Form.Label>
+                <Form.Label>Food or Item</Form.Label>
                 <Form.Control
                   type="text"
-                  name="vendorName"
-                  placeholder="Enter vendor name"
-                  value={formBooth.vendorName}
+                  name="item"
+                  placeholder="Enter food or item"
+                  value={formBooth.item}
+                  onChange={handleInputChange}
+                />
+              </Form.Group>
+              <Form.Group>
+                <Form.Label>Location</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="location"
+                  placeholder="Enter Location"
+                  value={formBooth.location}
+                  onChange={handleInputChange}
+                />
+              </Form.Group>
+              <Form.Group>
+                <Form.Label>Price Range</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="priceRange"
+                  placeholder="Enter Price Range"
+                  value={formBooth.priceRange}
                   onChange={handleInputChange}
                 />
               </Form.Group>

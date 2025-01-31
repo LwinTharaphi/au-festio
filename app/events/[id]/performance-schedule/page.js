@@ -320,7 +320,9 @@ export default function EventPerformancesPage() {
                         </Form.Group>
                       </Col>
                     </Row>
-                    <Button style={{ backgroundColor: "#A67EEC" }}>
+                    <Button style={{ backgroundColor: "#A67EEC" }}
+                    onClick={handleSubmit}
+                    >
                       {editPerformanceId ? "Update Performance" : "Add Performance"}
                     </Button>
                   </Form>

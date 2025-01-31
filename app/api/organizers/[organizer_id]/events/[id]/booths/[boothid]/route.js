@@ -1,7 +1,5 @@
 import Booth from "@/models/Booth";
 import dbConnect from "@/lib/db";
-import fs from 'fs';
-import path from 'path';
 import { S3Client, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { uploadFile } from "../../../route";
 import { deleteBoothFile } from "../route";
@@ -38,12 +36,14 @@ export async function PUT(request, { params }) {
     // Extract fields
     const boothNumber = formData.get("boothNumber");
     const boothName = formData.get("boothName");
-    const vendorName = formData.get("vendorName");
+    const item = formData.get("item");
+    const location = formData.get("location");
+    const priceRange = formData.get("priceRange");
     const image = formData.get("image");
 
     // Validation
-    if (!boothNumber || !vendorName) {
-      return new Response("Booth number and vendor name are required.", {
+    if (!boothNumber || !item) {
+      return new Response("Booth number and item are required.", {
         status: 400,
       });
     }
@@ -63,7 +63,9 @@ export async function PUT(request, { params }) {
     const updateData = {
       boothNumber,
       boothName,
-      vendorName,
+      item,
+      location,
+      priceRange,
     };
 
     if (imagePath) {
