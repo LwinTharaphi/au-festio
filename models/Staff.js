@@ -13,6 +13,7 @@ const staffSchema = new mongoose.Schema({
     enum: ['not viewed', 'approved', 'rejected'], 
     default: 'not viewed' 
   },
+  timestamps: true, // Adds createdAt and updatedAt timestamps
 });
 
 export default mongoose.models.Staff || mongoose.model("Staff", staffSchema);
