@@ -32,6 +32,13 @@ export async function POST(request, { params }) {
       );
     }
 
+    if(student.refundStatus === 'refunded') {
+      return new Response(
+        JSON.stringify({ message: 'This student has been refunded and cannot use this QR.' }),
+        { status: 400 }
+      );
+    }
+
     // Check if the student has already checked in
     if (student.checkInStatus === 'checked-in') {
       return new Response(

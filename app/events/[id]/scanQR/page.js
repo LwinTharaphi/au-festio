@@ -93,7 +93,7 @@ export default function ScanQRPage() {
       });
       const data = await response.json();
   
-      if (data.refundStatus === "refunded") {
+      if (data.message === "This student has been refunded and cannot use this QR.") {
         setScanStatus("This student has been refunded and cannot use this QR.");
         setScanResult("");
       } else if (data.message === "This student has already checked in.") {
