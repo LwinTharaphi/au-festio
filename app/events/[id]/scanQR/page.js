@@ -92,8 +92,11 @@ export default function ScanQRPage() {
         method: "POST",
       });
       const data = await response.json();
-
-      if (data.message === "This student has already checked in.") {
+  
+      if (data.refundStatus === "refunded") {
+        setScanStatus("This student has been refunded and cannot use this QR.");
+        setScanResult("");
+      } else if (data.message === "This student has already checked in.") {
         setScanStatus("This student has already checked in.");
         setScanResult("");
       } else if (data.success) {
@@ -111,6 +114,7 @@ export default function ScanQRPage() {
       resetProcessing();
     }
   };
+  
 
   const resetProcessing = () => {
     setTimeout(() => {
