@@ -41,6 +41,7 @@ import Event from "@/models/Event";
 import dbConnect from "@/lib/db";
 import generatePayload from "promptpay-qr";
 import qrcode from 'qrcode';
+import { createCanvas } from "canvas";
 
 export async function GET(request, { params }) {
   await dbConnect();
@@ -69,7 +70,7 @@ export async function GET(request, { params }) {
     //   ? await qrcode.toDataURL(qrData, { errorCorrectionLevel: 'H' })
     //   : null;
 
-    const qrCanvas = document.createElement('canvas');
+    const qrCanvas = createCanvas(500, 500);
     await new Promise((resolve, reject) => {
       qrcode.toCanvas(qrCanvas, qrData, { errorCorrectionLevel: 'H', width: 500, height: 500 }, function(error) {
         if (error) reject(error);
