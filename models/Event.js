@@ -30,6 +30,6 @@ const EventSchema = new mongoose.Schema({
   latitude: {type: String},
   longitude: {type: String},
   seats: { type: Number, required: false},
-});
+} ,{ timestamps: true});
 
 export default mongoose.models.Event || mongoose.model("Event", EventSchema);
