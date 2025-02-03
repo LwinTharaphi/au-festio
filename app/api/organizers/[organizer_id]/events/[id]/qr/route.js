@@ -62,8 +62,11 @@ export async function GET(request, { params }) {
     
     // Generate the QR code as PNG or Base64 encoded string (Krungsri may prefer this format)
     const qrData = event.isPaid ? generatePayload(event.phone, { amount: validAmount }): null;
+    // const qrSvg = event.isPaid
+    //   ? await qrcode.toString(qrData, { type: "svg", color: { dark: "#000", light: "#fff" } })
+    //   : null;
     const qrSvg = event.isPaid
-      ? await qrcode.toString(qrData, { type: "svg", color: { dark: "#000", light: "#fff" } })
+      ? await qrcode.toDataURL(qrData, { errorCorrectionLevel: 'H' })
       : null;
 
     return new Response(JSON.stringify({ amount, qrSvg, isEarlyBirdValidFlag }), { status: 200 });
