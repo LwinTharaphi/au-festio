@@ -56,13 +56,11 @@ export async function GET(request, { params }) {
     const isEarlyBirdValidFlag = event.isPaid && event.discount > 0 && isEarlyBirdValid(event.createdAt);
     const discountPrice = isEarlyBirdValidFlag ? event.price - (event.price * event.discount) / 100 : 0;
     const amount = isEarlyBirdValidFlag ? discountPrice : event.price;
-
-    // Generate QR data for PromptPay, rounding amount to 2 decimal places
-    const qrData = event.isPaid ? generatePayload(event.phone, { amount: amount.toFixed(2) }) : null;
     
     // Generate the QR code as PNG or Base64 encoded string (Krungsri may prefer this format)
+    const qrData = event.isPaid ? generatePayload(event.phone, { amount: amount.toFixed(2) }): null;
     const qrSvg = event.isPaid
-      ? await qrcode.toDataURL(qrData) // Change to Base64 string
+      ? await qrcode.toString(qrData, { type: "svg", color: { dark: "#000", light: "#fff" } })
       : null;
 
     return new Response(JSON.stringify({ amount, qrSvg, isEarlyBirdValidFlag }), { status: 200 });
