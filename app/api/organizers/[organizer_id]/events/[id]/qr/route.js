@@ -65,9 +65,21 @@ export async function GET(request, { params }) {
     // const qrSvg = event.isPaid
     //   ? await qrcode.toString(qrData, { type: "svg", color: { dark: "#000", light: "#fff" } })
     //   : null;
-    const qrSvg = event.isPaid
-      ? await qrcode.toDataURL(qrData, { errorCorrectionLevel: 'H' })
-      : null;
+    // const qrSvg = event.isPaid
+    //   ? await qrcode.toDataURL(qrData, { errorCorrectionLevel: 'H' })
+    //   : null;
+
+    const qrCanvas = document.createElement('canvas');
+    await new Promise((resolve, reject) => {
+      qrcode.toCanvas(qrCanvas, qrData, { errorCorrectionLevel: 'H', width: 500, height: 500 }, function(error) {
+        if (error) reject(error);
+        else resolve();
+      });
+    });
+
+    // Get the Base64-encoded image from the canvas
+    const qrSvg = qrCanvas.toDataURL();  // This will be the high-resolution QR code
+      
 
     return new Response(JSON.stringify({ amount, qrSvg, isEarlyBirdValidFlag }), { status: 200 });
   } catch (error) {
