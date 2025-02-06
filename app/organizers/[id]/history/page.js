@@ -106,8 +106,8 @@ export default function OrganizerHistoryPage() {
       // Count feedback stars (1 to 5)
       const feedbackStars = [0, 0, 0, 0, 0]; // Initialize an array to hold counts for each star (1-5)
       feedbacksData.forEach(feedback => {
-        if (feedback.star >= 1 && feedback.star <= 5) {
-          feedbackStars[feedback.star - 1] += 1; // Increment the count for the respective star
+        if (feedback.stars >= 1 && feedback.stars <= 5) {
+          feedbackStars[feedback.stars - 1] += 1; // Increment the count for the respective star
         }
       });
 
@@ -281,7 +281,7 @@ export default function OrganizerHistoryPage() {
                 </Row>
                 <Row className="mt-4">
                   <Col>
-                    <Card style={{ border: '2px solid #b1e7cc' }}>
+                    <Card style={{ border: '2px solid #b1e7cc' }} className="h-100">
                       <Card.Body>
                         <Card.Title>Attendance (Pie Chart)</Card.Title>
                         <Pie data={{
@@ -295,7 +295,7 @@ export default function OrganizerHistoryPage() {
                     </Card>
                   </Col>
                   <Col>
-                    <Card style={{ border: '2px solid #b1e7cc' }}>
+                    <Card style={{ border: '2px solid #b1e7cc' }} className="h-100">
                       <Card.Body>
                         <Card.Title>Feedback (Bar Chart)</Card.Title>
                         <Bar data={{

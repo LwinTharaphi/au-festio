@@ -21,7 +21,8 @@ export async function GET(req, { params }) {
     }
 
     // Fetch related data
-    const registrations =  await Student.find({ eventId: id });
+    // const registrations =  await Student.find({ eventId: id });
+    const registrations = await Student.find({ eventId: id, refundStatus: { $ne: "refunded" } });
     const booths = await Booth.find({ eventId: id });
     const feedbacks = await Feedback.find({eventId: id});
     const performances = await Performance.find({eventId: id});
