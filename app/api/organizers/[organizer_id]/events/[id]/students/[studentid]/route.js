@@ -3,6 +3,7 @@ import dbConnect from "@/lib/db";
 import { deleteBoothFile } from "../../booths/route";
 import { Expo } from "expo-server-sdk";
 import Event from "@/models/Event";
+
 const baseS3Url = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/`;
 // GET: Fetch a specific student by student ID and event ID
 export async function GET(request, { params }) {
