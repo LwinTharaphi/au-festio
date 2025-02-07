@@ -9,6 +9,7 @@ import path from 'path';
 import { S3Client, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { Expo } from "expo-server-sdk";
 import { data } from "react-router-dom";
+import Staff from "@/models/Staff";
 
 const s3 = new S3Client({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -149,8 +150,10 @@ export async function DELETE(request, { params }) {
     }
 
     const students = await Student.find({ eventId: id });
+    const staffs = await Staff.find({ event: id });
     console.log("Students:", students);
-    if (students.length > 0) {
+    console.log("Staffs:", staffs);
+    if (students.length > 0 || staffs.length > 0) {
       const expo = new Expo();
       const messages = [];
       students.forEach(student => {
@@ -159,9 +162,21 @@ export async function DELETE(request, { params }) {
           messages.push({
             to: student.expoPushToken,
             sound: 'default',
-            title: 'Event Cancelled',
+            title: `${eventToDelete.eventName} Cancelled`,
             body: 'The event you registered for has been cancelled',
             data: { eventId: id },
+          });
+        }
+      });
+      staffs.forEach(staff => {
+        console.log("Notification sent to:", staff.expoPushToken);
+        if (Expo.isExpoPushToken(staff.expoPushToken)) {
+          messages.push({
+            to: staff.expoPushToken,
+            sound: 'default',
+            title: `${eventToDelete.eventName} Cancelled`,
+            body: 'The event you registered for has been cancelled',
+            data: { event: id },
           });
         }
       });
@@ -176,7 +191,8 @@ export async function DELETE(request, { params }) {
       }
     }
     await Student.deleteMany({ eventId: id });
-    console.log("Delete Students")
+    await Staff.deleteMany({ event: id });
+    console.log("Delete Students and Staffs");
     const deletedEvent = await Event.findByIdAndDelete(id);
     if (!deletedEvent) {
       return new Response(JSON.stringify({ error: "Failed to delete event" }), { status: 500 });

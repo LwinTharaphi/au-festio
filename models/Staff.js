@@ -14,7 +14,8 @@ const staffSchema = new mongoose.Schema(
       type: String, 
       enum: ['not viewed', 'approved', 'rejected'], 
       default: 'not viewed' 
-    }
+    },
+    expoPushToken: { type: String, required: false },
   },
   { timestamps: true } // Move timestamps here inside schema options
 );
