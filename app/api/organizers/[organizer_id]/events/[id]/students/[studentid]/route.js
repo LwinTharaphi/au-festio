@@ -1,6 +1,7 @@
 import Student from "@/models/Student";
 import dbConnect from "@/lib/db";
 import { deleteBoothFile } from "../../booths/route";
+import { Expo } from "expo-server-sdk";
 const baseS3Url = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/`;
 // GET: Fetch a specific student by student ID and event ID
 export async function GET(request, { params }) {
@@ -68,21 +69,74 @@ export async function POST(request, { params }) {
 // PUT: Update an existing student
 export async function PUT(request, { params }) {
   await dbConnect();
-  const { id, studentid } = await params; // Event ID and Student ID from URL parameters
+  const { id, studentid } = params; // Event ID and Student ID from URL parameters
   const data = await request.json();
-  
+
+  // Fetch existing student details
+  const existingStudent = await Student.findOne({ _id: studentid, eventId: id });
+
+  if (!existingStudent) {
+    return new Response(JSON.stringify({ error: "Student not found" }), { status: 404 });
+  }
+
+  // Check if the status is changing
+  const statusChanged = data.status && data.status !== existingStudent.status;
+  const newStatus = data.status;
+
+  // Update the student record
   const updatedStudent = await Student.findOneAndUpdate(
-    { _id: studentid, eventId: id }, // Find student by ID and event ID
+    { _id: studentid, eventId: id },
     data,
     { new: true } // Return the updated document
   );
-  
+
   if (!updatedStudent) {
-    return new Response("Student not found", { status: 404 });
+    return new Response(JSON.stringify({ error: "Student update failed" }), { status: 500 });
+  }
+
+  // If status changed to "paid" or "rejected", send a notification
+  if (statusChanged && (newStatus === "paid" || newStatus === "rejected")) {
+    const expo = new Expo();
+    const messages = [];
+
+    if (updatedStudent.expoPushToken && Expo.isExpoPushToken(updatedStudent.expoPushToken)) {
+      let notificationBody, notificationDataType;
+
+      if (newStatus === "paid") {
+        notificationBody = `🎉 Your information has been received! You are now confirmed for the event.`;
+        notificationDataType = "registration-confirmation";
+      } else if (newStatus === "rejected") {
+        notificationBody = `❌ Unfortunately, your event registration was rejected. Please contact the event organizer for more information.`;
+        notificationDataType = "registration-rejected";
+      }
+
+      messages.push({
+        to: updatedStudent.expoPushToken,
+        sound: 'default',
+        title: "Event Registration",
+        body: notificationBody,
+        data: {
+          eventId: id,
+          studentId: studentid,
+          type: notificationDataType, // Dynamically changing type
+        },
+      });
+
+      // Send notification in chunks
+      const chunks = expo.chunkPushNotifications(messages);
+      for (const chunk of chunks) {
+        try {
+          await expo.sendPushNotificationsAsync(chunk);
+        } catch (error) {
+          console.error("Error sending push notification:", error);
+        }
+      }
+    }
   }
 
   return new Response(JSON.stringify(updatedStudent), { status: 200 });
 }
+
 
 // DELETE: Delete a specific student
 export async function DELETE(request, { params }) {
