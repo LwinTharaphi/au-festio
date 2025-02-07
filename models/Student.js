@@ -26,6 +26,8 @@ const StudentSchema = new mongoose.Schema({
   },
   refundQRCode: { type: String },
   paymentScreenshotUrl: { type: String },
+  expoPushToken: { type: String, required: false },
+
 }, {
   timestamps: true, // Adds createdAt and updatedAt timestamps
 });

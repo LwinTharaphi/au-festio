@@ -1,4 +1,5 @@
 import Event from "@/models/Event";
+import Student from "@/models/Student";
 import dbConnect from "@/lib/db";
 import { uploadFile } from "../route";
 import { NextResponse } from 'next/server';
@@ -6,6 +7,8 @@ import generatePayload from "promptpay-qr";
 import qrcode from 'qrcode';
 import path from 'path';
 import { S3Client, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import Expo from "expo-server-sdk";
+import { data } from "react-router-dom";
 
 const s3 = new S3Client({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -144,11 +147,38 @@ export async function DELETE(request, { params }) {
     if(eventToDelete.poster) {
       await deleteFile(eventToDelete.poster);
     }
+
+    const students = await Student.find({ event: id });
+    if (students.length > 0) {
+      return new Response(JSON.stringify({ error: "Event has registered students" }), { status: 400 });
+    }
+    const expo = new Expo();
+    const messages = [];
+    students.forEach(student => {
+      if (Expo.isExpoPushToken(student.expoPushToken)) {
+        messages.push({
+          to: student.expoPushToken,
+          sound: 'default',
+          title: 'Event Cancelled',
+          body: 'The event you registered for has been cancelled',
+          data: { event: id },
+        });
+      }
+    });
+    const chunks = expo.chunkPushNotifications(messages);
+    for (const chunk of chunks) {
+      try {
+        await expo.sendPushNotificationsAsync(chunk);
+      } catch (error) {
+        console.error('Error sending push notification:', error);
+      }
+    }
     const deletedEvent = await Event.findByIdAndDelete(id);
     if (!deletedEvent) {
       return new Response(JSON.stringify({ error: "Failed to delete event" }), { status: 500 });
     }
     return new Response("Event deleted successfully", { status: 200 });
+    await Student.deleteMany({ event: id });
   } catch (error) {
     return new Response(JSON.stringify({ error: "Server error" }), { status: 500 });
   }
