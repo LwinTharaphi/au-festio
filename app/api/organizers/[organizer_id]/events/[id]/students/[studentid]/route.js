@@ -2,6 +2,7 @@ import Student from "@/models/Student";
 import dbConnect from "@/lib/db";
 import { deleteBoothFile } from "../../booths/route";
 import { Expo } from "expo-server-sdk";
+import Event from "@/models/Event";
 const baseS3Url = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/`;
 // GET: Fetch a specific student by student ID and event ID
 export async function GET(request, { params }) {
@@ -74,6 +75,7 @@ export async function PUT(request, { params }) {
 
   // Fetch existing student details
   const existingStudent = await Student.findOne({ _id: studentid, eventId: id });
+  const event = await Event.findById(id);
 
   if (!existingStudent) {
     return new Response(JSON.stringify({ error: "Student not found" }), { status: 404 });
@@ -118,6 +120,7 @@ export async function PUT(request, { params }) {
         data: {
           eventId: id,
           studentId: studentid,
+          organizerId: event.organizerId,
           type: notificationDataType, // Dynamically changing type
         },
       });
