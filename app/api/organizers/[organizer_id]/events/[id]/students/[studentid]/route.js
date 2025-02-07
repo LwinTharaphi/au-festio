@@ -70,7 +70,7 @@ export async function POST(request, { params }) {
 // PUT: Update an existing student
 export async function PUT(request, { params }) {
   await dbConnect();
-  const { id, studentid } = params; // Event ID and Student ID from URL parameters
+  const { id, studentid } = await params; // Event ID and Student ID from URL parameters
   const data = await request.json();
 
   // Fetch existing student details
@@ -103,7 +103,7 @@ export async function PUT(request, { params }) {
 
     if (updatedStudent.expoPushToken && Expo.isExpoPushToken(updatedStudent.expoPushToken)) {
       let notificationBody, notificationDataType;
-      const organizerId = event.organizerId;
+      const organizerId = event.organizer;
       if (newStatus === "paid") {
         notificationBody = `🎉 Your information has been received for ${event.eventName}! You are now confirmed for the event.`;
         notificationDataType = "registration-confirmation";
@@ -124,6 +124,7 @@ export async function PUT(request, { params }) {
           type: notificationDataType, // Dynamically changing type
         },
       });
+      console.log("Sending push notification to student:", messages);
 
       // Send notification in chunks
       const chunks = expo.chunkPushNotifications(messages);
