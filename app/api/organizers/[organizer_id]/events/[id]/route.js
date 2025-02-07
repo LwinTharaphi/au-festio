@@ -85,6 +85,22 @@ export async function PUT(request, { params }) {
     // // Upload the QR code if it was generated
     // const qrPath = qrBuffer ? await uploadFile(qrBuffer, "qrcodes") : null;
     const existingEvent = await Event.findById(id);
+    // Track changes
+    let changes = [];
+    if (eventName !== existingEvent.eventName) changes.push(`Event name changed to ${eventName}`);
+    if (eventDate !== existingEvent.eventDate) changes.push(`Event date changed to ${eventDate}`);
+    if (startTime !== existingEvent.startTime) changes.push(`Start time changed to ${startTime}`);
+    if (endTime !== existingEvent.endTime) changes.push(`End time changed to ${endTime}`);
+    if (location !== existingEvent.location) changes.push(`Location changed to ${location}`);
+    if (isPaid !== existingEvent.isPaid) changes.push(`Payment status changed`);
+    if (price !== existingEvent.price) changes.push(`Ticket price changed to ${price}`);
+    if (discount !== existingEvent.discount) changes.push(`Discount changed to ${discount}%`);
+    if (venueName !== existingEvent.venueName) changes.push(`Venue name changed to ${venueName}`);
+    if (latitude !== existingEvent.latitude || longitude !== existingEvent.longitude) 
+      changes.push(`Venue GPS location updated`);
+    if (seats !== existingEvent.seats) changes.push(`Total seats changed to ${seats}`);
+    if (poster) changes.push(`New event poster uploaded`);
+    // if (phone !== existingEvent.phone) changes.push(`Contact phone number updated`);
     const updatedData = {
       eventName,
       registerationDate,
@@ -118,6 +134,36 @@ export async function PUT(request, { params }) {
 
     if (!updatedEvent) {
       return new Response(JSON.stringify({ error: "Event not found" }), { status: 404 });
+    }
+
+    // Send notifications to students and staff
+    if (changes.length > 0) {
+      const students = await Student.find({ eventId: id });
+      const expo = new Expo();
+      const messages = [];
+
+      const notificationBody = `The event "${eventName}" has been updated:\n- ${changes.join("\n- ")}`;
+
+      students.forEach(student => {
+        if (Expo.isExpoPushToken(student.expoPushToken)) {
+          messages.push({
+            to: student.expoPushToken,
+            sound: 'default',
+            title: "Event Updated",
+            body: notificationBody,
+            data: { eventId: id, type: "event-updated", organizerId: existingEvent.organizer },
+          });
+        }
+      });
+
+      const chunks = expo.chunkPushNotifications(messages);
+      for (const chunk of chunks) {
+        try {
+          await expo.sendPushNotificationsAsync(chunk);
+        } catch (error) {
+          console.error("Error sending push notification:", error);
+        }
+      }
     }
 
     return NextResponse.json({ message: "Event updated successfully" });
@@ -175,8 +221,8 @@ export async function DELETE(request, { params }) {
             to: staff.expoPushToken,
             sound: 'default',
             title: `${eventToDelete.eventName} Cancelled`,
-            body: 'The event you registered for has been cancelled',
-            data: { eventId: id , type: 'event-deleted', organizerId: eventToDelete.organizer },
+            body: 'The event you registered as a staff has been cancelled',
+            data: { eventId: id , type: 'event-deleted_staff', organizerId: eventToDelete.organizer },
           });
         }
       });
