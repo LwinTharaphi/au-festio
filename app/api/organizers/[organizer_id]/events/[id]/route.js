@@ -164,7 +164,7 @@ export async function DELETE(request, { params }) {
             sound: 'default',
             title: `${eventToDelete.eventName} Cancelled`,
             body: 'The event you registered for has been cancelled',
-            data: { eventId: id },
+            data: { eventId: id, type: 'event-deleted', organizerId: eventToDelete.organizer },
           });
         }
       });
@@ -176,7 +176,7 @@ export async function DELETE(request, { params }) {
             sound: 'default',
             title: `${eventToDelete.eventName} Cancelled`,
             body: 'The event you registered for has been cancelled',
-            data: { event: id },
+            data: { eventId: id , type: 'event-deleted', organizerId: eventToDelete.organizer },
           });
         }
       });
