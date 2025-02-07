@@ -103,12 +103,12 @@ export async function PUT(request, { params }) {
 
     if (updatedStudent.expoPushToken && Expo.isExpoPushToken(updatedStudent.expoPushToken)) {
       let notificationBody, notificationDataType;
-
+      const organizerId = event.organizerId;
       if (newStatus === "paid") {
-        notificationBody = `🎉 Your information has been received! You are now confirmed for the event.`;
+        notificationBody = `🎉 Your information has been received for ${event.eventName}! You are now confirmed for the event.`;
         notificationDataType = "registration-confirmation";
       } else if (newStatus === "rejected") {
-        notificationBody = `❌ Unfortunately, your event registration was rejected. Please contact the event organizer for more information.`;
+        notificationBody = `❌ Unfortunately, your ${event.eventName} registration was rejected. Please contact the event organizer for more information.`;
         notificationDataType = "registration-rejected";
       }
 
@@ -120,7 +120,7 @@ export async function PUT(request, { params }) {
         data: {
           eventId: id,
           studentId: studentid,
-          organizerId: event.organizerId,
+          organizerId: organizerId,
           type: notificationDataType, // Dynamically changing type
         },
       });
