@@ -99,7 +99,7 @@ export async function PUT(request, { params }) {
   }
 
   // If status changed to "paid" or "rejected", send a notification
-  if (statusChanged && (newStatus === "paid" || newStatus === "rejected" || refundStatus === "refunded")) {
+  if ((statusChanged && (newStatus === "paid" || newStatus === "rejected" )) || refundStatus === "refunded") {
     const expo = new Expo();
     const messages = [];
 
