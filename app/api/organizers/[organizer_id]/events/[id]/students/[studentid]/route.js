@@ -85,6 +85,7 @@ export async function PUT(request, { params }) {
   // Check if the status is changing
   const statusChanged = data.status && data.status !== existingStudent.status;
   const newStatus = data.status;
+  const refundStatus = data.refundStatus;
 
   // Update the student record
   const updatedStudent = await Student.findOneAndUpdate(
@@ -98,7 +99,7 @@ export async function PUT(request, { params }) {
   }
 
   // If status changed to "paid" or "rejected", send a notification
-  if (statusChanged && (newStatus === "paid" || newStatus === "rejected")) {
+  if (statusChanged && (newStatus === "paid" || newStatus === "rejected" || refundStatus === "refunded")) {
     const expo = new Expo();
     const messages = [];
 
@@ -111,6 +112,9 @@ export async function PUT(request, { params }) {
       } else if (newStatus === "rejected") {
         notificationBody = `❌ Unfortunately, your ${event.eventName} registration was rejected. Please contact the event organizer for more information.`;
         notificationDataType = "registration-rejected";
+      } else if (refundStatus === "refunded") {
+        notificationBody = `💸 Your refund for ${event.eventName} has been processed. Please check your account for the refund.`;
+        notificationDataType = "registration-refunded";
       }
 
       messages.push({
