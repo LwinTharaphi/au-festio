@@ -17,6 +17,7 @@ export default function ScanQRPage() {
   const [scanStatus, setScanStatus] = useState("");
   const [isScanning, setIsScanning] = useState(false);
   const [processing, setProcessing] = useState(false); // To debounce scanning
+  const [cameraStream, setCameraStream] = useState(null);
 
   useEffect(() => {
     if (status === "loading") return;  // Don't redirect while loading
@@ -26,6 +27,23 @@ export default function ScanQRPage() {
     }
     if (status === 'authenticated' && session?.user?.role === "organizer") {
       const video = document.getElementById("qr-video");
+
+       // Detect if the device is mobile/tablet
+       const isMobileOrTablet = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+       // Access camera with back camera on mobile/tablet
+      if (isMobileOrTablet) {
+        const constraints = {
+          video: { facingMode: { exact: "environment" } }, // Access back camera
+        };
+        navigator.mediaDevices.getUserMedia(constraints)
+        .then((stream) => {
+          setCameraStream(stream);
+          video.srcObject = stream;
+        })
+        .catch((error) => {
+          console.error("Error accessing camera: ", error);
+        });
+      } else {
       const qrScanner = new QrScanner(video, (result) => {
         if (!processing) {
           setProcessing(true);
@@ -45,7 +63,8 @@ export default function ScanQRPage() {
         qrScanner.stop(); // Cleanup on unmount
       };
     }
-  }, [status, isScanning, session, router]);
+  }
+}, [status, isScanning, session, router]);
 
   const handleScan = (result) => {
     console.log("QR Scanner Result:", result); // Debug: Log the result object
