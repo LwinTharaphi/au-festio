@@ -70,7 +70,7 @@ export async function POST(request) {
     await newNotification.save();
     console.log("Sending SSE notification for new student registration:", newNotification);
     sendEventsToAll(newNotification);
-    return new Response(JSON.stringify(newStudent, newNotification), { status: 201 }); // Return the newly created student
+    return new Response(JSON.stringify(newStudent), { status: 201 }); // Return the newly created student
   } catch (error) {
     console.error(error);
     return new Response(
