@@ -3,6 +3,9 @@
 import Student from "@/models/Student"; // Import the Student model
 import dbConnect from "@/lib/db"; // Import the database connection
 import { S3Client, DeleteObjectCommand, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import Event from "@/models/Event";
+import Notification from "@/models/Notification";
+import { sendEventsToAll } from "../notifications/route";
 
 const s3 = new S3Client({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -40,7 +43,6 @@ export async function GET(request, { params }) {
 // POST a new student
 export async function POST(request) {
   await dbConnect(); // Ensure the database is connected
-
   try {
     const data = await request.json(); // Parse the incoming JSON data from the request
     
@@ -52,7 +54,23 @@ export async function POST(request) {
     const newStudent = new Student({ ...data, paymentScreenshotUrl: data.paymentScreenshot, refundQRCode: data.refundQRCode}); // Create a new Student instance with the provided data and the S3 URL
     // const newStudent = new Student(data);
     await newStudent.save(); // Save the new student to the database
-    return new Response(JSON.stringify(newStudent), { status: 201 }); // Return the newly created student
+    const event = await Event.findById(data.eventId);
+
+    const organizerId = event.organizer;
+
+    // Send SSE notification
+    const newNotification = new Notification({
+      notificationId: new mongoose.Types.ObjectId().toString(),
+      eventId: data.eventId,
+      organizerId: organizerId,
+      title: "New Student Registration",
+      body: `A new student has registered for ${event.eventName}.`,
+    });
+
+    await newNotification.save();
+    console.log("Sending SSE notification for new student registration:", newNotification);
+    sendEventsToAll(newNotification);
+    return new Response(JSON.stringify(newStudent, newNotification), { status: 201 }); // Return the newly created student
   } catch (error) {
     console.error(error);
     return new Response(

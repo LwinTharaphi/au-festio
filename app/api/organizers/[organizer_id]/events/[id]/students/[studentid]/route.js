@@ -80,18 +80,6 @@ export async function PUT(request, { params }) {
   const existingStudent = await Student.findOne({ _id: studentid, eventId: id });
   const event = await Event.findById(id);
 
-  // Send SSE notification
-  const newNotification = new Notification({
-    notificationId: new mongoose.Types.ObjectId().toString(),
-    eventId: id,
-    organizerId: organizerId,
-    title: "New Student Registration",
-    body: `A new student has registered for ${event.eventName}.`,
-  });
-
-  await newNotification.save();
-  sendEventsToAll(newNotification);
-
   if (!existingStudent) {
     return new Response(JSON.stringify({ error: "Student not found" }), { status: 404 });
   }
