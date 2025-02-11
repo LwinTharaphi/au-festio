@@ -3,6 +3,8 @@ import dbConnect from "@/lib/db";
 import { deleteBoothFile } from "../../booths/route";
 import { Expo } from "expo-server-sdk";
 import Event from "@/models/Event";
+import Notification from "@/models/Notification";
+import { sendEventsToAll } from "../../notifications/route";
 
 const baseS3Url = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/`;
 // GET: Fetch a specific student by student ID and event ID
@@ -140,6 +142,18 @@ export async function PUT(request, { params }) {
           console.error("Error sending push notification:", error);
         }
       }
+
+      // Send SSE notification
+      const newNotification = new Notification({
+        notificationId: new mongoose.Types.ObjectId().toString(),
+        eventId: id,
+        organizerId: organizerId,
+        title: "Event Registration",
+        body: notificationBody,
+      });
+
+      await newNotification.save();
+      sendEventsToAll(newNotification);
     }
   }
 
