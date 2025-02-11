@@ -6,6 +6,7 @@ import { S3Client, DeleteObjectCommand, PutObjectCommand, GetObjectCommand } fro
 import Event from "@/models/Event";
 import Notification from "@/models/Notification";
 import { sendEventsToAll } from "../notifications/route";
+import mongoose from "mongoose";
 
 const s3 = new S3Client({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
