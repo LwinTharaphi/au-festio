@@ -81,3 +81,12 @@ export async function POST(req, { params }) {
 
   return new Response(JSON.stringify(newNotification), { status: 201 });
 }
+
+export function sendEventsToAll(newNotification) {
+  const eventKey = `${newNotification.organizerId}-${newNotification.eventId}`;
+  if (clients[eventKey]) {
+    clients[eventKey].forEach((client) => {
+      client.enqueue(`data: ${JSON.stringify(newNotification)}\n\n`);
+    });
+  }
+}
