@@ -15,6 +15,8 @@ export async function GET(req, { params }) {
 
   await dbConnect();
 
+  const notifications = await Notification.find({ eventId: id }).sort({ sentAt: -1 });
+
   const organizer_id = await EventOrganizer.findOne({ eventId: id }).select("_id");
 
   const eventKey = `${organizer_id}-${id}`;
@@ -31,6 +33,8 @@ export async function GET(req, { params }) {
       const sendEvent = (data) => {
         client.enqueue(`data: ${JSON.stringify(data)}\n\n`);
       };
+
+      notifications.forEach(sendEvent);
 
       req.signal.addEventListener("abort", () => {
         clients[eventKey] = clients[eventKey].filter((c) => c !== client);

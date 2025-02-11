@@ -29,10 +29,23 @@ export default function NotificationPage() {
           if (status === 'authenticated' && session?.user && session.user.role === "organizer"){
             const userId = session.user.id
             if(userId){
+                const fetchNotifications = async () => {
+                    try {
+                        const response = await fetch(`/api/organizers/${userId}/events/${id}/notifications`);
+                        if (!response.ok) {
+                            throw new Error("Failed to fetch notifications.");
+                        }
+                        const data = await response.json();
+                        setNotifications(data);
+                    } catch (error) {
+                        console.error("Error fetching notifications:", error);
+                    }
+                };
                 const eventSource = new EventSource(`/api/organizers/${userId}/events/${id}/notifications`);
                 eventSource.onmessage = (event) => {
                     const newNotification = JSON.parse(event.data);
                     setNotifications((prevNotifications) => [newNotification, ...prevNotifications]);
+                    console.log("New notification:", newNotification);
                     alert(`New notification: ${newNotification.title}`);
                 };
                 eventSource.onerror = (error) => {
@@ -67,7 +80,7 @@ export default function NotificationPage() {
                         console.error("Error fetching students:", error);
                     }
                 };
-        
+                fetchNotifications();
                 fetchEventData();
                 fetchStudents();
                 return () => {
