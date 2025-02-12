@@ -11,17 +11,26 @@ export const NotificationProvider = ({ children }) => {
     if (status !== "authenticated" || !session?.user?.id) return;
 
     const userId = session.user.id;
-    const eventSource = new EventSource(`/api/organizers/${userId}/notifications`);
+    const eventSource = new EventSource(`/api/organizers/${userId}/notifications/sse`);
 
     eventSource.onmessage = (event) => {
       const newNotification = JSON.parse(event.data);
-      setNotifications((prev) => [newNotification, ...prev]);
+      setNotifications((prev) => {
+        if (!prev.some((notif) => notif.notificationId === newNotification.notificationId)) {
+          return [newNotification, ...prev];
+        }
+        return prev;
+      });
       console.log("New notification:", newNotification);
-      alert(`New notification: ${newNotification.title}`);
     };
 
     eventSource.onerror = (error) => {
       console.error("EventSource failed:", error);
+      if (error instanceof Error) {
+        console.error("Error message:", error.message);
+      } else {
+        console.error("Unknown error:", error);
+      }
       eventSource.close();
     };
 

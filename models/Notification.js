@@ -6,6 +6,8 @@ const NotificationSchema = new mongoose.Schema({
   organizerId: { type: mongoose.Schema.Types.ObjectId, ref: "EventOrganizer", required: true }, // Change here
   title: { type: String, required: true },
   body: { type: String, required: true },
+  read: {type: Boolean, default: false},
+  sent: {type: Boolean, default: false},
   sentAt: { type: Date, default: Date.now },
 });
 
