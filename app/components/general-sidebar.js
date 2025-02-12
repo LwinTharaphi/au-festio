@@ -75,6 +75,12 @@ export default function Sidebar() {
           >
             <BsClockHistory className="me-2" /> History
           </Nav.Link>
+          <Nav.Link
+            onClick={() => router.push(`/organizers/${userId}/notification`)}
+            className={`navbar-link me-10 d-flex align-items-center ${isActive(`/organizers/${userId}/notification`)}`} // Apply active class conditionally
+          >
+            <BsClockHistory className="me-2" /> Notification
+          </Nav.Link>
 
           <Nav.Link
             onClick={() => signOut()} // Log out user

@@ -4,7 +4,7 @@ import { deleteBoothFile } from "../../booths/route";
 import { Expo } from "expo-server-sdk";
 import Event from "@/models/Event";
 import Notification from "@/models/Notification";
-import { sendEventsToAll } from "../../notifications/route";
+import { sendEventsToAll } from "../../../../notifications/route";
 
 const baseS3Url = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/`;
 // GET: Fetch a specific student by student ID and event ID

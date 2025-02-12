@@ -5,7 +5,7 @@ import dbConnect from "@/lib/db"; // Import the database connection
 import { S3Client, DeleteObjectCommand, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import Event from "@/models/Event";
 import Notification from "@/models/Notification";
-import { sendEventsToAll } from "../notifications/route";
+import { sendEventsToAll } from "../../../notifications/route";
 import mongoose from "mongoose";
 
 const s3 = new S3Client({
