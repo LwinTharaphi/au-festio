@@ -92,7 +92,7 @@ export async function POST(request) {
     // Send SSE notification
     const newNotification = new Notification({
       notificationId: new mongoose.Types.ObjectId().toString(),
-      eventId: data.event,
+      eventId: data.event._id,
       organizerId: event.organizer,
       title: "New Staff Registration",
       body: `A new staff member has registered for ${event.eventName}.`,
