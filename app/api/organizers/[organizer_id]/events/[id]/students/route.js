@@ -77,6 +77,14 @@ export async function POST(request) {
           },
         });
       }
+      const chunks = expo.chunkPushNotifications(messages);
+      for (const chunk of chunks) {
+        try {
+          await expo.sendPushNotificationsAsync(chunk);
+        } catch (error) {
+          console.error("Error sending push notification:", error);
+        }
+      }
       // Send SSE notification
       const newNotification = new Notification({
         notificationId: new mongoose.Types.ObjectId().toString(),
@@ -103,6 +111,14 @@ export async function POST(request) {
             type: paid_event_registeration, // Dynamically changing type
           },
         });
+        const chunks = expo.chunkPushNotifications(messages);
+        for (const chunk of chunks) {
+          try {
+            await expo.sendPushNotificationsAsync(chunk);
+          } catch (error) {
+            console.error("Error sending push notification:", error);
+          }
+        }
       }
       // Send SSE notification
       const newNotification = new Notification({

@@ -59,7 +59,7 @@ export async function POST(request) {
     const newStaff = new Staff(data); // Create a new Staff instance with the provided data
     await newStaff.save(); // Save the staff member to the database
 
-    const event = await Event.findById(data.event); // Fetch the event associated with the staff member
+    const event = await Event.findById(data.event._id); // Fetch the event associated with the staff member
 
     const expo = new Expo();
     const messages = [];
@@ -70,7 +70,7 @@ export async function POST(request) {
         title: 'Staff Registration',
         body: `🎉 Your information has been received for ${event.eventName}! Please wait for approval.`,
         data: {
-          eventId: data.event,
+          eventId: data.event._id,
           staffId: newStaff._id,
           organizerId: event.organizer,
           type: 'staff-registration',
