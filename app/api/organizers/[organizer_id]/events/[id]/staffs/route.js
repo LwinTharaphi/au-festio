@@ -1,5 +1,9 @@
 import Staff from "@/models/Staff"; // Import your Staff model
 import dbConnect from "@/lib/db"; // Database connection utility
+import { Expo } from "expo-server-sdk";
+import Notification from "@/models/Notification";
+import { sendEventsToAll } from "../../../notifications/route";
+import mongoose from "mongoose";
 
 // GET: Fetch all staff for a specific event
 export async function GET(request, { params }) {
@@ -54,6 +58,49 @@ export async function POST(request) {
     const data = await request.json(); // Parse the incoming JSON data from the request
     const newStaff = new Staff(data); // Create a new Staff instance with the provided data
     await newStaff.save(); // Save the staff member to the database
+
+    const event = await Event.findById(data.event); // Fetch the event associated with the staff member
+
+    const expo = new Expo();
+    const messages = [];
+    if(newStaff.expoPushToken && Expo.isExpoPushToken(newStaff.expoPushToken)) {
+      messages.push({
+        to: newStaff.expoPushToken,
+        sound: 'default',
+        title: 'Staff Registration',
+        body: `🎉 Your information has been received for ${event.eventName}! Please wait for approval.`,
+        data: {
+          eventId: data.event,
+          staffId: newStaff._id,
+          organizerId: event.organizer,
+          type: 'staff-registration',
+        },
+      });
+      console.log("Sending push notification to staff:", messages);
+
+      // Send the push notification
+      const chunks = expo.chunkPushNotifications(messages);
+      for (const chunk of chunks) {
+        try {
+          await expo.sendPushNotificationsAsync(chunk);
+        } catch (error) {
+          console.error("Error sending push notification:", error);
+        }
+      }
+    }
+
+    // Send SSE notification
+    const newNotification = new Notification({
+      notificationId: new mongoose.Types.ObjectId().toString(),
+      eventId: data.event,
+      organizerId: event.organizer,
+      title: "New Staff Registration",
+      body: `A new staff member has registered for ${event.eventName}.`,
+    });
+    await newNotification.save();
+    console.log("Sending SSE notification for new staff registration:", newNotification);
+    sendEventsToAll(newNotification);
+
     return new Response(JSON.stringify(newStaff), { status: 201 }); // Return the newly created staff member
   } catch (error) {
     console.error("Error creating staff:", error);

@@ -4,6 +4,9 @@ import Staff from "@/models/Staff"; // Import your Staff model
 import dbConnect from "@/lib/db";  // Database connection utility
 import { Expo } from "expo-server-sdk";
 import Event from "@/models/Event";
+import Notification from "@/models/Notification";
+import { sendEventsToAll } from "../../../../notifications/route";
+import mongoose from "mongoose";
 
 // GET: Fetch a specific staff by staffid and event ID
 export async function GET(request, { params }) {
@@ -112,7 +115,46 @@ export async function DELETE(request, { params }) {
     if (!deletedStaff) {
       return new Response("Staff not found", { status: 404 });
     }
-    
+    const event = await Event.findById(id);
+    const expo = new Expo();
+    const messages = [];
+    if(deletedStaff.expoPushToken && Expo.isExpoPushToken(deletedStaff.expoPushToken)) {
+      messages.push({
+        to: deletedStaff.expoPushToken,
+        sound: 'default',
+        title: 'Staff Registration',
+        body: `🎉 Your successfully canceled your registration for ${event.eventName}.`,
+        data: {
+          eventId: id,
+          staffId: staffid,
+          organizerId: event.organizer,
+          type: 'staff-canceled',
+        },
+      });
+      console.log("Sending push notification to staff:", messages);
+
+      // Send the push notification
+      const chunks = expo.chunkPushNotifications(messages);
+      for (const chunk of chunks) {
+        try {
+          await expo.sendPushNotificationsAsync(chunk);
+        } catch (error) {
+          console.error("Error sending push notification:", error);
+        }
+      }
+    }
+
+    const newNotification = new Notification({
+      notificationId: new mongoose.Types.ObjectId().toString(),
+      eventId: id,
+      organizerId: event.organizer,
+      title: "Staff Registration Cancellation",
+      body: `📢 A staff member has canceled their registration for ${event.eventName}.`,
+    });
+    await newNotification.save();
+    console.log("Sending SSE notification for staff cancellation:", newNotification);
+    sendEventsToAll(newNotification);
+
     // Return a success message
     return new Response("Staff deleted successfully", { status: 200 });
   } catch (error) {
