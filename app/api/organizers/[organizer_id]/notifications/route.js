@@ -17,7 +17,7 @@ export async function GET(req, { params }) {
   await dbConnect();
 
   // Fetch all notifications for the given organizer, regardless of whether they have been sent or not.
-  const notifications = await Notification.find({ organizerId: organizer_id }).sort({ sentAt: -1 });
+  const notifications = await Notification.find({ organizerId: organizer_id, read: false }).sort({ sentAt: -1 });
 
   return new Response(JSON.stringify(notifications), { status: 200 });
 }
@@ -87,27 +87,24 @@ export function sendEventsToAll(newNotification) {
 
 
 
-export async function PATCH(req, { params }) {
-  const { notification_id } = params;
+// export async function PATCH(req, { params }) {
+//   const { notification_id } = await params;
+//   const { read } = await req.body;
 
-  if (!notification_id) {
-    return new Response("Missing notification_id", { status: 400 });
-  }
+//   if (!notification_id) {
+//     return new Response("Missing notification_id", { status: 400 });
+//   }
 
-  await dbConnect();
+//   await dbConnect();
 
-  const updatedNotification = await Notification.findByIdAndUpdate(
-    notification_id,
-    { read: true },  // ✅ Mark as read
-    { new: true }
-  );
+//   const updatedNotification = await Notification.findOneAndUpdate({ notificationId: notification_id }, { read }, { new: true });
 
-  if (!updatedNotification) {
-    return new Response("Notification not found", { status: 404 });
-  }
+//   if (!updatedNotification) {
+//     return new Response("Notification not found", { status: 404 });
+//   }
 
-  return new Response(JSON.stringify(updatedNotification), { status: 200 });
-}
+//   return new Response(JSON.stringify(updatedNotification), { status: 200 });
+// }
 
 
 

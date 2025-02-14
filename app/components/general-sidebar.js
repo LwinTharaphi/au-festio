@@ -4,22 +4,36 @@ import { useRouter } from "next/navigation";
 import { Nav, Navbar } from "react-bootstrap";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Sidebar.css';
-import { BsGrid, BsPeople, BsPerson, BsBoxArrowRight, BsClockHistory } from "react-icons/bs"; // Add icons
+import { BsGrid, BsPeople, BsPerson, BsBoxArrowRight, BsClockHistory, BsBell } from "react-icons/bs"; // Add icons
 
 import { signOut } from "next-auth/react";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation"; // Import usePathname from next/navigation
+import { useEffect, useState } from "react";
 
 export default function Sidebar() {
   const { data: session } = useSession();
   const router = useRouter();
   const pathname = usePathname(); // Use usePathname to get the current path
+  const [unreadCount , setUnReadCount] = useState(0);
+  const userId = session?.user?.id;
+  useEffect(() => {
+    if (!session) return;
+    const userId = session.user?.id || session.user?._id;
 
-  if (!session) {
-    return <p>Loading...</p>; // Show a loading state if the session is not available
-  }
-
-  const userId = session.user?.id || session.user?._id;
+    async function fetchNotifications() {
+      try {
+        const res = await fetch(`/api/organizers/${userId}/notifications/bulk`);
+        if (!res.ok) throw new Error("Failed to fetch notifications");
+        const data = await res.json();
+        const unread = data.filter((notif) => !notif.read).length;
+        setUnReadCount(unread);
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+      }
+    }
+    fetchNotifications();
+  }, [session]);
 
   const isActive = (path) => pathname === path ? 'active' : ''; // Function to check if the link is active
 
@@ -79,7 +93,8 @@ export default function Sidebar() {
             onClick={() => router.push(`/organizers/${userId}/notification`)}
             className={`navbar-link me-10 d-flex align-items-center ${isActive(`/organizers/${userId}/notification`)}`} // Apply active class conditionally
           >
-            <BsClockHistory className="me-2" /> Notification
+            <BsBell className="me-2" /> Notification
+            {unreadCount > 0 && <span className="badge bg-danger">{unreadCount}</span>}
           </Nav.Link>
 
           <Nav.Link

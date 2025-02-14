@@ -1,155 +1,98 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { Container, Row, Col, Table, Button, Spinner } from "react-bootstrap";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { Spinner } from "react-bootstrap";
 import Sidebar from "../../../components/general-sidebar";
-import "../../../components/Sidebar.css";
-import { useSession } from 'next-auth/react';
-import { useNotifications } from "../../../NotificationProvider";
 
-export default function NotificationPage() {
-    const { data: session, status } = useSession();
-    const router = useRouter();
-    const { id: organizerId } = useParams();
-    const [loading, setLoading] = useState(true);
-    const { notifications, setNotifications } = useNotifications(); // Get notifications from context
+export default function NotificationsPage() {
+  const { data: session, status } = useSession();
+  const userId = session?.user?.id;
+  const router = useRouter();
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
+  useEffect(() => {
+
+    const fetchNotifications = async () => {
+      try {
         if (status === "loading") return;  // Don't redirect while loading
         if (status === 'unauthenticated' || session?.user?.role !== "organizer") {
-            router.push('/');
-            return;
+          router.push('/')
         }
-
-        if (status === 'authenticated' && session?.user?.role === "organizer") {
-            const userId = session.user.id;
-            const eventSource = new EventSource(`/api/organizers/${userId}/notifications/sse`);
-
-            eventSource.onmessage = function(event) {
-                const notification = JSON.parse(event.data);
-                console.log('New notification:', notification);
-                setNotifications(prevNotifications => {
-                    const isDuplicate = prevNotifications.some(notif => notif.notificationId === notification.notificationId);
-                    if (isDuplicate) {
-                        return prevNotifications;
-                    }
-                    return [notification, ...prevNotifications];
-                });
-            };
-
-            eventSource.onerror = function(error) {
-                console.error('EventSource failed:', error);
-                eventSource.close();
-            };
-
-            const fetchNotifications = async () => {
-                try {
-                    const response = await fetch(`/api/organizers/${userId}/notifications`);
-                    if (!response.ok) {
-                        throw new Error("Failed to fetch notifications.");
-                    }
-                    const data = await response.json();
-                    setNotifications(data);
-                } catch (error) {
-                    console.error("Error fetching notifications:", error);
-                } finally {
-                    setLoading(false);
-                }
-            };
-
-            fetchNotifications();
-
-            return () => {
-                eventSource.close();
-            };
+        if ( status === 'authenticated' && session?.user?.role === "organizer") {
+            setLoading(true);
+            const res = await fetch(`/api/organizers/${session.user.id}/notifications/bulk`);
+            if (!res.ok) throw new Error("Failed to fetch notifications");
+            const data = await res.json();
+            setNotifications(data);
         }
-    }, [router, session, status, setNotifications]);
-
-    const handleMarkAsRead = async (notificationId) => {
-        const userId = session.user.id;
-        if (!userId) return;
-        await fetch(`/api/organizers/${userId}/notifications/${notificationId}`, {
-            method: 'PATCH', // PATCH request to mark notification as read
-        });
-        setNotifications((prev) =>
-            prev.map((notif) =>
-                notif.notificationId === notificationId
-                    ? { ...notif, read: true }
-                    : notif
-            )
-        );
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    if (loading || status === "loading") {
-        return (
-            <div
-                style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    height: "100vh",
-                    flexDirection: "column",
-                    backgroundColor: '#F3EFFD'
-                }}
-            >
-                <Spinner animation="border" variant="primary" role="status" style={{ width: "2rem", height: "2rem" }}>
-                    <span className="visually-hidden">Loading...</span>
-                </Spinner>
-                <p style={{ marginTop: "1rem", fontSize: "1.2rem", fontWeight: "500", color: "#007bff" }}>
-                    Loading...
-                </p>
-            </div>
-        );
-    }
+    fetchNotifications();
+  }, [session, status, router]);
 
-    if (!notifications || notifications.length === 0) {
-        return (
-            <div>
-                <Sidebar />
-                <Container>
-                    <h2>Notifications</h2>
-                    <p>No notifications available.</p>
-                </Container>
-            </div>
-        );
-    }
-
+  if (loading || status === "loading") {
     return (
-        <div>
-            <Sidebar />
-            <Container>
-                <h2>Notifications</h2>
-                <Row>
-                    <Col>
-                        <Table striped bordered hover responsive>
-                            <thead>
-                                <tr>
-                                    <th>Title</th>
-                                    <th>Body</th>
-                                    <th>Time</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {notifications.map((notification, index) => (
-                                    <tr key={index}>
-                                        <td>{notification.title}</td>
-                                        <td>{notification.body}</td>
-                                        <td>{new Date(notification.sentAt).toLocaleString()}</td>
-                                        <td>
-                                            {!notification.read && (
-                                                <Button variant="primary" onClick={() => handleMarkAsRead(notification.notificationId)}>
-                                                    Mark as Read
-                                                </Button>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </Table>
-                    </Col>
-                </Row>
-            </Container>
-        </div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          flexDirection: "column",
+          backgroundColor: '#F3EFFD'
+        }}
+      >
+        <Spinner animation="border" variant="primary" role="status" style={{ width: "2rem", height: "2rem" }}>
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+        <p style={{ marginTop: "1rem", fontSize: "1.2rem", fontWeight: "500", color: "#007bff" }}>
+          Loading...
+        </p>
+      </div>
     );
+  }
+
+  if (status === "authenticated" && session.user.role === "organizer") {
+    return (
+        <div style={{ backgroundColor: '#F3EFFD' }}>
+            <Sidebar />
+            <div className="container" style={{ backgroundColor: '#F3EFFD' }}>
+                <h3 className="mb-4 mt-4">Notification</h3>
+                {notifications.length === 0 ? (
+                    <p className="text-gray-600">No notifications found.</p>
+                ) : (
+                    <div className="bg-white shadow-md rounded-lg p-4">
+                    <ul className="divide-y divide-gray-200">
+                        {notifications.map((notification) => (
+                        <li
+                            key={notification.notificationId}
+                            className={`py-4 flex justify-between items-center ${!notification.read ? 'bg-yellow-100' : ''}`}
+                        >
+                            <div>
+                            <h2 className="text-lg font-semibold text-gray-800">{notification.title}</h2>
+                            <p className="text-gray-600 mt-1">{notification.body}</p>
+                            <small className="text-gray-500 block mt-1">
+                                {new Date(notification.sentAt).toLocaleString()}
+                            </small>
+                            </div>
+                            {!notification.read && (
+                            <span className="text-sm text-red-500 font-medium">Unread</span>
+                            )}
+                        </li>
+                        ))}
+                    </ul>
+                    </div>
+                )}
+        </div>
+      </div>
+    );
+  }
+  return null;
 }

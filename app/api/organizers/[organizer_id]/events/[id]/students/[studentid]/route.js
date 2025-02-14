@@ -5,6 +5,7 @@ import { Expo } from "expo-server-sdk";
 import Event from "@/models/Event";
 import Notification from "@/models/Notification";
 import { sendEventsToAll } from "../../../../notifications/route";
+import mongoose from "mongoose";
 
 const baseS3Url = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/`;
 // GET: Fetch a specific student by student ID and event ID
@@ -162,11 +163,51 @@ export async function DELETE(request, { params }) {
     await deleteBoothFile(studentToDelete.paymentScreenshotUrl);
     await deleteBoothFile(studentToDelete.refundQRCode);
   }
+
   const deletedStudent = await Student.findOneAndDelete({ _id: studentid, eventId: id });
   
   if (!deletedStudent) {
     return new Response("Student not found", { status: 404 });
   }
+
+  const expo = new Expo();
+  const messages = [];
+  if(deletedStudent.expoPushToken && Expo.isExpoPushToken(deletedStudent.expoPushToken)) {
+    messages.push({
+      to: deletedStudent.expoPushToken,
+      sound: 'default',
+      title: "Event Registration Cancellation",
+      body: `📢 You successfully canceled your registration for the event ${deletedStudent.eventName}.`,
+      data: {
+        eventId: id,
+        studentId: studentid,
+        type: "registration-canceled",
+      },
+    });
+    console.log("Sending push notification to student:", messages);
+    const chunks = expo.chunkPushNotifications(messages);
+    for (const chunk of chunks) {
+      try {
+        await expo.sendPushNotificationsAsync(chunk);
+      } catch (error) {
+        console.error("Error sending push notification:", error);
+      }
+    }
+  }
+
+  const event = await Event.findById(id);
+  // Send SSE notification
+  const newNotification = new Notification({
+    notificationId: new mongoose.Types.ObjectId().toString(),
+    eventId: id,
+    organizerId: event.organizer,
+    title: "New Student Registration",
+    body: `A new student has registered for ${event.eventName}.`,
+  });
+
+  await newNotification.save();
+  console.log("Sending SSE notification for new student registration:", newNotification);
+  sendEventsToAll(newNotification);
 
   return new Response("Student deleted successfully", { status: 200 });
 }
