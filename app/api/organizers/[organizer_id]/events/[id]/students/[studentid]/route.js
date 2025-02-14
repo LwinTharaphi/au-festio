@@ -121,6 +121,17 @@ export async function PUT(request, { params }) {
       } else if (refundStatus === "requested") {
         notificationBody = `🔄 Your refund request for ${event.eventName} has been received. Please wait for further instructions.`;
         notificationDataType = "registration-refund-requested";
+        // Send SSE notification
+        const newNotification = new Notification({
+          notificationId: new mongoose.Types.ObjectId().toString(),
+          eventId: id,
+          organizerId: organizerId,
+          title: "Refund Request",
+          body: `A student has requested a refund for ${event.eventName}.`,
+        });
+        await newNotification.save();
+        console.log("Sending SSE notification for refund request:", newNotification);
+        sendEventsToAll(newNotification);
       }
 
       messages.push({
@@ -147,19 +158,6 @@ export async function PUT(request, { params }) {
         }
       }
     }
-
-    // Send SSE notification
-    const newNotification = new Notification({
-      notificationId: new mongoose.Types.ObjectId().toString(),
-      eventId: id,
-      organizerId: event.organizer,
-      title: "Refund Request",
-      body: `A student has requested a refund for ${event.eventName}.`,
-    });
-
-    await newNotification.save();
-    console.log("Sending SSE notification for new student registration:", newNotification);
-    sendEventsToAll(newNotification);
   }
 
   return new Response(JSON.stringify(updatedStudent), { status: 200 });

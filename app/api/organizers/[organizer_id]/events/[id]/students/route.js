@@ -98,7 +98,7 @@ export async function POST(request) {
       console.log("Sending SSE notification for new student registration:", newNotification);
       sendEventsToAll(newNotification);
     } else {
-      if (newStudent.expoPushTokens && Expo.isExpoPushToken(newStudent.expoPushTokens)) {
+      if (event.isPaid == true && newStudent.expoPushTokens && Expo.isExpoPushToken(newStudent.expoPushTokens)) {
         messages.push({
           to: newStudent.expoPushTokens,
           sound: 'default',

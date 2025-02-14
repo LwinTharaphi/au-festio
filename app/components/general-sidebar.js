@@ -10,30 +10,15 @@ import { signOut } from "next-auth/react";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation"; // Import usePathname from next/navigation
 import { useEffect, useState } from "react";
+import { useNotifications } from "../NotificationProvider";
 
 export default function Sidebar() {
   const { data: session } = useSession();
   const router = useRouter();
   const pathname = usePathname(); // Use usePathname to get the current path
-  const [unreadCount , setUnReadCount] = useState(0);
+  // const [unreadCount , setUnReadCount] = useState(0);
+  const { unreadCount } = useNotifications();
   const userId = session?.user?.id;
-  useEffect(() => {
-    if (!session) return;
-    const userId = session.user?.id || session.user?._id;
-
-    async function fetchNotifications() {
-      try {
-        const res = await fetch(`/api/organizers/${userId}/notifications/bulk`);
-        if (!res.ok) throw new Error("Failed to fetch notifications");
-        const data = await res.json();
-        const unread = data.filter((notif) => !notif.read).length;
-        setUnReadCount(unread);
-      } catch (error) {
-        console.error("Error fetching notifications:", error);
-      }
-    }
-    fetchNotifications();
-  }, [session]);
 
   const isActive = (path) => pathname === path ? 'active' : ''; // Function to check if the link is active
 
