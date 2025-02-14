@@ -102,7 +102,7 @@ export async function PUT(request, { params }) {
   }
 
   // If status changed to "paid" or "rejected", send a notification
-  if ((statusChanged && (newStatus === "paid" || newStatus === "rejected" )) || refundStatus === "refunded") {
+  if ((statusChanged && (newStatus === "paid" || newStatus === "rejected" )) || refundStatus === "refunded" || refundStatus === "requested") {
     const expo = new Expo();
     const messages = [];
 
@@ -118,6 +118,9 @@ export async function PUT(request, { params }) {
       } else if (refundStatus === "refunded") {
         notificationBody = `💸 Your refund for ${event.eventName} has been processed. Please check your account for the refund.`;
         notificationDataType = "registration-refunded";
+      } else if (refundStatus === "requested") {
+        notificationBody = `🔄 Your refund request for ${event.eventName} has been received. Please wait for further instructions.`;
+        notificationDataType = "registration-refund-requested";
       }
 
       messages.push({
@@ -144,6 +147,15 @@ export async function PUT(request, { params }) {
         }
       }
     }
+
+    // Send SSE notification
+    const newNotification = new Notification({
+      notificationId: new mongoose.Types.ObjectId().toString(),
+      eventId: id,
+      organizerId: event.organizer,
+      title: "Refund Request",
+      body: `A student has requested a refund for ${event.eventName}.`,
+    });
   }
 
   return new Response(JSON.stringify(updatedStudent), { status: 200 });
@@ -201,8 +213,8 @@ export async function DELETE(request, { params }) {
     notificationId: new mongoose.Types.ObjectId().toString(),
     eventId: id,
     organizerId: event.organizer,
-    title: "New Student Registration",
-    body: `A new student has registered for ${event.eventName}.`,
+    title: "Student Registration Deleted",
+    body: `A student has canceled their registration for ${event.eventName}.`,
   });
 
   await newNotification.save();
