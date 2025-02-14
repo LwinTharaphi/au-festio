@@ -7,6 +7,7 @@ import Event from "@/models/Event";
 import Notification from "@/models/Notification";
 import { sendEventsToAll } from "../../../notifications/route";
 import mongoose from "mongoose";
+import { Expo } from "expo-server-sdk";
 
 const s3 = new S3Client({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -59,18 +60,63 @@ export async function POST(request) {
 
     const organizerId = event.organizer;
 
-    // Send SSE notification
-    const newNotification = new Notification({
-      notificationId: new mongoose.Types.ObjectId().toString(),
-      eventId: data.eventId,
-      organizerId: organizerId,
-      title: "New Student Registration",
-      body: `A new student has registered for ${event.eventName}.`,
-    });
+    const expo = new Expo();
+    const messages = [];
+    if(event.isPaid == false) {
+      if (newStudent.expoPushTokens && Expo.isExpoPushToken(newStudent.expoPushTokens)) {
+        messages.push({
+          to: newStudent.expoPushTokens,
+          sound: 'default',
+          title: 'Event Registration',
+          body: `🎉 You successfully registered for ${event.eventName}!`,
+          data: {
+            eventId: data.eventId,
+            studentId: newStudent._id,
+            organizerId: organizerId,
+            type: free_event_registeration, // Dynamically changing type
+          },
+        });
+      }
+      // Send SSE notification
+      const newNotification = new Notification({
+        notificationId: new mongoose.Types.ObjectId().toString(),
+        eventId: data.eventId,
+        organizerId: organizerId,
+        title: "New Student Registration",
+        body: `A new student has registered for ${event.eventName}.`,
+      });
 
-    await newNotification.save();
-    console.log("Sending SSE notification for new student registration:", newNotification);
-    sendEventsToAll(newNotification);
+      await newNotification.save();
+      console.log("Sending SSE notification for new student registration:", newNotification);
+      sendEventsToAll(newNotification);
+    } else {
+      if (newStudent.expoPushTokens && Expo.isExpoPushToken(newStudent.expoPushTokens)) {
+        messages.push({
+          to: newStudent.expoPushTokens,
+          sound: 'default',
+          title: 'Event Registration',
+          body: `🎉 Your information has been received for ${event.eventName}! Please wait for approval.`,
+          data: {
+            eventId: data.eventId,
+            studentId: newStudent._id,
+            organizerId: organizerId,
+            type: paid_event_registeration, // Dynamically changing type
+          },
+        });
+      }
+      // Send SSE notification
+      const newNotification = new Notification({
+        notificationId: new mongoose.Types.ObjectId().toString(),
+        eventId: data.eventId,
+        organizerId: organizerId,
+        title: "New Student Registration",
+        body: `A new student has registered for ${event.eventName}. Please check the payment for registeration.`,
+      });
+
+      await newNotification.save();
+      console.log("Sending SSE notification for new student registration:", newNotification);
+      sendEventsToAll(newNotification);
+    }
     return new Response(JSON.stringify(newStudent), { status: 201 }); // Return the newly created student
   } catch (error) {
     console.error(error);

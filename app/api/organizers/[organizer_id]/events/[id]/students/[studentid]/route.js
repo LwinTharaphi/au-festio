@@ -156,6 +156,10 @@ export async function PUT(request, { params }) {
       title: "Refund Request",
       body: `A student has requested a refund for ${event.eventName}.`,
     });
+
+    await newNotification.save();
+    console.log("Sending SSE notification for new student registration:", newNotification);
+    sendEventsToAll(newNotification);
   }
 
   return new Response(JSON.stringify(updatedStudent), { status: 200 });
@@ -182,6 +186,8 @@ export async function DELETE(request, { params }) {
     return new Response("Student not found", { status: 404 });
   }
 
+  const event = await Event.findById(id);
+
   const expo = new Expo();
   const messages = [];
   if(deletedStudent.expoPushToken && Expo.isExpoPushToken(deletedStudent.expoPushToken)) {
@@ -189,7 +195,7 @@ export async function DELETE(request, { params }) {
       to: deletedStudent.expoPushToken,
       sound: 'default',
       title: "Event Registration Cancellation",
-      body: `📢 You successfully canceled your registration for the event ${deletedStudent.eventName}.`,
+      body: `📢 You successfully canceled your registration for ${event.eventName}.`,
       data: {
         eventId: id,
         studentId: studentid,
@@ -206,8 +212,6 @@ export async function DELETE(request, { params }) {
       }
     }
   }
-
-  const event = await Event.findById(id);
   // Send SSE notification
   const newNotification = new Notification({
     notificationId: new mongoose.Types.ObjectId().toString(),
