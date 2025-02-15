@@ -4,6 +4,7 @@ import { Expo } from "expo-server-sdk";
 import Notification from "@/models/Notification";
 import { sendEventsToAll } from "../../../notifications/route";
 import mongoose from "mongoose";
+import Event from "@/models/Event";
 
 // GET: Fetch all staff for a specific event
 export async function GET(request, { params }) {
