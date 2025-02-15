@@ -12,15 +12,20 @@ export const NotificationProvider = ({ children }) => {
 
   // Fetch unread notifications from database when the user logs in
   useEffect(() => {
-    if (status !== "authenticated" || !session?.user?.id) return;
-
     const fetchNotifications = async () => {
       try {
-        const res = await fetch(`/api/organizers/${session.user.id}/notifications`);
-        if (!res.ok) throw new Error("Failed to fetch notifications");
-        const data = await res.json();
-        setNotifications(data);
-        setUnreadCount(data.length);
+        if (status === "loading") return;  // Don't redirect while loading
+        if (status === 'unauthenticated' || session?.user?.role !== "organizer") {
+          router.push('/')
+        }
+
+        if (status === "authenticated" && session.user.role === "organizer") {
+          const res = await fetch(`/api/organizers/${session.user.id}/notifications`);
+          if (!res.ok) throw new Error("Failed to fetch notifications");
+          const data = await res.json();
+          setNotifications(data);
+          setUnreadCount(data.length);
+        }
       } catch (error) {
         console.error("Error fetching notifications:", error);
       }
@@ -34,26 +39,39 @@ export const NotificationProvider = ({ children }) => {
     if (status !== "authenticated" || !session?.user?.id) return;
 
     const userId = session.user.id;
-    const eventSource = new EventSource(`/api/organizers/${userId}/notifications/sse`);
-
-    eventSource.onmessage = (event) => {
-      const newNotification = JSON.parse(event.data);
-      setNotifications((prev) => {
-        if (!prev.some((notif) => notif.notificationId === newNotification.notificationId)) {
-          setUnreadCount((prevCount) => prevCount + 1);
-          return [newNotification, ...prev];
+    const notifications = () => {
+      try {
+        if (status === "loading") return;  // Don't redirect while loading
+        if (status === 'unauthenticated' || session?.user?.role !== "organizer") {
+          router.push('/')
         }
-        return prev;
-      });
-    };
 
-    eventSource.onerror = () => {
-      console.error("SSE connection lost, attempting to reconnect...");
-      eventSource.close();
-    };
+        if (status === "authenticated" && session.user.role === "organizer") {
+          const eventSource = new EventSource(`/api/organizers/${userId}/notifications/sse`);
 
-    return () => {
-      eventSource.close();
+          eventSource.onmessage = (event) => {
+            const newNotification = JSON.parse(event.data);
+            setNotifications((prev) => {
+              if (!prev.some((notif) => notif.notificationId === newNotification.notificationId)) {
+                setUnreadCount((prevCount) => prevCount + 1);
+                return [newNotification, ...prev];
+              }
+              return prev;
+            });
+          };
+      
+          eventSource.onerror = () => {
+            console.error("SSE connection lost, attempting to reconnect...");
+            eventSource.close();
+          };
+
+          return () => {
+            eventSource.close();
+          };
+        }
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+      }
     };
   }, [session, status]);
 
