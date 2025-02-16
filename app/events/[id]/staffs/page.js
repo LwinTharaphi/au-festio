@@ -368,7 +368,7 @@ export default function StaffPage() {
           </Col>
           <Col xs={10} className="main-content p-4" style={{ backgroundColor: "#F3EFFD" }}>
             <Breadcrumb>
-              <Breadcrumb.Item href="/organizers/[id]/create-event">All Events</Breadcrumb.Item>
+              <Breadcrumb.Item href={`/organizers/${session.user.id}/create-event`}>All Events</Breadcrumb.Item>
               {/* <Breadcrumb.Item active>{event.eventName}</Breadcrumb.Item> */}
             </Breadcrumb>
             <Container>
