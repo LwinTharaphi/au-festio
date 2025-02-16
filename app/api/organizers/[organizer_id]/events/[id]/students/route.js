@@ -56,8 +56,9 @@ export async function POST(request) {
     const newStudent = new Student({ ...data, paymentScreenshotUrl: data.paymentScreenshot, refundQRCode: data.refundQRCode}); // Create a new Student instance with the provided data and the S3 URL
     // const newStudent = new Student(data);
     await newStudent.save(); // Save the new student to the database
+    console.log("New student registered:", newStudent);
     const event = await Event.findById(data.eventId);
-
+    console.log("Event details:", event);
     const organizerId = event.organizer;
 
     const expo = new Expo();
@@ -73,7 +74,7 @@ export async function POST(request) {
             eventId: data.eventId,
             studentId: newStudent._id,
             organizerId: organizerId,
-            type: paid_event_registeration, // Dynamically changing type
+            type: 'paid_event_registeration', // Dynamically changing type
           },
         });
       }
@@ -108,7 +109,7 @@ export async function POST(request) {
             eventId: data.eventId,
             studentId: newStudent._id,
             organizerId: organizerId,
-            type: free_event_registeration, // Dynamically changing type
+            type: 'free_event_registeration', // Dynamically changing type
           },
         });
         const chunks = expo.chunkPushNotifications(messages);
