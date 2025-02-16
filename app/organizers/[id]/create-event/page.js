@@ -160,25 +160,19 @@ function EventForm() {
 
   const categorizeEvents = (events) => {
     const today = moment();
-    const groupedEvents = { ongoing: {}, upcoming: {} };
+    const groupedEvents = { paid: {}, free: {} };
 
     events.forEach((event, index) => {
-      const registrationDate = moment(event.registerationDate);
+      // const registrationDate = moment(event.registerationDate);
       const eventDate = moment(event.eventDate);
 
       let categories = "";
-      if (today.isBetween(registrationDate, eventDate, "day", "[]")) {
-        categories = "ongoing";
-        // console.log("Status: Ongoing");
-      } else if (today.isBefore(registrationDate, "day")) {
-        categories = "upcoming";
-        // console.log("Status: Upcoming");
+      console.log("Event paid", event.isPaid)
+      if (event.isPaid) {
+        categories = "paid";
+      } else {
+        categories = "free";
       }
-      // else if (today.isAfter(eventDate, "day")) {
-      //   categories = "completed";
-      //   console.log("Status: Completed");
-      // }
-
       if (categories) {
         const month = eventDate.format("MMMM YYYY");
         if (!groupedEvents[categories][month]) {
@@ -451,7 +445,7 @@ function EventForm() {
 
                 {/* Event List by Status */}
                 {Object.keys(groupedEvents).length > 0 ? (
-                  ["ongoing", "upcoming"].map((status) => (
+                  ["paid", "free"].map((status) => (
                     Object.keys(groupedEvents[status] || {}).length > 0 ? (
                       <Box key={status} sx={{ marginTop: 4 }}>
                         <Box
