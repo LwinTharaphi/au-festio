@@ -274,10 +274,10 @@ export default function Dashboard() {
                     <Card.Body>
                       <BsPeopleFill size={30} className="mb-2 text-primary" />
                       <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
-                        Upcoming Events
+                        Paid Events
                       </Card.Title>
                       <Card.Text style={{ fontSize: "1.5rem" }}>
-                        {data.upcomingEvent}
+                        {data.paidEvents}
                       </Card.Text>
                     </Card.Body>
                   </Card>
@@ -291,10 +291,10 @@ export default function Dashboard() {
                     <Card.Body>
                       <BsShop size={30} className="mb-2 text-success" />
                       <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
-                        Ongoing Events
+                        Free Events
                       </Card.Title>
                       <Card.Text style={{ fontSize: "1.5rem" }}>
-                        {data.ongoingEvent}
+                        {data.freeEvents}
                       </Card.Text>
                     </Card.Body>
                   </Card>

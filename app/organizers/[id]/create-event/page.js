@@ -640,7 +640,7 @@ function EventForm() {
                           onChange={setEventName}
                         />
                         <FormField
-                          title="Registration Date"
+                          title="Registration Deadline"
                           type="date"
                           value={registerationDate}
                           onChange={setRegisterationDate}
