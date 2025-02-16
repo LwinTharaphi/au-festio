@@ -62,18 +62,18 @@ export async function POST(request) {
 
     const expo = new Expo();
     const messages = [];
-    if(event.isPaid == false) {
+    if(event.isPaid) {
       if (newStudent.expoPushToken && Expo.isExpoPushToken(newStudent.expoPushToken)) {
         messages.push({
           to: newStudent.expoPushToken,
           sound: 'default',
           title: 'Event Registration',
-          body: `🎉 You successfully registered for ${event.eventName}!`,
+          body: `🎉 Your information has been received for ${event.eventName}! Please wait for approval.`,
           data: {
             eventId: data.eventId,
             studentId: newStudent._id,
             organizerId: organizerId,
-            type: free_event_registeration, // Dynamically changing type
+            type: paid_event_registeration, // Dynamically changing type
           },
         });
       }
@@ -91,24 +91,24 @@ export async function POST(request) {
         eventId: data.eventId,
         organizerId: organizerId,
         title: "New Student Registration",
-        body: `A new student has registered for ${event.eventName}.`,
+        body: `A new student has registered for ${event.eventName}. Please check the payment for registeration.`,
       });
 
       await newNotification.save();
       console.log("Sending SSE notification for new student registration:", newNotification);
       sendEventsToAll(newNotification);
     } else {
-      if (event.isPaid == true && newStudent.expoPushToken && Expo.isExpoPushToken(newStudent.expoPushToken)) {
+      if (newStudent.expoPushToken && Expo.isExpoPushToken(newStudent.expoPushToken)) {
         messages.push({
           to: newStudent.expoPushToken,
           sound: 'default',
           title: 'Event Registration',
-          body: `🎉 Your information has been received for ${event.eventName}! Please wait for approval.`,
+          body: `🎉 You successfully registered for ${event.eventName}!`,
           data: {
             eventId: data.eventId,
             studentId: newStudent._id,
             organizerId: organizerId,
-            type: paid_event_registeration, // Dynamically changing type
+            type: free_event_registeration, // Dynamically changing type
           },
         });
         const chunks = expo.chunkPushNotifications(messages);
@@ -126,7 +126,7 @@ export async function POST(request) {
         eventId: data.eventId,
         organizerId: organizerId,
         title: "New Student Registration",
-        body: `A new student has registered for ${event.eventName}. Please check the payment for registeration.`,
+        body: `A new student has registered for ${event.eventName}.`,
       });
 
       await newNotification.save();
