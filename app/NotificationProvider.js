@@ -17,6 +17,7 @@ export const NotificationProvider = ({ children }) => {
         if (status === "loading") return;  // Don't redirect while loading
         if (status === 'unauthenticated' || session?.user?.role !== "organizer") {
           router.push('/')
+          return;
         }
 
         if (status === "authenticated" && session.user.role === "organizer") {
@@ -44,6 +45,7 @@ export const NotificationProvider = ({ children }) => {
         if (status === "loading") return;  // Don't redirect while loading
         if (status === 'unauthenticated' || session?.user?.role !== "organizer") {
           router.push('/')
+          return;
         }
 
         if (status === "authenticated" && session.user.role === "organizer") {
@@ -73,6 +75,7 @@ export const NotificationProvider = ({ children }) => {
         console.error("Error fetching notifications:", error);
       }
     };
+    notifications();
   }, [session, status]);
 
   // Mark notification as read and remove it from the UI

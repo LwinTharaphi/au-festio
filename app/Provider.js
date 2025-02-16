@@ -6,9 +6,7 @@ import { NotificationProvider } from "./NotificationProvider";
 export const AuthPorvider = ({children}) =>{
     return (
         <SessionProvider>
-            <NotificationProvider>
-                {children}
-            </NotificationProvider>
+            {children}
         </SessionProvider>
     )
 }
