@@ -168,10 +168,12 @@ function EventForm() {
 
       let categories = "";
       console.log("Event paid", event.isPaid)
-      if (event.isPaid) {
-        categories = "paid";
-      } else {
-        categories = "free";
+      if (eventDate > today){
+        if (event.isPaid) {
+          categories = "paid";
+        } else {
+          categories = "free";
+        }
       }
       if (categories) {
         const month = eventDate.format("MMMM YYYY");
