@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Container, Row, Col, Alert, Card, Button, Modal, Form, Table, Dropdown, Spinner } from "react-bootstrap";
+import { Container, Row, Col, Alert, Card, Button, Modal, Form, Table, Dropdown, Spinner, Breadcrumb } from "react-bootstrap";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FaTrash, FaEdit, FaPlusCircle } from "react-icons/fa";
@@ -366,7 +366,11 @@ export default function StaffPage() {
           <Col xs={3} md={2} className="sidebar">
             <Sidebar event={{ _id: id }} /> {/* Sidebar component */}
           </Col>
-          <Col xs={9} md={10} className="main-content" style={{ backgroundColor: '#F3EFFD' }} >
+          <Col xs={10} className="main-content p-4" style={{ backgroundColor: "#F3EFFD" }}>
+            <Breadcrumb>
+              <Breadcrumb.Item href="/organizers/[id]/create-event">All Events</Breadcrumb.Item>
+              {/* <Breadcrumb.Item active>{event.eventName}</Breadcrumb.Item> */}
+            </Breadcrumb>
             <Container>
               {error && <Alert variant="danger">{error}</Alert>} {/* Show error if any */}
               {/* {!error && eventName && <h4>Staff List for {eventName}</h4>} */}

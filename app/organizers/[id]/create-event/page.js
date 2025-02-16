@@ -428,486 +428,497 @@ function EventForm() {
         <div style={{ display: 'flex', flex: 1 }}>
 
           {/* Main Content */}
-          <div style={{ display: 'flex', flex: 1,backgroundColor: '#F3EFFD' }}>
-          <Box
-            sx={{
-              flex: 1, // Take up remaining space
-              padding: 1,
-            }}
-          >
-
-            <Paper
-              elevation={3}
+          <div style={{ display: 'flex', flex: 1, backgroundColor: '#F3EFFD' }}>
+            <Box
               sx={{
-                padding: 4,
-                backgroundColor: '#ffffff',
-                maxWidth: '1200px',
-                margin: 'auto auto',
+                flex: 1, // Take up remaining space
+                padding: 1,
               }}
             >
-              <Typography variant="h5" align="center" sx={{ marginBottom: 3 }}>
-                Event List
-              </Typography>
 
-              {/* Event List by Status */}
-              {Object.keys(groupedEvents).length > 0 ? (
-                ["ongoing", "upcoming"].map((status) => (
-                  Object.keys(groupedEvents[status] || {}).length > 0 ? (
-                    <Box key={status} sx={{ marginTop: 4 }}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          cursor: "pointer",
-                        }}
-                        onClick={() => toggleSection(status)}
-                      >
-                        <Typography sx={{ fontSize: '1.2rem', marginBottom: 3 }}>
-                          {status.charAt(0).toUpperCase() + status.slice(1)} Events
-                        </Typography>
-                        <IconButton>
-                          {expandedSection[status] ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                        </IconButton>
-                      </Box>
-                      {expandedSection[status] &&(
-                        Object.entries(groupedEvents[status]).map(([month, events], monthIndex) => (
-                          <Box key={monthIndex} sx={{ marginTop: 2 }}>
-                            <Typography sx={{ fontSize: '1rem', marginBottom: 3 }}>
-                              {month} Events
-                            </Typography>
-                            <Grid container spacing={4}>
-                              {events.map((event, eventIndex) => (
-                                <Grid item xs={12} sm={6} md={4} key={event._index}>
-                                  <Card sx={{ position: "relative", marginBottom: 2 }}>
-                                    <CardActionArea onClick={() => router.push(`/events/${event._id}/dashboard`)}>
-                                      {event.posterName && (
-                                        <CardMedia
-                                          component="img"
-                                          height="140"
-                                          image={event.poster} // Ensure the correct URL is set for images
-                                          alt={event.posterName}
-                                        />
-                                      )}
-                                    </CardActionArea>
-                                    <CardContent>
-                                    <Typography sx={{ fontSize: '1rem', textAlign: 'center', fontWeight: 'bold' }}>
-                                        {event.eventName}
-                                      </Typography>
-                                    </CardContent>
-                                    {/* Delete Button */}
-                                    <Box
-                                      sx={{
-                                        position: "absolute",
-                                        top: 8,
-                                        right: 8,
-                                      }}
-                                    >
-                                      <IconButton
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          // console.log("menu click",event._index)
-                                          handleMenuClick(e, event._index);
-                                        }}
-                                        sx={{ color: "rgba(0, 0, 0, 0.54)" }}
-                                      >
-                                        <MoreVertIcon />
-                                      </IconButton>
-                                    </Box>
-
-                                    {/* Menu with options for delete/edit */}
-                                    <Menu
-                                      anchorEl={anchorEl}
-                                      open={Boolean(anchorEl)}
-                                      onClose={handleCloseMenu}
-                                      anchorOrigin={{
-                                        vertical: "top",
-                                        horizontal: "right",
-                                      }}
-                                      transformOrigin={{
-                                        vertical: "top",
-                                        horizontal: "right",
-                                      }}
-                                    >
-                                      <MenuItem
-                                        onClick={() => {
-                                          // console.log("delete confirm",eventIndex)
-                                          confirmDelete();
-                                        }}
-                                      >
-                                        Delete
-                                      </MenuItem>
-                                      <MenuItem
-                                        onClick={(e) => {
-                                          // console.log("clicked edit",event._index)
-                                          handleEdit();
-                                        }}
-                                      >
-                                        Edit
-                                      </MenuItem>
-                                    </Menu>
-                                  </Card>
-                                  <Typography sx={{ fontSize: '1rem', textAlign: 'center' }}>
-                                    Registeration Date: {event.registerationDate
-                                      ? new Date(event.registerationDate).toISOString().split('T')[0]
-                                      : "Invalid Date"}
-                                  </Typography>
-                                  <Typography sx={{ fontSize: '1rem', textAlign: 'center' }}>
-                                    Event Date: {event.eventDate
-                                      ? new Date(event.eventDate).toISOString().split('T')[0]
-                                      : "Invalid Date"}
-                                  </Typography>
-                                </Grid>
-                              ))}
-                            </Grid>
-                          </Box>
-                        ))
-                      )}
-                    </Box>
-                  ) : (
-                    <Typography key={status} variant="body1" align="center" sx={{ marginTop: 3 }}>
-                      No {status} events available.
-                    </Typography>
-                  )
-                ))
-              ) : (
-                <Typography variant="body1" align="center">
-                  No events available.
+              <Paper
+                elevation={3}
+                sx={{
+                  padding: 4,
+                  backgroundColor: '#ffffff',
+                  maxWidth: '1200px',
+                  margin: 'auto auto',
+                }}
+              >
+                <Typography variant="h5" align="center" sx={{ marginBottom: 3 }}>
+                  Event List
                 </Typography>
-              )}
 
-              <Fab
-                color="primary"
-                aria-label="add"
-                sx={{
-                  position: 'fixed',
-                  bottom: 16,
-                  right: 16,
-                }}
-                onClick={handleFabClick}
-              >
-                <AddIcon />
-              </Fab>
+                {/* Event List by Status */}
+                {Object.keys(groupedEvents).length > 0 ? (
+                  ["ongoing", "upcoming"].map((status) => (
+                    Object.keys(groupedEvents[status] || {}).length > 0 ? (
+                      <Box key={status} sx={{ marginTop: 4 }}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => toggleSection(status)}
+                        >
+                          <Typography sx={{ fontSize: '1.2rem', marginBottom: 3 }}>
+                            {status.charAt(0).toUpperCase() + status.slice(1)} Events
+                          </Typography>
+                          <IconButton>
+                            {expandedSection[status] ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                          </IconButton>
+                        </Box>
+                        {expandedSection[status] && (
+                          Object.entries(groupedEvents[status]).map(([month, events], monthIndex) => (
+                            <Box key={monthIndex} sx={{ marginTop: 2 }}>
+                              <Typography sx={{ fontSize: '1rem', marginBottom: 3 }}>
+                                {month} Events
+                              </Typography>
+                              <Grid container spacing={2}>
+                                {events.map((event, eventIndex) => (
+                                  <Grid item xs={12} sm={6} md={4} lg={3} key={event._index}>
+                                    <Card sx={{
+                                      width: "100%", // Set fixed width
+                                      height: 200, // Set fixed height
+                                      display: "flex",
+                                      flexDirection: "column",
+                                      justifyContent: "space-between",
+                                      position: "relative",
+                                      marginBottom: 2,
+                                    }}>
+                                      <CardActionArea onClick={() => router.push(`/events/${event._id}/dashboard`)}>
+                                        {event.posterName && (
+                                          <CardMedia
+                                            component="img"
+                                            sx={{
+                                              height: 150,  // Fixed height for images
+                                              objectFit: "cover" // Ensures images fill the space properly
+                                            }}
+                                            image={event.poster} // Ensure the correct URL is set for images
+                                            alt={event.posterName}
+                                          />
+                                        )}
+                                      </CardActionArea>
+                                      <CardContent>
+                                        <Typography sx={{ fontSize: '1rem', textAlign: 'center', fontWeight: 'bold' }}>
+                                          {event.eventName}
+                                        </Typography>
+                                      </CardContent>
+                                      {/* Delete Button */}
+                                      <Box
+                                        sx={{
+                                          position: "absolute",
+                                          top: 8,
+                                          right: 8,
+                                        }}
+                                      >
+                                        <IconButton
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            // console.log("menu click",event._index)
+                                            handleMenuClick(e, event._index);
+                                          }}
+                                          sx={{ color: "rgba(0, 0, 0, 0.54)" }}
+                                        >
+                                          <MoreVertIcon />
+                                        </IconButton>
+                                      </Box>
 
-              <Modal
-                open={showModal}
-                onClose={() => setShowModal(false)}
-                aria-labelledby="modal-title"
-                aria-describedby="modal-description"
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Box
+                                      {/* Menu with options for delete/edit */}
+                                      <Menu
+                                        anchorEl={anchorEl}
+                                        open={Boolean(anchorEl)}
+                                        onClose={handleCloseMenu}
+                                        anchorOrigin={{
+                                          vertical: "top",
+                                          horizontal: "right",
+                                        }}
+                                        transformOrigin={{
+                                          vertical: "top",
+                                          horizontal: "right",
+                                        }}
+                                      >
+                                        <MenuItem
+                                          onClick={() => {
+                                            // console.log("delete confirm",eventIndex)
+                                            confirmDelete();
+                                          }}
+                                        >
+                                          Delete
+                                        </MenuItem>
+                                        <MenuItem
+                                          onClick={(e) => {
+                                            // console.log("clicked edit",event._index)
+                                            handleEdit();
+                                          }}
+                                        >
+                                          Edit
+                                        </MenuItem>
+                                      </Menu>
+                                    </Card>
+                                    <Typography sx={{ fontSize: '0.8rem', textAlign: 'center' }}>
+                                      Registeration Deadline: {event.registerationDate
+                                        ? new Date(event.registerationDate).toISOString().split('T')[0]
+                                        : "Invalid Date"}
+                                    </Typography>
+                                    <Typography sx={{ fontSize: '0.8rem', textAlign: 'center' }}>
+                                      Event Date: {event.eventDate
+                                        ? new Date(event.eventDate).toISOString().split('T')[0]
+                                        : "Invalid Date"}
+                                    </Typography>
+                                  </Grid>
+                                ))}
+                              </Grid>
+                            </Box>
+                          ))
+                        )}
+                      </Box>
+                    ) : (
+                      <Typography key={status} variant="body1" align="center" sx={{ marginTop: 3 }}>
+                        No {status} events available.
+                      </Typography>
+                    )
+                  ))
+                ) : (
+                  <Typography variant="body1" align="center">
+                    No events available.
+                  </Typography>
+                )}
+
+                <Fab
+                  color="primary"
+                  aria-label="add"
                   sx={{
-                    bgcolor: "background.paper",
-                    borderRadius: 2,
-                    boxShadow: 24,
-                    width: "90%", // Adjusts the width
-                    maxWidth: "600px", // Limits to max-width
-                    maxHeight: "90vh", // Makes it scrollable
-                    overflowY: "auto", // Adds scrolling
-                    p: 4,
+                    position: 'fixed',
+                    bottom: 16,
+                    right: 16,
+                  }}
+                  onClick={handleFabClick}
+                >
+                  <AddIcon />
+                </Fab>
+
+                <Modal
+                  open={showModal}
+                  onClose={() => setShowModal(false)}
+                  aria-labelledby="modal-title"
+                  aria-describedby="modal-description"
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
                   }}
                 >
-                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <h2 id="modal-title">{isEditing ? "Edit Event" : "Add a New Event"}</h2>
-                    <IconButton color="error" onClick={() => setShowModal(false)}>
-                      <CloseIcon />
-                    </IconButton>
-                  </Box>
-                  <Box id="modal-description" sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                    {/* Event Form Fields */}
-                    <Box>
-                      <FormField
-                        title="Event Name"
-                        type="text"
-                        placeholder="Enter event name"
-                        value={eventName}
-                        onChange={setEventName}
-                      />
-                      <FormField
-                        title="Registration Date"
-                        type="date"
-                        value={registerationDate}
-                        onChange={setRegisterationDate}
-                      />
-                      <FormField
-                        title="Event Date"
-                        type="date"
-                        value={eventDate}
-                        onChange={setEventDate}
-                      />
-                      <Typography variant="subtitle1" style={{ marginBottom: '8px' }}>
-                        Event Time:
-                      </Typography>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Box
+                    sx={{
+                      bgcolor: "background.paper",
+                      borderRadius: 2,
+                      boxShadow: 24,
+                      width: "90%", // Adjusts the width
+                      maxWidth: "600px", // Limits to max-width
+                      maxHeight: "90vh", // Makes it scrollable
+                      overflowY: "auto", // Adds scrolling
+                      p: 4,
+                    }}
+                  >
+                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <h2 id="modal-title">{isEditing ? "Edit Event" : "Add a New Event"}</h2>
+                      <IconButton color="error" onClick={() => setShowModal(false)}>
+                        <CloseIcon />
+                      </IconButton>
+                    </Box>
+                    <Box id="modal-description" sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                      {/* Event Form Fields */}
+                      <Box>
                         <FormField
-                          title=""
-                          type="time"
-                          value={startTime}
-                          onChange={handleStartTimeChange}
+                          title="Event Name"
+                          type="text"
+                          placeholder="Enter event name"
+                          value={eventName}
+                          onChange={setEventName}
                         />
-                        <Typography variant="body1">TO</Typography>
                         <FormField
-                          title=""
-                          type="time"
-                          value={endTime || ""}
-                          onChange={handleEndTimeChange}
+                          title="Registration Date"
+                          type="date"
+                          value={registerationDate}
+                          onChange={setRegisterationDate}
                         />
-                      </div>
-                      <FormField
-                        title="Location"
-                        type="text"
-                        placeholder="Enter location"
-                        value={location}
-                        onChange={setLocation}
-                      />
-                      <FormField
-                        title="AR Toggle"
-                        type="switch"
-                        value={isArEnabled}
-                        onChange={setIsArEnabled}
-                      />
-
-                      {/* Conditional Venue and GPS Location Fields */}
-                      {isArEnabled && (
-                        <>
+                        <FormField
+                          title="Event Date"
+                          type="date"
+                          value={eventDate}
+                          onChange={setEventDate}
+                        />
+                        <Typography variant="subtitle1" style={{ marginBottom: '8px' }}>
+                          Event Time:
+                        </Typography>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <FormField
-                            title="Venue Name"
-                            type="text"
-                            placeholder="Enter main location"
-                            value={venueName}
-                            onChange={setVenueName}
+                            title=""
+                            type="time"
+                            value={startTime}
+                            onChange={handleStartTimeChange}
                           />
-                          <Box sx={{ display: "flex", gap: 2 }}>
-                            <FormField
-                              title="Latitude"
-                              type="text"
-                              placeholder="Enter latitude"
-                              value={latitude}
-                              onChange={setLatitude}
-                            />
-                            <FormField
-                              title="Longitude"
-                              type="text"
-                              placeholder="Enter longitude"
-                              value={longitude}
-                              onChange={setLongitude}
-                            />
-                          </Box>
-                        </>
-                      )}
-                    </Box>
-                    {/* Poster Upload */}
-                    <Box sx={{ display: "flex", alignItems: "center", marginBottom: 2 }}>
-                      <TextField
-                        label="Poster Name"
-                        value={posterName || ""}
-                        placeholder="No file uploaded"
-                        variant="outlined"
-                        fullWidth
-                        InputProps={{
-                          readOnly: true,
-                          style: { backgroundColor: "#f5f5f5" },
-                        }}
-                        sx={{ marginRight: 2 }}
-                      />
-                      <Button
-                        variant="contained"
-                        component="span"
-                        onClick={() => posterInputRef.current.click()}
-                      >
-                        Upload
-                      </Button>
-                      {posterName && (
-                        <IconButton
-                          color="error"
-                          onClick={() => handleDeleteFile("poster")}
-                          sx={{ marginLeft: 1 }}
-                        >
-                          <CloseIcon />
-                        </IconButton>
-                      )}
-                      <input
-                        id="poster-upload"
-                        type="file"
-                        ref={posterInputRef}
-                        key={isEditing ? "editing" : "new"} // Reset the file input when editing
-                        accept="image/*"
-                        onChange={(e) => handleFileChange(e, "poster")}
-                        style={{ display: "none" }}
-                      />
-                    </Box>
+                          <Typography variant="body1">TO</Typography>
+                          <FormField
+                            title=""
+                            type="time"
+                            value={endTime || ""}
+                            onChange={handleEndTimeChange}
+                          />
+                        </div>
+                        <FormField
+                          title="Location"
+                          type="text"
+                          placeholder="Enter location"
+                          value={location}
+                          onChange={setLocation}
+                        />
+                        <FormField
+                          title="AR Toggle"
+                          type="switch"
+                          value={isArEnabled}
+                          onChange={setIsArEnabled}
+                        />
 
-                    {/* Other Fields */}
-                    <FormField
-                      title="Event Type"
-                      type="radio"
-                      value={isPaid ? "paid" : "free"}
-                      onChange={(value) => setIsPaid(value === "paid")}
-                      options={[
-                        { label: "Free", value: "free" },
-                        { label: "Paid", value: "paid" },
-                      ]}
-                    />
-                    {isPaid && (
-                      <>
+                        {/* Conditional Venue and GPS Location Fields */}
+                        {isArEnabled && (
+                          <>
+                            <FormField
+                              title="Venue Name"
+                              type="text"
+                              placeholder="Enter main location"
+                              value={venueName}
+                              onChange={setVenueName}
+                            />
+                            <Box sx={{ display: "flex", gap: 2 }}>
+                              <FormField
+                                title="Latitude"
+                                type="text"
+                                placeholder="Enter latitude"
+                                value={latitude}
+                                onChange={setLatitude}
+                              />
+                              <FormField
+                                title="Longitude"
+                                type="text"
+                                placeholder="Enter longitude"
+                                value={longitude}
+                                onChange={setLongitude}
+                              />
+                            </Box>
+                          </>
+                        )}
+                      </Box>
+                      {/* Poster Upload */}
+                      <Box sx={{ display: "flex", alignItems: "center", marginBottom: 2 }}>
                         <TextField
-                          label="Price"
-                          value={price || ""}
-                          onChange={(e) => setPrice(e.target.value)}
-                          placeholder="Enter price"
+                          label="Poster Name"
+                          value={posterName || ""}
+                          placeholder="No file uploaded"
                           variant="outlined"
                           fullWidth
-                          sx={{ marginBottom: 2 }}
+                          InputProps={{
+                            readOnly: true,
+                            style: { backgroundColor: "#f5f5f5" },
+                          }}
+                          sx={{ marginRight: 2 }}
                         />
-                        <TextField 
-                          label="Phone Number"
-                          value={phone || ""}
-                          onChange={(e) => setPhone(e.target.value)}
-                          placeholder="Enter phone number"
-                          variant='outlined'
-                          fullWidth
-                          sx={{ marginBottom: 2 }}
-                        />
-                        <FormField
-                          title="Early Bird Discount"
-                          type="switch"
-                          value={hasDiscount}
-                          onChange={setHasDiscount}
-                        />
-                        {hasDiscount && (
-                          <FormField
-                            title="Discount Percentage"
-                            type="number"
-                            value={discount}
-                            onChange={setDiscount}
-                          />
-                        )}
-                        {Array.isArray(refundPolicy) &&
-                          refundPolicy.map((policy, index) => (
-                            <Box
-                              key={index}
-                              sx={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}
-                            >
-                              <Typography variant="subtitle1" style={{ marginBottom: '8px' }}>
-                                Refund Policy:
-                              </Typography>
-                              <TextField
-                                label="Days"
-                                type="number"
-                                value={policy.days || ""}
-                                onChange={(e) =>
-                                  updateRefundPolicy(index, { ...policy, days: e.target.value })
-                                }
-                                placeholder="Days"
-                                variant="outlined"
-                                fullWidth
-                              />
-                              <TextField
-                                label="Refund (%)"
-                                type="number"
-                                value={policy.percentage || ""}
-                                onChange={(e) =>
-                                  updateRefundPolicy(index, { ...policy, percentage: e.target.value })
-                                }
-                                placeholder="Refund Percentage"
-                                variant="outlined"
-                                fullWidth
-                              />
-                              <IconButton
-                                color="error"
-                                onClick={() => removeRefundPolicy(index)}
-                              >
-                                <CloseIcon />
-                              </IconButton>
-                            </Box>
-                          ))}
-                        <Button variant="contained" onClick={addRefundPolicy}>
-                          Add Refund Policy
+                        <Button
+                          variant="contained"
+                          component="span"
+                          onClick={() => posterInputRef.current.click()}
+                        >
+                          Upload
                         </Button>
-                      </>
-                    )}
-                    <FormField
-                      title="Seat Limitation"
-                      type="switch"
-                      value={hasSeatLimitation}
-                      onChange={setHasSeatLimitation}
-                    />
-                    {hasSeatLimitation && (
+                        {posterName && (
+                          <IconButton
+                            color="error"
+                            onClick={() => handleDeleteFile("poster")}
+                            sx={{ marginLeft: 1 }}
+                          >
+                            <CloseIcon />
+                          </IconButton>
+                        )}
+                        <input
+                          id="poster-upload"
+                          type="file"
+                          ref={posterInputRef}
+                          key={isEditing ? "editing" : "new"} // Reset the file input when editing
+                          accept="image/*"
+                          onChange={(e) => handleFileChange(e, "poster")}
+                          style={{ display: "none" }}
+                        />
+                      </Box>
+
+                      {/* Other Fields */}
                       <FormField
-                        title="Seat Amount"
-                        type="number"
-                        placeholder="Enter number of seats"
-                        value={seatAmount}
-                        onChange={setSeatAmount}
+                        title="Event Type"
+                        type="radio"
+                        value={isPaid ? "paid" : "free"}
+                        onChange={(value) => setIsPaid(value === "paid")}
+                        options={[
+                          { label: "Free", value: "free" },
+                          { label: "Paid", value: "paid" },
+                        ]}
                       />
-                    )}
+                      {isPaid && (
+                        <>
+                          <TextField
+                            label="Price"
+                            value={price || ""}
+                            onChange={(e) => setPrice(e.target.value)}
+                            placeholder="Enter price"
+                            variant="outlined"
+                            fullWidth
+                            sx={{ marginBottom: 2 }}
+                          />
+                          <TextField
+                            label="Phone Number"
+                            value={phone || ""}
+                            onChange={(e) => setPhone(e.target.value)}
+                            placeholder="Enter phone number"
+                            variant='outlined'
+                            fullWidth
+                            sx={{ marginBottom: 2 }}
+                          />
+                          <FormField
+                            title="Early Bird Discount"
+                            type="switch"
+                            value={hasDiscount}
+                            onChange={setHasDiscount}
+                          />
+                          {hasDiscount && (
+                            <FormField
+                              title="Discount Percentage"
+                              type="number"
+                              value={discount}
+                              onChange={setDiscount}
+                            />
+                          )}
+                          {Array.isArray(refundPolicy) &&
+                            refundPolicy.map((policy, index) => (
+                              <Box
+                                key={index}
+                                sx={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}
+                              >
+                                <Typography variant="subtitle1" style={{ marginBottom: '8px' }}>
+                                  Refund Policy:
+                                </Typography>
+                                <TextField
+                                  label="Days"
+                                  type="number"
+                                  value={policy.days || ""}
+                                  onChange={(e) =>
+                                    updateRefundPolicy(index, { ...policy, days: e.target.value })
+                                  }
+                                  placeholder="Days"
+                                  variant="outlined"
+                                  fullWidth
+                                />
+                                <TextField
+                                  label="Refund (%)"
+                                  type="number"
+                                  value={policy.percentage || ""}
+                                  onChange={(e) =>
+                                    updateRefundPolicy(index, { ...policy, percentage: e.target.value })
+                                  }
+                                  placeholder="Refund Percentage"
+                                  variant="outlined"
+                                  fullWidth
+                                />
+                                <IconButton
+                                  color="error"
+                                  onClick={() => removeRefundPolicy(index)}
+                                >
+                                  <CloseIcon />
+                                </IconButton>
+                              </Box>
+                            ))}
+                          <Button variant="contained" onClick={addRefundPolicy}>
+                            Add Refund Policy
+                          </Button>
+                        </>
+                      )}
+                      <FormField
+                        title="Seat Limitation"
+                        type="switch"
+                        value={hasSeatLimitation}
+                        onChange={setHasSeatLimitation}
+                      />
+                      {hasSeatLimitation && (
+                        <FormField
+                          title="Seat Amount"
+                          type="number"
+                          placeholder="Enter number of seats"
+                          value={seatAmount}
+                          onChange={setSeatAmount}
+                        />
+                      )}
+                    </Box>
+                    <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, marginTop: 3 }}>
+                      <Button variant="secondary" onClick={() => setShowModal(false)}>
+                        Cancel
+                      </Button>
+                      <Button variant="primary" onClick={handleSubmit}>
+                        {isEditing ? "Update Event" : "Add Event"}
+                      </Button>
+                    </Box>
                   </Box>
-                  <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, marginTop: 3 }}>
-                    <Button variant="secondary" onClick={() => setShowModal(false)}>
-                      Cancel
-                    </Button>
-                    <Button variant="primary" onClick={handleSubmit}>
-                      {isEditing ? "Update Event" : "Add Event"}
-                    </Button>
-                  </Box>
-                </Box>
-              </Modal>
-              <Modal
-                open={deleteModalOpen}
-                onClose={() => {
-                  setEventToDeleteIndex('')
-                  setDeleteModalOpen(false)
-                }}
-                aria-labelledby="delete-confirmation-title"
-                aria-describedby="delete-confirmation-description"
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Box
+                </Modal>
+                <Modal
+                  open={deleteModalOpen}
+                  onClose={() => {
+                    setEventToDeleteIndex('')
+                    setDeleteModalOpen(false)
+                  }}
+                  aria-labelledby="delete-confirmation-title"
+                  aria-describedby="delete-confirmation-description"
                   sx={{
-                    bgcolor: "background.paper",
-                    borderRadius: 2,
-                    boxShadow: 24,
-                    p: 4,
-                    width: "90%",
-                    maxWidth: "400px",
-                    textAlign: "center",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
                   }}
                 >
-                  <Typography id="delete-confirmation-title" variant="h6" gutterBottom>
-                    Confirm Delete
-                  </Typography>
-                  <Typography id="delete-confirmation-description" variant="body1" gutterBottom>
-                    Are you sure you want to delete this event? This action cannot be undone.
-                  </Typography>
-                  <Box sx={{ display: "flex", justifyContent: "space-around", marginTop: 3 }}>
-                    <Button variant="outlined" color="primary" onClick={() => { setEventToDeleteIndex(''); setDeleteModalOpen(false) }}>
-                      Cancel
-                    </Button>
-                    <Button
-                      variant="contained"
-                      color="error"
-                      onClick={() => {
-                        handleDelete(eventToDeleteIndex);
-                        setDeleteModalOpen(false);
-                      }}
-                    >
-                      Delete
-                    </Button>
+                  <Box
+                    sx={{
+                      bgcolor: "background.paper",
+                      borderRadius: 2,
+                      boxShadow: 24,
+                      p: 4,
+                      width: "90%",
+                      maxWidth: "400px",
+                      textAlign: "center",
+                    }}
+                  >
+                    <Typography id="delete-confirmation-title" variant="h6" gutterBottom>
+                      Confirm Delete
+                    </Typography>
+                    <Typography id="delete-confirmation-description" variant="body1" gutterBottom>
+                      Are you sure you want to delete this event? This action cannot be undone.
+                    </Typography>
+                    <Box sx={{ display: "flex", justifyContent: "space-around", marginTop: 3 }}>
+                      <Button variant="outlined" color="primary" onClick={() => { setEventToDeleteIndex(''); setDeleteModalOpen(false) }}>
+                        Cancel
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="error"
+                        onClick={() => {
+                          handleDelete(eventToDeleteIndex);
+                          setDeleteModalOpen(false);
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    </Box>
                   </Box>
-                </Box>
-              </Modal>
+                </Modal>
 
-            </Paper>
-          </Box>
+              </Paper>
+            </Box>
           </div>
         </div>
       </div>

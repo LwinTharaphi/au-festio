@@ -127,7 +127,7 @@ export default function Dashboard() {
           <Col xs={10} className="main-content p-4" style={{ backgroundColor: "#F3EFFD" }}>
             <Breadcrumb>
               <Breadcrumb.Item href="/organizers/[id]/create-event">All Events</Breadcrumb.Item>
-              <Breadcrumb.Item active>{event.eventName}</Breadcrumb.Item>
+              {/* <Breadcrumb.Item active>{event.eventName}</Breadcrumb.Item> */}
             </Breadcrumb>
             <div className="d-flex aligh-items-center justify-content-between">
               <h2 className="text-primary">
@@ -253,45 +253,47 @@ export default function Dashboard() {
                 <Card className="text-center shadow-sm" style={{ backgroundColor: "#F4F9F9", minHeight: "300px" }}>
                   <Card.Body>
                     <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>Performance Details</Card.Title>
-                    <table
-                      style={{
-                        width: "100%",
-                        backgroundColor: "#F4F9F9",
-                        borderCollapse: "collapse",
-                        fontSize: "0.9rem",
-                        marginTop: "10px",
-                      }}
-                    >
-                      <thead>
-                        <tr style={{ borderBottom: "1px solid #ccc", textAlign: "center" }}>
-                          <th style={{ padding: "8px 12px" }}>Performance Name</th>
-                          <th style={{ padding: "8px 12px" }}>Time</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {performanceDetails && performanceDetails.length > 0 ? (
-                          performanceDetails.map((performance, index) => {
-                            const startTime = new Date(performance.startTime);
-                            const endTime = new Date(performance.endTime);
-                            return (
-                              <tr key={index} style={{ borderBottom: "1px solid #ddd" }}>
-                                <td style={{ padding: "8px 12px" }}>{performance.name}</td>
-                                <td style={{ padding: "8px 12px" }}>
-                                  {startTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} -{" "}
-                                  {endTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                                </td>
-                              </tr>
-                            );
-                          })
-                        ) : (
-                          <tr>
-                            <td colSpan="2" style={{ textAlign: "center", padding: "8px 12px" }}>
-                              No performances available.
-                            </td>
+                    <div style={{ maxHeight: "200px", overflowY: "auto" }}>
+                      <table
+                        style={{
+                          width: "100%",
+                          backgroundColor: "#F4F9F9",
+                          borderCollapse: "collapse",
+                          fontSize: "0.9rem",
+                          marginTop: "10px",
+                        }}
+                      >
+                        <thead>
+                          <tr style={{ borderBottom: "1px solid #ccc", textAlign: "center" }}>
+                            <th style={{ padding: "8px 12px" }}>Performance Name</th>
+                            <th style={{ padding: "8px 12px" }}>Time</th>
                           </tr>
-                        )}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {performanceDetails && performanceDetails.length > 0 ? (
+                            performanceDetails.map((performance, index) => {
+                              const startTime = new Date(performance.startTime);
+                              const endTime = new Date(performance.endTime);
+                              return (
+                                <tr key={index} style={{ borderBottom: "1px solid #ddd" }}>
+                                  <td style={{ padding: "8px 12px" }}>{performance.name}</td>
+                                  <td style={{ padding: "8px 12px" }}>
+                                    {startTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} -{" "}
+                                    {endTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                  </td>
+                                </tr>
+                              );
+                            })
+                          ) : (
+                            <tr>
+                              <td colSpan="2" style={{ textAlign: "center", padding: "8px 12px" }}>
+                                No performances available.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
                   </Card.Body>
                 </Card>
               </Col>

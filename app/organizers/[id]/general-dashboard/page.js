@@ -108,6 +108,15 @@ export default function Dashboard() {
   };
 
   const PieChartCard = ({ data }) => {
+    if (!data || (data.paidEvents === 0 && data.freeEvents === 0)) {
+      return (
+        <Card className="text-center shadow-sm" style={{ backgroundColor: "#F0F4F8", padding: "20px" }}>
+          <h5 style={{ fontWeight: "bold" }}>Free and Paid Events</h5>
+          <p>No events created yet.</p>
+        </Card>
+      );
+    }
+
     const chartData = {
       labels: ['Paid Events', 'Free Events'],
       datasets: [
@@ -127,6 +136,7 @@ export default function Dashboard() {
       </Card>
     );
   };
+
 
   if (status === 'loading') {
     return (
@@ -150,6 +160,17 @@ export default function Dashboard() {
   }
 
   const StudentRegistrationPieChart = ({ events }) => {
+    if (!events || events.length === 0 || events.every(event => event.studentsRegistered === 0)) {
+      return (
+        <Card className="shadow-sm" style={{ backgroundColor: "#F4F9F9", height: '100%', textAlign: 'center' }}>
+          <Card.Body>
+            <h5 style={{ fontWeight: "bold" }}>Registered Participants</h5>
+            <p>No participants have registered yet.</p>
+          </Card.Body>
+        </Card>
+      );
+    }
+
     const eventNames = events.map(event => event.eventName);
     const studentsRegistered = events.map(event => event.studentsRegistered);
 
@@ -174,7 +195,19 @@ export default function Dashboard() {
     );
   };
 
+
   const CheckInPieChart = ({ events }) => {
+    if (!events || events.length === 0 || events.every(event => event.studentsCheckIn === 0)) {
+      return (
+        <Card className="shadow-sm" style={{ backgroundColor: "#F4F9F9", height: '100%', textAlign: 'center' }}>
+          <Card.Body>
+            <h5 style={{ fontWeight: "bold" }}>Check-In Participants</h5>
+            <p>No participants have checked in yet.</p>
+          </Card.Body>
+        </Card>
+      );
+    }
+
     const eventNames = events.map(event => event.eventName);
     const studentsCheckIn = events.map(event => event.studentsCheckIn);
 
@@ -190,14 +223,15 @@ export default function Dashboard() {
     };
 
     return (
-      <Card className="shadow-sm" style={{ backgroundColor: "#F4F9F9", height: '100%' }}>
+      <Card className="shadow-sm" style={{ backgroundColor: "#F4F9F9", height: '100%', textAlign: 'center' }}>
         <Card.Body>
-          <h5 style={{ fontWeight: "bold" }}>Participants checked in for Events</h5>
+          <h5 style={{ fontWeight: "bold" }}>Check-In Participants</h5>
           <Pie data={chartData} />
         </Card.Body>
       </Card>
     );
   };
+
 
   if (error) {
     return (

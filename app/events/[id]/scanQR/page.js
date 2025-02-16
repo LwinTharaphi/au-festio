@@ -1,10 +1,10 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Container, Row, Col } from "react-bootstrap";
+import { Container, Row, Col, Breadcrumb } from "react-bootstrap";
 import QrScanner from "qr-scanner";
 import { useParams } from "next/navigation";
-import { useSession } from 'next-auth/react';
+import { useSession } from "next-auth/react";
 import Sidebar from "../../../components/Sidebar";
 import "../../../components/Sidebar.css";
 
@@ -18,53 +18,77 @@ export default function ScanQRPage() {
   const [isScanning, setIsScanning] = useState(false);
   const [processing, setProcessing] = useState(false); // To debounce scanning
   const [cameraStream, setCameraStream] = useState(null);
+  const [eventName, setEventName] = useState(null);
+  const [error, setError] = useState(null); // Error state
+  const [loading, setLoading] = useState(false); // Loading state
 
   useEffect(() => {
-    if (status === "loading") return;  // Don't redirect while loading
-    if (status === 'unauthenticated' || session?.user?.role !== "organizer") {
-      router.push('/');
+    if (status === "loading") return; // Don't redirect while loading
+    if (status === "unauthenticated" || session?.user?.role !== "organizer") {
+      router.push("/");
       return;
     }
-    if (status === 'authenticated' && session?.user?.role === "organizer") {
+
+    if (status === "authenticated" && session?.user?.role === "organizer") {
+      const fetchEventData = async () => {
+        setError(null); // Clear previous errors before fetching data
+        try {
+          setLoading(true);
+          const response = await fetch(`/api/organizers/${userId}/events/${eventId}`); // Use eventId here
+          if (!response.ok) {
+            throw new Error("Failed to fetch event data.");
+          }
+          const event = await response.json();
+          setEventName(event.eventName); // Set the event name
+        } catch (err) {
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchEventData();
+
       const video = document.getElementById("qr-video");
 
-       // Detect if the device is mobile/tablet
-       const isMobileOrTablet = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
-       // Access camera with back camera on mobile/tablet
+      // Detect if the device is mobile/tablet
+      const isMobileOrTablet = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+
+      // Access camera with back camera on mobile/tablet
       if (isMobileOrTablet) {
         const constraints = {
           video: { facingMode: { exact: "environment" } }, // Access back camera
         };
-        navigator.mediaDevices.getUserMedia(constraints)
-        .then((stream) => {
-          setCameraStream(stream);
-          video.srcObject = stream;
-        })
-        .catch((error) => {
-          console.error("Error accessing camera: ", error);
-        });
+        navigator.mediaDevices
+          .getUserMedia(constraints)
+          .then((stream) => {
+            setCameraStream(stream);
+            video.srcObject = stream;
+          })
+          .catch((error) => {
+            console.error("Error accessing camera: ", error);
+          });
       } else {
-      const qrScanner = new QrScanner(video, (result) => {
-        if (!processing) {
-          setProcessing(true);
-          handleScan(result);
+        const qrScanner = new QrScanner(video, (result) => {
+          if (!processing) {
+            setProcessing(true);
+            handleScan(result);
+          }
+        });
+
+        if (isScanning) {
+          qrScanner.start().catch((error) => {
+            console.error("Error starting QR scanner: ", error);
+          });
+        } else {
+          qrScanner.stop();
         }
-      });
 
-      if (isScanning) {
-        qrScanner.start().catch((error) => {
-          console.error("Error starting QR scanner: ", error);
-        });
-      } else {
-        qrScanner.stop();
+        return () => {
+          qrScanner.stop(); // Cleanup on unmount
+        };
       }
-
-      return () => {
-        qrScanner.stop(); // Cleanup on unmount
-      };
     }
-  }
-}, [status, isScanning, session, router]);
+  }, [status, isScanning, session, router, eventId, userId, processing]);
 
   const handleScan = (result) => {
     console.log("QR Scanner Result:", result); // Debug: Log the result object
@@ -111,7 +135,7 @@ export default function ScanQRPage() {
         method: "POST",
       });
       const data = await response.json();
-  
+
       if (data.message === "This student has been refunded and cannot use this QR.") {
         setScanStatus("This student has been refunded and cannot use this QR.");
         setScanResult("");
@@ -133,7 +157,7 @@ export default function ScanQRPage() {
       resetProcessing();
     }
   };
-  
+
 
   const resetProcessing = () => {
     setTimeout(() => {
@@ -149,11 +173,18 @@ export default function ScanQRPage() {
         <Col xs={3} md={2} className="sidebar">
           <Sidebar event={{ _id: eventId }} />
         </Col>
-        <Col xs={9} md={10} className="main-content" style={{ backgroundColor: "#F3EFFD" }}>
+        <Col xs={10} className="main-content p-4" style={{ backgroundColor: "#F3EFFD" }}>
+          <Breadcrumb>
+            <Breadcrumb.Item href="/organizers/[id]/create-event">All Events</Breadcrumb.Item>
+            {/* <Breadcrumb.Item active>{event.eventName}</Breadcrumb.Item> */}
+          </Breadcrumb>
           <Container>
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#F3EFFD' }}>
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", backgroundColor: "#F3EFFD" }}>
               <div style={styles.container}>
-                <h1 style={styles.title}>Scan QR Code for Event Check-in</h1>
+                <h1 style={styles.title}>
+                  Scan QR Code for Event Check-in for {loading ? "Loading..." : eventName}
+                </h1>
+                {error && <p style={{ color: "red" }}>{error}</p>}
                 <div style={styles.videoWrapper}>
                   <video id="qr-video" style={styles.video}></video>
                   <div style={styles.line}></div>

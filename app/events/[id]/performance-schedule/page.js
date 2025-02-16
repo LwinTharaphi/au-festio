@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Container, Row, Col, Table, Button, Alert, Form, Dropdown, Spinner } from "react-bootstrap";
+import { Container, Row, Col, Table, Button, Alert, Form, Dropdown, Spinner, Breadcrumb } from "react-bootstrap";
 import { FaTrash, FaEdit } from "react-icons/fa";
 import Sidebar from "../../../components/Sidebar";
 import "../../../components/Sidebar.css";
@@ -81,7 +81,7 @@ export default function EventPerformancesPage() {
             const nonCompletedEvents = data.events.filter((event) => {
               const registrationDate = moment(event.registerationDate);
               const eventDate = moment(event.eventDate);
-      
+
               // Include events where today is between registration and event date or before registration
               return today.isBetween(registrationDate, eventDate, "day", "[]") || today.isBefore(registrationDate, "day");
             });
@@ -191,7 +191,7 @@ export default function EventPerformancesPage() {
     router.push(`/events/${id}/performance-schedule`);
   };
 
-  
+
 
   if (status === 'loading') {
     return (
@@ -226,7 +226,11 @@ export default function EventPerformancesPage() {
           </Col>
 
           {/* Main Content */}
-          <Col xs={9} md={10} className="main-content" style={{ backgroundColor: '#F3EFFD' }}>
+          <Col xs={10} className="main-content p-4" style={{ backgroundColor: "#F3EFFD" }}>
+            <Breadcrumb>
+              <Breadcrumb.Item href="/organizers/[id]/create-event">All Events</Breadcrumb.Item>
+              {/* <Breadcrumb.Item active>{event.eventName}</Breadcrumb.Item> */}
+            </Breadcrumb>
             <Container>
               <div className="d-flex justify-content-between align-items-center mb-3 sticky-header" style={{ backgroundColor: '#F3EFFD' }}>
                 <h4>Performances for {eventName}</h4>
@@ -309,7 +313,7 @@ export default function EventPerformancesPage() {
                         </Form.Group>
                       </Col>
                       <Col md={2}>
-                      <Form.Group className="mb-3">
+                        <Form.Group className="mb-3">
                           <Form.Label>End Time</Form.Label>
                           <Form.Control
                             type="time"
@@ -321,7 +325,7 @@ export default function EventPerformancesPage() {
                       </Col>
                     </Row>
                     <Button style={{ backgroundColor: "#A67EEC" }}
-                    onClick={handleSubmit}
+                      onClick={handleSubmit}
                     >
                       {editPerformanceId ? "Update Performance" : "Add Performance"}
                     </Button>

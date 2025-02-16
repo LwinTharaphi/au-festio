@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Container, Row, Col, Table, Button, Alert, Modal, Form, Dropdown, Spinner } from "react-bootstrap";
+import { Container, Row, Col, Table, Button, Alert, Modal, Form, Dropdown, Spinner, Breadcrumb} from "react-bootstrap";
 import { FaTrash, FaEdit, FaEyeSlash, FaRegCheckCircle, FaRegTimesCircle } from "react-icons/fa";
 import Sidebar from "../../../components/Sidebar";
 import "../../../components/Sidebar.css";
@@ -310,7 +310,11 @@ export default function RegisteredStudentsPage() {
           <Col xs={3} md={2} className="sidebar">
             <Sidebar event={{ _id: id }} />
           </Col>
-          <Col xs={9} md={10} className="main-content" style={{ backgroundColor: "#F3EFFD" }}>
+          <Col xs={10} className="main-content p-4" style={{ backgroundColor: "#F3EFFD" }}>
+          <Breadcrumb>
+              <Breadcrumb.Item href="/organizers/[id]/create-event">All Events</Breadcrumb.Item>
+              {/* <Breadcrumb.Item active>{event.eventName}</Breadcrumb.Item> */}
+            </Breadcrumb>
             <Container>
               <div className="d-flex justify-content-between align-items-center mb-4 sticky-header" style={{ backgroundColor: "#F3EFFD" }}>
                 <h4>Registered Participants for {eventName}</h4>

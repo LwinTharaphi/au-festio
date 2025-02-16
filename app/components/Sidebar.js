@@ -92,13 +92,6 @@ export default function Sidebar({ event }) {
           <BsQrCodeScan className="me-2" /> Scan QR
         </Nav.Link>
 
-        {/* Notifications */}
-        <Nav.Link
-          onClick={() => router.push(`/events/${event._id}/notification`)}
-          className={`sidebar-link my-2 text-start ${isActive(`/events/${event._id}/notification`)}`}
-        >
-          <BsBell className="me-2" /> Notification
-        </Nav.Link>
       </Nav>
     </Navbar>
   );
