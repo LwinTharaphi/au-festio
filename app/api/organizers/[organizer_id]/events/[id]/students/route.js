@@ -63,9 +63,9 @@ export async function POST(request) {
     const expo = new Expo();
     const messages = [];
     if(event.isPaid == false) {
-      if (newStudent.expoPushTokens && Expo.isExpoPushToken(newStudent.expoPushTokens)) {
+      if (newStudent.expoPushToken && Expo.isExpoPushToken(newStudent.expoPushToken)) {
         messages.push({
-          to: newStudent.expoPushTokens,
+          to: newStudent.expoPushToken,
           sound: 'default',
           title: 'Event Registration',
           body: `🎉 You successfully registered for ${event.eventName}!`,
@@ -98,9 +98,9 @@ export async function POST(request) {
       console.log("Sending SSE notification for new student registration:", newNotification);
       sendEventsToAll(newNotification);
     } else {
-      if (event.isPaid == true && newStudent.expoPushTokens && Expo.isExpoPushToken(newStudent.expoPushTokens)) {
+      if (event.isPaid == true && newStudent.expoPushToken && Expo.isExpoPushToken(newStudent.expoPushToken)) {
         messages.push({
-          to: newStudent.expoPushTokens,
+          to: newStudent.expoPushToken,
           sound: 'default',
           title: 'Event Registration',
           body: `🎉 Your information has been received for ${event.eventName}! Please wait for approval.`,
