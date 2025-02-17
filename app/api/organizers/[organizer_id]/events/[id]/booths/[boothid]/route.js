@@ -172,11 +172,11 @@ export async function DELETE(request, { params }) {
     if (validTokens.length === 0) {
       return new Response("No valid push tokens found", { status: 500 });
     } else {
-      const messageBody = `The booth "${deletedBooth.name}" has been deleted from the event "${event.eventName}"`;
+      const messageBody = `The booth "${deletedBooth.boothName}" has been deleted from the event "${event.eventName}"`;
       const messages = validTokens.map((pushToken) => ({
         to: pushToken,
         sound: "default",
-        title: "Performance Deleted",
+        title: "Booth Deleted",
         body: messageBody,
         data: {
           eventId: id,
