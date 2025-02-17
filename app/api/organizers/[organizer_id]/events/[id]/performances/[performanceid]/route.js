@@ -36,7 +36,7 @@ export async function PUT(request, { params }) {
 
   const expo = new Expo();
   const event = await Event.findById(id);
-  const student = await Student.findById({eventId: id});
+  const student = await Student.find({eventId: id});
   const pushTokens = student.map((student) => student.expoPushToken);
 
   const messages = pushTokens.map((pushToken) => ({
