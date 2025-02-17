@@ -65,13 +65,18 @@ export async function PUT(request, { params }) {
 
   if(pushTokens.length >0 ){
     const expo = new Expo();
+    const validTokens = pushTokens.filter(Expo.isExpoPushToken);
+
+    if (validTokens.length === 0) {
+      return new Response("No valid push tokens found", { status: 500 });
+    }
     let messageBody;
     if(nameUpdatedMessage){
       messageBody = nameUpdatedMessage;
     } else {
       messageBody = `The performance "${existingPerformance.name}" has been updated for the event "${event.eventName}: ${changedFields.join(", ")}"`;
     }
-    const messages = pushTokens.map((pushToken) => ({
+    const messages = validTokens.map((pushToken) => ({
       to: pushToken,
       sound: "default",
       title: "Performance Update",
