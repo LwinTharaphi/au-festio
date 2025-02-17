@@ -23,7 +23,7 @@ export async function PUT(request, { params }) {
   await dbConnect();
   const { id, performanceid } = await params; // Event ID and Performance ID from URL parameters
   const data = await request.json();
-
+  console.log("data", data);
   const existingPerformance = await Performance.findOne({ _id: performanceid, eventId: id });
   if (!existingPerformance) {
     return new Response("Performance not found", { status: 404 });
@@ -60,9 +60,10 @@ export async function PUT(request, { params }) {
   if (!event) {
     return new Response("Event not found", { status: 404 });
   }
-  const student = await Student.find({eventId: id});
-  const pushTokens = student.map((student) => student.expoPushToken);
-
+  const students = await Student.find({eventId: id});
+  console.log("student", students);
+  const pushTokens = students.map((student) => student.expoPushToken);
+  console.log("pushTokens", pushTokens);
   if(pushTokens.length >0 ){
     const expo = new Expo();
     const validTokens = pushTokens.filter(Expo.isExpoPushToken);
@@ -89,6 +90,8 @@ export async function PUT(request, { params }) {
       }
     }));
 
+    console.log("Notification messages", messages);
+
     const chunks = expo.chunkPushNotifications(messages);
     for (const chunk of chunks) {
       try {
@@ -110,6 +113,39 @@ export async function DELETE(request, { params }) {
   
   if (!deletedPerformance) {
     return new Response("Performance not found", { status: 404 });
+  }
+
+  const event = await Event.findById(id);
+  const expo = new Expo();
+  const messages = [];
+  const students = await Student.find({ eventId: id });
+  const pushTokens = students.map((student) => student.expoPushToken);
+  const validTokens = pushTokens.filter(Expo.isExpoPushToken);
+  if (validTokens.length === 0) {
+    return new Response("No valid push tokens found", { status: 500 });
+  } else {
+    const messageBody = `The performance "${deletedPerformance.name}" has been deleted from the event "${event.eventName}"`;
+    const messages = validTokens.map((pushToken) => ({
+      to: pushToken,
+      sound: "default",
+      title: "Performance Deleted",
+      body: messageBody,
+      data: {
+        eventId: id,
+        organizerId: event.organizer,
+        performanceId: deletedPerformance._id,
+        type: "performance_deleted",
+      }
+    }));
+
+    const chunks = expo.chunkPushNotifications(messages);
+    for (const chunk of chunks) {
+      try {
+        await expo.sendPushNotificationsAsync(chunk);
+      } catch (error) {
+        console.error("Error sending push notification:", error);
+      }
+    }
   }
 
   return new Response("Performance deleted successfully", { status: 200 });

@@ -124,6 +124,7 @@ export default function EventPerformancesPage() {
     try {
       let response;
       if (editPerformanceId) {
+        console.log("Edit performance data:", performanceData);
         // Update performance
         response = await fetch(`/api/organizers/${userId}/events/${id}/performances/${editPerformanceId}`, {
           method: "PUT",
