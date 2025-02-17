@@ -1,5 +1,9 @@
 import Performance from "@/models/Performance";
 import dbConnect from "@/lib/db";
+import { Expo } from "expo-server-sdk";
+import mongoose from "mongoose";
+import Event from "@/models/Event";
+import Student from "@/models/Student";
 
 // GET: Fetch a specific performance by performanceid and event ID
 export async function GET(request, { params }) {
@@ -29,6 +33,35 @@ export async function PUT(request, { params }) {
   if (!updatedPerformance) {
     return new Response("Performance not found", { status: 404 });
   }
+
+  const expo = new Expo();
+  const event = await Event.findById(id);
+  const student = await Student.findById({eventId: id});
+  const pushTokens = student.map((student) => student.expoPushToken);
+
+  const messages = pushTokens.map((pushToken) => ({
+    to: pushToken,
+    sound: "default",
+    title: "Performance Update",
+    body: `The performance "${updatedPerformance.name}" has been updated for the event "${event.eventName}`,
+    data: {
+      eventId: id,
+      studentId: student._id,
+      organizerId: event.organizer,
+      performanceId: updatedPerformance._id,
+      type: "performance_updated",
+    }
+  }));
+
+  const chunks = expo.chunkPushNotifications(messages);
+  for (const chunk of chunks) {
+    try {
+      await expo.sendPushNotificationsAsync(chunk);
+    } catch (error) {
+      console.error("Error sending push notification:", error);
+    }
+  }
+
 
   return new Response(JSON.stringify(updatedPerformance), { status: 200 });
 }
