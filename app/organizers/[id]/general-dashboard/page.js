@@ -269,7 +269,7 @@ export default function Dashboard() {
                   <Card
                     className="text-center shadow-sm"
                     style={{ backgroundColor: "#FFF4E6", cursor: "pointer" }} // Added cursor pointer to indicate it's clickable
-                    onClick={() => router.push(`/organizers/${userId}/create-event?expand=upcoming`)} // This will navigate to the create-event page
+                    onClick={() => router.push(`/organizers/${userId}/create-event?type=paid`)} // This will navigate to the create-event page
                   >
                     <Card.Body>
                       <BsPeopleFill size={30} className="mb-2 text-primary" />
@@ -286,7 +286,7 @@ export default function Dashboard() {
                   <Card
                     className="text-center shadow-sm"
                     style={{ backgroundColor: "#E2ECF5", cursor: "pointer" }}
-                    onClick={() => router.push(`/organizers/${userId}/create-event?expand=ongoing`)}
+                    onClick={() => router.push(`/organizers/${userId}/create-event?type=free`)}
                   >
                     <Card.Body>
                       <BsShop size={30} className="mb-2 text-success" />

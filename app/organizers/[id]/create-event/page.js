@@ -147,7 +147,7 @@ function EventForm() {
             new Date(a.registerationDate) - new Date(b.registerationDate));
           setEvents(sortedEvents);
         };
-        const expandParam = searchParams.get('expand');
+        const expandParam = searchParams.get('type');
         if (expandParam) {
           setExpandedSection((prev) => ({ ...prev, [expandParam]: true }));
         }
@@ -462,11 +462,11 @@ function EventForm() {
                           <Typography sx={{ fontSize: '1.2rem', marginBottom: 3 }}>
                             {status.charAt(0).toUpperCase() + status.slice(1)} Events
                           </Typography>
-                          <IconButton>
+                          {/* <IconButton>
                             {expandedSection[status] ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                          </IconButton>
+                          </IconButton> */}
                         </Box>
-                        {expandedSection[status] && (
+                        {(
                           Object.entries(groupedEvents[status]).map(([month, events], monthIndex) => (
                             <Box key={monthIndex} sx={{ marginTop: 2 }}>
                               <Typography sx={{ fontSize: '1rem', marginBottom: 3 }}>
@@ -672,15 +672,15 @@ function EventForm() {
                           value={location}
                           onChange={setLocation}
                         />
-                        <FormField
+                        {/* <FormField
                           title="AR Toggle"
                           type="switch"
                           value={isArEnabled}
                           onChange={setIsArEnabled}
-                        />
+                        /> */}
 
                         {/* Conditional Venue and GPS Location Fields */}
-                        {isArEnabled && (
+                        {/* {isArEnabled && (
                           <>
                             <FormField
                               title="Venue Name"
@@ -706,7 +706,7 @@ function EventForm() {
                               />
                             </Box>
                           </>
-                        )}
+                        )} */}
                       </Box>
                       {/* Poster Upload */}
                       <Box sx={{ display: "flex", alignItems: "center", marginBottom: 2 }}>
