@@ -30,8 +30,10 @@ export async function PUT(request, { params }) {
   }
 
   const changedFields = [];
+  let nameUpdatedMessage = null;
   if (data.name && data.name !== existingPerformance.name) {
     changedFields.push("name");
+    nameUpdatedMessage = `The ${existingPerformance.name} performance name has been updated to "${data.name}"`;
   } else if (data.description && data.description !== existingPerformance.description) {
     changedFields.push("description");
   } else if (data.startTime && data.startTime !== existingPerformance.startTime) {
@@ -54,24 +56,28 @@ export async function PUT(request, { params }) {
     return new Response(JSON.stringify(updatedPerformance), { status: 200 });
   }
 
-  const expo = new Expo();
   const event = await Event.findById(id);
   if (!event) {
     return new Response("Event not found", { status: 404 });
   }
   const student = await Student.find({eventId: id});
-  const pushTokens = student.map((student) => student.expoPushToken).filter(Boolean);
+  const pushTokens = student.map((student) => student.expoPushToken);
 
   if(pushTokens.length >0 ){
     const expo = new Expo();
+    let messageBody;
+    if(nameUpdatedMessage){
+      messageBody = nameUpdatedMessage;
+    } else {
+      messageBody = `The performance "${existingPerformance.name}" has been updated for the event "${event.eventName}: ${changedFields.join(", ")}"`;
+    }
     const messages = pushTokens.map((pushToken) => ({
       to: pushToken,
       sound: "default",
       title: "Performance Update",
-      body: `The performance "${updatedPerformance.name}" has been updated for the event "${event.eventName}: ${changedFields.join(", ")}"`,
+      body: messageBody,
       data: {
         eventId: id,
-        studentId: student._id,
         organizerId: event.organizer,
         performanceId: updatedPerformance._id,
         type: "performance_updated",
