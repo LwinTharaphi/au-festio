@@ -1,7 +1,6 @@
 import Performance from "@/models/Performance";
 import dbConnect from "@/lib/db";
 import { Expo } from "expo-server-sdk";
-import mongoose from "mongoose";
 import Event from "@/models/Event";
 import Student from "@/models/Student";
 
@@ -117,7 +116,6 @@ export async function DELETE(request, { params }) {
 
   const event = await Event.findById(id);
   const expo = new Expo();
-  const messages = [];
   const students = await Student.find({ eventId: id });
   const pushTokens = students.map((student) => student.expoPushToken);
   const validTokens = pushTokens.filter(Expo.isExpoPushToken);

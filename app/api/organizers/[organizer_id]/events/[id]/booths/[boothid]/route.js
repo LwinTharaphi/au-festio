@@ -3,6 +3,9 @@ import dbConnect from "@/lib/db";
 import { S3Client, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { uploadFile } from "../../../route";
 import { deleteBoothFile } from "../route";
+import Event from "@/models/Event";
+import Student from "@/models/Student";
+import { Expo } from "expo-server-sdk";
 
 const s3 = new S3Client({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -59,6 +62,26 @@ export async function PUT(request, { params }) {
     }
     console.log("Image Path booths:", imagePath);
 
+    let changes = [];
+    if (existingBooth.boothNumber !== boothNumber) {
+      changes.push("boothNumber");
+    }
+    if (existingBooth.boothName !== boothName) {
+      changes.push("boothName");
+    }
+    if (existingBooth.item !== item) {
+      changes.push("item");
+    }
+    if (existingBooth.location !== location) {
+      changes.push("location");
+    }
+    if (existingBooth.priceRange !== priceRange) {
+      changes.push("priceRange");
+    }
+    if (existingBooth.imagePath !== imagePath) {
+      changes.push("image");
+    }
+
     // Update booth data
     const updateData = {
       boothNumber,
@@ -82,6 +105,42 @@ export async function PUT(request, { params }) {
       return new Response("Booth not found", { status: 404 });
     }
 
+    // Send notification if there are changes
+    if (changes.length > 0) {
+    const event = await Event.findById(id);
+    if (!event) return new Response("Event not found", { status: 404 });
+    
+    const expo = new Expo();
+    const students = await Student.find({ eventId: id });
+    const pushTokens = students.map((student) => student.expoPushToken);
+    const validTokens = pushTokens.filter(Expo.isExpoPushToken);
+    
+    if (validTokens.length > 0) {
+      const messageBody = `The booth "${updatedBooth.boothName}" has been updated for the event "${event.eventName}". Changes include: ${changes.join(", ")}`;
+      const messages = validTokens.map((pushToken) => ({
+        to: pushToken,
+        sound: "default",
+        title: "Booth Update",
+        body: messageBody,
+        data: {
+          eventId: id,
+          organizerId: event.organizer,
+          boothId: updatedBooth._id,
+          type: "booth_updated",
+        },
+      }));
+
+      const chunks = expo.chunkPushNotifications(messages);
+      for (const chunk of chunks) {
+        try {
+          await expo.sendPushNotificationsAsync(chunk);
+        } catch (error) {
+          console.error("Error sending push notification:", error);
+        }
+      }
+    }
+  }
+
     return new Response(JSON.stringify(updatedBooth), { status: 200 });
   } catch (error) {
     console.error("Error updating booth:", error);
@@ -102,6 +161,41 @@ export async function DELETE(request, { params }) {
     }
     const deletedBooth = await Booth.findOneAndDelete({ boothId: boothid, eventId: id });
     if (!deletedBooth) return new Response("Booth not found", { status: 404 });
+
+    const event = await Event.findById(id);
+    if (!event) return new Response("Event not found", { status: 404 });
+    const expo = new Expo();
+
+    const students = await Student.find({ eventId: id });
+    const pushTokens = students.map((student) => student.expoPushToken);
+    const validTokens = pushTokens.filter(Expo.isExpoPushToken);
+    if (validTokens.length === 0) {
+      return new Response("No valid push tokens found", { status: 500 });
+    } else {
+      const messageBody = `The booth "${deletedBooth.name}" has been deleted from the event "${event.eventName}"`;
+      const messages = validTokens.map((pushToken) => ({
+        to: pushToken,
+        sound: "default",
+        title: "Performance Deleted",
+        body: messageBody,
+        data: {
+          eventId: id,
+          organizerId: event.organizer,
+          boothId: deletedBooth._id,
+          type: "booth_deleted",
+        }
+      }));
+
+      const chunks = expo.chunkPushNotifications(messages);
+      for (const chunk of chunks) {
+        try {
+          await expo.sendPushNotificationsAsync(chunk);
+        } catch (error) {
+          console.error("Error sending push notification:", error);
+        }
+      }
+    }
+
     return new Response("Booth deleted successfully", { status: 200 });
   } catch (error) {
     console.error("Error deleting booth:", error);
