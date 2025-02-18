@@ -177,150 +177,151 @@ export default function OrganizerHistoryPage() {
     return (
       <div style={{ backgroundColor: '#F3EFFD' }}>
         <Sidebar />
-      <div className="container" style={{ backgroundColor: '#F3EFFD' }}>
-        <h3 className="mb-4 mt-4">History</h3>
-        {completedEvents.length === 0 ? (
-          <p>No completed events found.</p>
-        ) : (
-          <Row xs={1} md={2} lg={3} className="g-4">
-            {completedEvents.map((event, index) => (
-              <Col key={index}>
-                <Card onClick={() => handleCardClick(event._id)} style={{ cursor: 'pointer' }}>
-                  <Card.Img
-                    variant="top"
-                    src={event.poster}
-                    alt={event.name}
-                    style={{
-                      height: "200px", // Fixed height
-                      objectFit: "cover", // Ensures the image fills the space proportionally
-                      width: "100%", // Ensures it spans the card's width
-                    }}
-                  />
+        <div className="container" style={{ backgroundColor: '#F3EFFD' }}>
+          <h3 className="mb-4 mt-4">History</h3>
+          {completedEvents.length === 0 ? (
+            <p>No completed events found.</p>
+          ) : (
+            <Row xs={1} sm={2} md={3} lg={4} className="g-4 justify-content-start">
+              {completedEvents.map((event, index) => (
+                <Col key={index}>
+                  <Card onClick={() => handleCardClick(event._id)} style={{ cursor: 'pointer', height: '240px' }}>
+                    <Card.Img
+                      variant="top"
+                      src={event.poster}
+                      alt={event.name}
+                      style={{
+                        height: "180px", // Fixed height
+                        objectFit: "cover", // Ensures the image fills the space proportionally
+                        width: "100%", // Ensures it spans the card's width
+                      }}
+                    />
 
-                  <Card.Body>
-                    <Card.Title>{event.eventName}</Card.Title>
-                    <Card.Text>
-                      <strong>Completed on:</strong>{" "}
-                      {new Date(event.eventDate).toLocaleDateString()}
-                    </Card.Text>
-                    <Card.Text>{event.description}</Card.Text>
-                  </Card.Body>
-                  <AiFillDelete
-                    style={{
-                      position: "absolute",
-                      top: "10px",
-                      right: "10px",
-                      color: "blue",
-                      cursor: "pointer",
-                      fontSize: '1.5rem',
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevent the card's onClick from being triggered
-                      handleDeleteClick(event._id);
-                    }}
-                  />
-                </Card>
-              </Col>
-            ))}
-          </Row>
-        )}
+                    <Card.Body>
+                      <Card.Title style={{ fontSize: '1rem' }}>{event.eventName}</Card.Title>
+                      <Card.Text style={{ fontSize: '0.9rem' }}>
+                        <strong>Completed on:</strong>{" "}
+                        {new Date(event.eventDate).toLocaleDateString()}
+                      </Card.Text>
+                      <Card.Text style={{ fontSize: '0.9rem' }}>{event.description}</Card.Text>
+                    </Card.Body>
 
-        {/* Delete Confirmation Modal */}
-        <Modal show={showDeleteModal} onHide={handleCloseDeleteModal}>
-          <Modal.Header closeButton>
-            <Modal.Title>Confirm Delete</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>Are you sure you want to delete this event?</Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleCloseDeleteModal}>Cancel</Button>
-            <Button variant="danger" onClick={confirmDelete}>Delete</Button>
-          </Modal.Footer>
-        </Modal>
+                    <AiFillDelete
+                      style={{
+                        position: "absolute",
+                        top: "10px",
+                        right: "10px",
+                        color: "blue",
+                        cursor: "pointer",
+                        fontSize: '1.5rem',
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent the card's onClick from being triggered
+                        handleDeleteClick(event._id);
+                      }}
+                    />
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+          )}
 
-        <Modal show={showModal} onHide={handleClose} id="event-statistics-modal" size="lg">
-          <Modal.Header closeButton>
-            <Modal.Title>Event Statistics: {selectedEvent?.eventName}</Modal.Title>
-          </Modal.Header>
-          <Modal.Body style={{ height: 'auto', padding: '3rem' }}>
-            {selectedEvent ? (
-              <div>
-                <Row>
-                  <Col>
-                    <Card style={{ border: '2px solid #b1e7cc' }}>
-                      <Card.Body>
-                        <Card.Title style={{ fontSize: '0.8rem' }}>Registered Students</Card.Title>
-                        <Card.Text>{selectedEvent.totalRegistered}</Card.Text>
-                      </Card.Body>
-                    </Card>
+          {/* Delete Confirmation Modal */}
+          <Modal show={showDeleteModal} onHide={handleCloseDeleteModal}>
+            <Modal.Header closeButton>
+              <Modal.Title>Confirm Delete</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>Are you sure you want to delete this event?</Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={handleCloseDeleteModal}>Cancel</Button>
+              <Button variant="danger" onClick={confirmDelete}>Delete</Button>
+            </Modal.Footer>
+          </Modal>
 
-                  </Col>
-                  <Col>
-                    <Card style={{ border: '2px solid #b1e7cc' }}>
-                      <Card.Body>
-                        <Card.Title style={{ fontSize: '0.8rem' }}>Check-in Students</Card.Title>
-                        <Card.Text>{selectedEvent.totalCheckedIn}</Card.Text>
-                      </Card.Body>
-                    </Card>
-                  </Col>
-                  <Col>
-                    <Card style={{ border: '2px solid #b1e7cc' }}>
-                      <Card.Body>
-                        <Card.Title style={{ fontSize: '0.8rem' }}>Total Booths</Card.Title>
-                        <Card.Text>{selectedEvent.totalBooths}</Card.Text>
-                      </Card.Body>
-                    </Card>
-                  </Col>
-                  <Col>
-                    <Card style={{ border: '2px solid #b1e7cc' }}>
-                      <Card.Body>
-                        <Card.Title style={{ fontSize: '0.8rem' }}>Total Staffs</Card.Title>
-                        <Card.Text>{selectedEvent.totalStaffs}</Card.Text>
-                      </Card.Body>
-                    </Card>
-                  </Col>
-                </Row>
-                <Row className="mt-4">
-                  <Col>
-                    <Card style={{ border: '2px solid #b1e7cc' }} className="h-100">
-                      <Card.Body>
-                        <Card.Title>Attendance (Pie Chart)</Card.Title>
-                        <Pie data={{
-                          labels: ['Checked In', 'Not Checked In'],
-                          datasets: [{
-                            data: [selectedEvent.totalCheckedIn, selectedEvent.totalRegistered - selectedEvent.totalCheckedIn],
-                            backgroundColor: ['#36A2EB', '#FF6384'],
-                          }]
-                        }} />
-                      </Card.Body>
-                    </Card>
-                  </Col>
-                  <Col>
-                    <Card style={{ border: '2px solid #b1e7cc' }} className="h-100">
-                      <Card.Body>
-                        <Card.Title>Feedback (Bar Chart)</Card.Title>
-                        <Bar data={{
-                          labels: ['1', '2', '3', '4', '5'],
-                          datasets: [{
-                            label: 'Feedback Stars',
-                            data: selectedEvent.feedbackStars,
-                            backgroundColor: '#FF6384',
-                          }]
-                        }} />
-                      </Card.Body>
-                    </Card>
-                  </Col>
-                </Row>
-              </div>
-            ) : (
-              <p>Loading statistics...</p>
-            )}
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleClose}>Close</Button>
-            <Button variant="primary" onClick={handleSaveToDevice}>Save to Device</Button>
-          </Modal.Footer>
-        </Modal>
-      </div>
+          <Modal show={showModal} onHide={handleClose} id="event-statistics-modal" size="lg">
+            <Modal.Header closeButton>
+              <Modal.Title>Event Statistics: {selectedEvent?.eventName}</Modal.Title>
+            </Modal.Header>
+            <Modal.Body style={{ height: 'auto', padding: '3rem' }}>
+              {selectedEvent ? (
+                <div>
+                  <Row>
+                    <Col>
+                      <Card style={{ border: '2px solid #b1e7cc' }}>
+                        <Card.Body>
+                          <Card.Title style={{ fontSize: '0.8rem' }}>Registered Students</Card.Title>
+                          <Card.Text>{selectedEvent.totalRegistered}</Card.Text>
+                        </Card.Body>
+                      </Card>
+
+                    </Col>
+                    <Col>
+                      <Card style={{ border: '2px solid #b1e7cc' }}>
+                        <Card.Body>
+                          <Card.Title style={{ fontSize: '0.8rem' }}>Check-in Students</Card.Title>
+                          <Card.Text>{selectedEvent.totalCheckedIn}</Card.Text>
+                        </Card.Body>
+                      </Card>
+                    </Col>
+                    <Col>
+                      <Card style={{ border: '2px solid #b1e7cc' }}>
+                        <Card.Body>
+                          <Card.Title style={{ fontSize: '0.8rem' }}>Total Booths</Card.Title>
+                          <Card.Text>{selectedEvent.totalBooths}</Card.Text>
+                        </Card.Body>
+                      </Card>
+                    </Col>
+                    <Col>
+                      <Card style={{ border: '2px solid #b1e7cc' }}>
+                        <Card.Body>
+                          <Card.Title style={{ fontSize: '0.8rem' }}>Total Staffs</Card.Title>
+                          <Card.Text>{selectedEvent.totalStaffs}</Card.Text>
+                        </Card.Body>
+                      </Card>
+                    </Col>
+                  </Row>
+                  <Row className="mt-4">
+                    <Col>
+                      <Card style={{ border: '2px solid #b1e7cc' }} className="h-100">
+                        <Card.Body>
+                          <Card.Title>Attendance (Pie Chart)</Card.Title>
+                          <Pie data={{
+                            labels: ['Checked In', 'Not Checked In'],
+                            datasets: [{
+                              data: [selectedEvent.totalCheckedIn, selectedEvent.totalRegistered - selectedEvent.totalCheckedIn],
+                              backgroundColor: ['#36A2EB', '#FF6384'],
+                            }]
+                          }} />
+                        </Card.Body>
+                      </Card>
+                    </Col>
+                    <Col>
+                      <Card style={{ border: '2px solid #b1e7cc' }} className="h-100">
+                        <Card.Body>
+                          <Card.Title>Feedback (Bar Chart)</Card.Title>
+                          <Bar data={{
+                            labels: ['1', '2', '3', '4', '5'],
+                            datasets: [{
+                              label: 'Feedback Stars',
+                              data: selectedEvent.feedbackStars,
+                              backgroundColor: '#FF6384',
+                            }]
+                          }} />
+                        </Card.Body>
+                      </Card>
+                    </Col>
+                  </Row>
+                </div>
+              ) : (
+                <p>Loading statistics...</p>
+              )}
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={handleClose}>Close</Button>
+              <Button variant="primary" onClick={handleSaveToDevice}>Save to Device</Button>
+            </Modal.Footer>
+          </Modal>
+        </div>
       </div>
     );
   }
