@@ -26,6 +26,7 @@ import {
 } from "react-bootstrap";
 import Sidebar from "@/app/components/Sidebar";
 import { BsPeopleFill, BsShop, BsCheckCircle, BsStarFill } from "react-icons/bs";
+import { FaPlusCircle, FaMinusCircle } from "react-icons/fa";
 
 // Register Chart.js components
 ChartJS.register(
@@ -75,7 +76,7 @@ export default function Dashboard() {
     }
   }, [id, route, session, status]);
 
-  const { stats, entryTimes, monthData, event, averageRating, performanceDetails } = data || {};
+  const { stats, event, averageRating, performanceDetails, totalCashIn, totalCashOut } = data || {};
 
   if (status === 'loading' || !data) {
     return (
@@ -99,20 +100,6 @@ export default function Dashboard() {
     );
   }
   if (error) return <Alert variant="danger">Error: {error}</Alert>;
-
-  // Formatting Entry Times Data
-  const timeLabels = Array.from(
-    new Set(entryTimes.map((time) => new Date(time).toLocaleTimeString()))
-  );
-  const timeCounts = timeLabels.map((time) =>
-    entryTimes.filter((t) => new Date(t).toLocaleTimeString() === time).length
-  );
-
-  // Formatting Monthly Crowd Flow Data
-  // const monthLabels = Object.keys(monthData).map(
-  //   (month) => `Month ${+month + 1}`
-  // );
-  // const monthCounts = Object.values(monthData);
 
   if (status === 'authenticated' && session.user.role === "organizer") {
     return (
@@ -203,49 +190,54 @@ export default function Dashboard() {
               </Col>
             </Row>
 
-
             {/* Charts Section */}
             <Row className="g-4">
               <Col md={6}>
-                <Card className="shadow-sm" style={{ backgroundColor: "#F4F9F9", minHeight: "300px" }}>
+                <Card className="shadow-sm position-relative" style={{ backgroundColor: "#F4F9F9", minHeight: "300px" }}>
+                  {/* Cash Flow Indicators */}
+                  {event.isPaid && (
+                    <div className="position-absolute top-0 end-0 pt-2 pe-3 text-end" style={{ transform: "translateY(-5px)" }}>
+                      <div className="d-flex align-items-center text-success fw-bold fs-6">
+                        <FaPlusCircle className="me-1" /> {totalCashIn.toLocaleString()}
+                      </div>
+                      <div className="d-flex align-items-center text-danger fw-bold fs-6">
+                        <FaMinusCircle className="me-1" /> {totalCashOut.toLocaleString()}
+                      </div>
+                    </div>
+                  )}
                   <Card.Body>
-                    <h5 className="text-center">Entry Times</h5>
-                    <Line
-                      data={{
-                        labels: timeLabels,
-                        datasets: [
-                          {
-                            label: "Entries Over Time",
-                            data: timeCounts,
-                            backgroundColor: "rgba(54, 162, 235, 0.2)",
-                            borderColor: "rgba(54, 162, 235, 1)",
-                            borderWidth: 1,
-                            tension: 0.4,
+                    <h5 className="text-center">Total Cash Flow</h5>
+                    {event.isPaid ? (
+                      <Bar
+                        data={{
+                          labels: ["Total Cash In", "Total Cash Out"],
+                          datasets: [
+                            {
+                              label: "Amount (in currency)",
+                              data: [totalCashIn, totalCashOut],
+                              backgroundColor: ["rgba(75, 192, 192, 0.6)", "rgba(255, 99, 132, 0.6)"],
+                              borderColor: ["rgba(75, 192, 192, 1)", "rgba(255, 99, 132, 1)"],
+                              borderWidth: 1,
+                              barThickness: 30, // Make bars thinner
+                            },
+                          ],
+                        }}
+                        options={{
+                          responsive: true,
+                          plugins: {
+                            legend: { display: false },
                           },
-                        ],
-                      }}
-                      options={{
-                        responsive: true,
-                        plugins: {
-                          legend: { display: false },
-                          tooltip: {
-                            callbacks: {
-                              label: (tooltipItem) =>
-                                `${tooltipItem.raw} people`,
+                          scales: {
+                            y: {
+                              beginAtZero: true,
+                              title: { display: true, text: "Amount" },
                             },
                           },
-                        },
-                        scales: {
-                          x: {
-                            title: { display: true, text: "Time of Day" },
-                          },
-                          y: {
-                            title: { display: true, text: "Number of People" },
-                            beginAtZero: true,
-                          },
-                        },
-                      }}
-                    />
+                        }}
+                      />
+                    ) : (
+                      <p className="text-center mt-4">No cash flow for free event.</p>
+                    )}
                   </Card.Body>
                 </Card>
               </Col>
@@ -297,12 +289,9 @@ export default function Dashboard() {
                   </Card.Body>
                 </Card>
               </Col>
-
             </Row>
             <Row>
-
             </Row>
-
           </Col>
         </Row>
       </Container>

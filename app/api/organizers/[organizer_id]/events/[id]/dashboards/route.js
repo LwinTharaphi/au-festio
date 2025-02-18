@@ -4,6 +4,7 @@ import Booth from "@/models/Booth";
 import Feedback from "@/models/Feedback";
 import Performance from "@/models/Performance";
 import Student from "@/models/Student";
+import Refund from "@/models/Refund"
 
 export async function GET(req, { params }) {
   const { id } = await params; // Get dynamic ID from the request parameters
@@ -21,7 +22,7 @@ export async function GET(req, { params }) {
     }
 
     // Fetch related data
-    // const registrations =  await Student.find({ eventId: id });
+    const allregistrations = await Student.find({eventId: id})
     const registrations = await Student.find({ eventId: id, refundStatus: { $ne: "refunded" } });
     const booths = await Booth.find({ eventId: id });
     const feedbacks = await Feedback.find({eventId: id});
@@ -46,19 +47,20 @@ export async function GET(req, { params }) {
       checkInStatus: "checked-in",
     });
 
-    // Extract entry times
-    const entryTimes = registrations
-      .filter((reg) => reg.checkInTime)
-      .map((reg) => reg.checkInTime);
+    // Calculate total cash in
+    const totalCashIn = allregistrations.length * event.price;
 
-    // Calculate monthly data
-    const monthData = registrations.reduce((acc, reg) => {
-      if (reg.checkInTime) {
-        const month = new Date(reg.checkInTime).getMonth();
-        acc[month] = (acc[month] || 0) + 1;
-      }
-      return acc;
-    }, {});
+    // Get refunded students
+    const refundedStudents = await Student.find({ eventId: id, refundStatus: "refunded" });
+
+    // Fetch refund details for each refunded student
+    const refundRecords = await Refund.find({ studentId: { $in: refundedStudents.map(s => s._id) } });
+
+    // Calculate total cash out (refunds)
+    const totalCashOut = refundRecords.reduce((sum, refund) => {
+      return sum + (event.price * refund.refundPercentage) / 100;
+    }, 0);
+
 
     // Return a successful response
     return new Response(
@@ -69,8 +71,8 @@ export async function GET(req, { params }) {
           boothsRegistered: booths.length,
           checkIns: checkInCount,
         },
-        entryTimes,
-        monthData,
+        totalCashIn,
+        totalCashOut,
         averageRating,
         performanceDetails,
       }),
