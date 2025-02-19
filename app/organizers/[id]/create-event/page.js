@@ -355,6 +355,8 @@ function EventForm() {
     setHasDiscount(Boolean(eventToEdit.discount && eventToEdit.discount > 0))
     setDiscount(eventToEdit.discount || '');
     setRefundPolicy(Array.isArray(eventToEdit.refundPolicy) ? eventToEdit.refundPolicy : []);
+    setHasSeatLimitation(Boolean(eventToEdit.seats && eventToEdit.seats > 0));
+    setSeatAmount(eventToEdit.seats || '');
     // setSelectedEventIndex(); // Store the index for saving the updated event later
     setAnchorEl(null); // Close the menu after edit
     setIsEditing(true);
