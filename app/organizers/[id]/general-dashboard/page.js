@@ -170,10 +170,10 @@ export default function Dashboard() {
         </Card>
       );
     }
-
+   
     const eventNames = events.map(event => event.eventName);
     const studentsRegistered = events.map(event => event.studentsRegistered);
-
+  
     const chartData = {
       labels: eventNames,
       datasets: [
@@ -184,12 +184,26 @@ export default function Dashboard() {
         },
       ],
     };
-
+  
+    const chartOptions = {
+      plugins: {
+        legend: {
+          position: 'top',  // Set to 'top' to move the legend to the top
+          align: 'end',     // Align the legend to the right
+          labels: {
+            font: {
+              size: 8, // Make the labels smaller
+            },
+          },
+        },
+      },
+    };
+  
     return (
       <Card className="shadow-sm" style={{ backgroundColor: "#F4F9F9", height: '100%', textAlign: 'center' }}>
         <Card.Body>
           <h5 style={{ fontWeight: "bold" }}>Registered Participants</h5>
-          <Pie data={chartData} />
+          <Pie data={chartData} options={chartOptions} />
         </Card.Body>
       </Card>
     );
@@ -222,11 +236,25 @@ export default function Dashboard() {
       ],
     };
 
+    const chartOptions = {
+      plugins: {
+        legend: {
+          position: 'top',  // Set to 'top' to move the legend to the top
+          align: 'end',     // Align the legend to the right
+          labels: {
+            font: {
+              size: 8, // Make the labels smaller
+            },
+          },
+        },
+      },
+    };
+
     return (
       <Card className="shadow-sm" style={{ backgroundColor: "#F4F9F9", height: '100%', textAlign: 'center' }}>
         <Card.Body>
           <h5 style={{ fontWeight: "bold" }}>Check-In Participants</h5>
-          <Pie data={chartData} />
+          <Pie data={chartData} options={chartOptions}/>
         </Card.Body>
       </Card>
     );

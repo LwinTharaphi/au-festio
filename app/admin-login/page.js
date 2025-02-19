@@ -22,7 +22,7 @@ export default function AdminLogin() {
         if (result.error) {
             setError(result.error);
         } else {
-            router.push("/admin-dashboard");
+            router.push("/event-organizers");
         }
     };
 
