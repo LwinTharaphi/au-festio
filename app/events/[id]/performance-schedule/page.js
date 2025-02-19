@@ -1,13 +1,16 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Container, Row, Col, Table, Button, Alert, Form, Dropdown, Spinner, Breadcrumb } from "react-bootstrap";
+import { Container, Row, Col, Table, Button, Alert, Form, Dropdown, Spinner, Breadcrumb, Modal } from "react-bootstrap";
 import { FaTrash, FaEdit } from "react-icons/fa";
 import Sidebar from "../../../components/Sidebar";
 import "../../../components/Sidebar.css";
 import moment from 'moment';
 import { useSession } from 'next-auth/react';
 import { set } from "mongoose";
+import {
+  Box,Typography
+} from '@mui/material';
 
 
 export default function EventPerformancesPage() {
@@ -29,6 +32,9 @@ export default function EventPerformancesPage() {
   const [editPerformanceId, setEditPerformanceId] = useState(null);
   const [startTime, setStartTime] = useState("08:00"); // Default time
   const [endTime, setEndTime] = useState("09:00"); // Default time
+
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [performanceToDeleteIndex, setPerformanceToDeleteIndex] = useState(null);
 
   // Fetch event details and performances for the event
   useEffect(() => {
@@ -101,6 +107,13 @@ export default function EventPerformancesPage() {
     }
 
   }, [id, , router, session, status]);
+
+  const confirmDelete = () => {
+    // console.log("deleted index",eventToDeleteIndex)
+    // setEventToDeleteIndex(index);
+    setDeleteModalOpen(true); // Open the delete confirmation modal
+    // setAnchorEl(null); // Close the menu
+  };
 
   // Handle form submission to add or update performance
   const handleSubmit = async (e) => {
@@ -361,7 +374,7 @@ export default function EventPerformancesPage() {
                                 />
                                 <FaTrash
                                   style={{ cursor: "pointer", color: "red" }}
-                                  onClick={() => handleDelete(performance._id)}
+                                  onClick={() => {confirmDelete(); setPerformanceToDeleteIndex(performance._id)}}
                                 />
                               </div>
                             </td>
@@ -375,6 +388,79 @@ export default function EventPerformancesPage() {
                       )}
                     </tbody>
                   </Table>
+
+                  <Modal show={deleteModalOpen} onHide={() => setDeleteModalOpen(false)}>
+                    <Modal.Header closeButton>
+                      <Modal.Title>Confirm Delete</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                      Are you sure you want to delete this performance? This action cannot be undone.
+                    </Modal.Body>
+                    <Modal.Footer>
+                      <Button variant="outline-primary" onClick={() => { setPerformanceToDeleteIndex(''); setDeleteModalOpen(false); }}>
+                        Cancel
+                      </Button>
+                      <Button
+                        variant="danger"
+                        onClick={() => {
+                          handleDelete(performanceToDeleteIndex);
+                          setDeleteModalOpen(false);
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    </Modal.Footer>
+                  </Modal>
+
+                  {/* <Modal
+                  open={deleteModalOpen}
+                  onClose={() => {
+                    // setEventToDeleteIndex('')
+                    setDeleteModalOpen(false)
+                  }}
+                  aria-labelledby="delete-confirmation-title"
+                  aria-describedby="delete-confirmation-description"
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      bgcolor: "background.paper",
+                      borderRadius: 2,
+                      boxShadow: 24,
+                      p: 4,
+                      width: "90%",
+                      maxWidth: "400px",
+                      textAlign: "center",
+                    }}
+                  >
+                    <Typography id="delete-confirmation-title" variant="h6" gutterBottom>
+                      Confirm Delete
+                    </Typography>
+                    <Typography id="delete-confirmation-description" variant="body1" gutterBottom>
+                      Are you sure you want to delete this performance? This action cannot be undone.
+                    </Typography>
+                    <Box sx={{ display: "flex", justifyContent: "space-around", marginTop: 3 }}>
+                      <Button variant="outlined" color="primary" onClick={() => { setPerformanceToDeleteIndex('');setDeleteModalOpen(false) }}>
+                        Cancel
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="error"
+                        onClick={() => {
+                          handleDelete(performanceToDeleteIndex);
+                          setDeleteModalOpen(false);
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    </Box>
+                  </Box>
+                </Modal> */}
+
                 </>
               )}
             </Container>
