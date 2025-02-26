@@ -100,7 +100,7 @@ export const NotificationProvider = ({ children }) => {
       {status === "authenticated" && session.user.role === "organizer" && notifications.length>0 &&(
         <ToastContainer position="bottom-end" className="p-3" style={{ position: 'fixed', bottom: 0, right: 0, zIndex: 1050 }}>
           {notifications.map((notification) => (
-            <Toast key={notification.notificationId} onClose={() => removeNotification(notification.notificationId)} delay={5000}>
+            <Toast key={notification.notificationId} onClose={() => removeNotification(notification.notificationId)} autohide delay={5000}>
               <Toast.Header closeButton={true}>
                 <strong className="me-auto">{notification.title}</strong>
                 <small>{new Date(notification.sentAt).toLocaleString()}</small>
