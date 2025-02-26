@@ -1,7 +1,6 @@
 import { createContext, useState, useEffect, useContext } from "react";
 import { useSession } from "next-auth/react";
 import { ToastContainer, Toast } from "react-bootstrap";
-import { set } from "mongoose";
 
 const NotificationContext = createContext();
 
@@ -61,6 +60,7 @@ export const NotificationProvider = ({ children }) => {
               return prev;
             });
           };
+          console.log("Notification", eventSource);
       
           eventSource.onerror = () => {
             console.error("SSE connection lost, attempting to reconnect...");
@@ -97,17 +97,19 @@ export const NotificationProvider = ({ children }) => {
   return (
     <NotificationContext.Provider value={{ notifications, setNotifications, unreadCount }}>
       {children}
-      <ToastContainer position="bottom-end" className="p-3" style={{ position: 'fixed', bottom: 0, right: 0, zIndex: 1050 }}>
-        {notifications.map((notification) => (
-          <Toast key={notification.notificationId} onClose={() => removeNotification(notification.notificationId)} delay={5000}>
-            <Toast.Header closeButton={true}>
-              <strong className="me-auto">{notification.title}</strong>
-              <small>{new Date(notification.sentAt).toLocaleString()}</small>
-            </Toast.Header>
-            <Toast.Body>{notification.body}</Toast.Body>
-          </Toast>
-        ))}
-      </ToastContainer>
+      {status === "authenticated" && session.user.role === "organizer" && notifications.length>0 &&(
+        <ToastContainer position="bottom-end" className="p-3" style={{ position: 'fixed', bottom: 0, right: 0, zIndex: 1050 }}>
+          {notifications.map((notification) => (
+            <Toast key={notification.notificationId} onClose={() => removeNotification(notification.notificationId)} delay={5000}>
+              <Toast.Header closeButton={true}>
+                <strong className="me-auto">{notification.title}</strong>
+                <small>{new Date(notification.sentAt).toLocaleString()}</small>
+              </Toast.Header>
+              <Toast.Body>{notification.body}</Toast.Body>
+            </Toast>
+          ))}
+        </ToastContainer>
+      )}
     </NotificationContext.Provider>
   );
 };

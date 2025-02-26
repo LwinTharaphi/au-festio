@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthPorvider } from "./Provider";
 import Head from 'next/head';
 import { NotificationProvider } from "./NotificationProvider";
+import AuthenticatedLayout from "./AuthenticatedLayout";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -28,9 +29,12 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthPorvider>
-          <NotificationProvider>
+          {/* <NotificationProvider>
             {children}
-          </NotificationProvider>
+          </NotificationProvider> */}
+          <AuthenticatedLayout>
+            {children}
+          </AuthenticatedLayout>
         </AuthPorvider>
       </body>
     </html>
