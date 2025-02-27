@@ -29,9 +29,6 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthPorvider>
-          {/* <NotificationProvider>
-            {children}
-          </NotificationProvider> */}
           <AuthenticatedLayout>
             {children}
           </AuthenticatedLayout>

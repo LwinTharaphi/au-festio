@@ -1,8 +1,33 @@
 "use client";
 import { useRouter } from 'next/navigation';
+import { useSession } from "next-auth/react";
+import { useEffect } from "react";
 
 export default function Home() {
+    const { data: session, status } = useSession();
     const router = useRouter();
+    useEffect(() => {
+        console.log("Status: ", status);
+        console.log("Session: ", session);
+        if (status === "loading") return;  // Don't redirect while loading
+        if (!session) {
+            router.push('/')
+            return;
+        }
+        if (status === 'unauthenticated' || session?.user?.role !== "organizer" || session?.user?.role !== "admin") {
+            router.push('/');
+        }
+        // If user is authenticated and has the correct role
+        if (status === 'authenticated') {
+            if (session?.user?.role === "organizer") {
+                const userId = session.user.id;
+                router.push(`/organizers/${userId}/general-dashboard`);
+            } else if (session?.user?.role === "admin") {
+                router.push('/admin-dashboard');
+            }
+        }
+      }, [status, router, session]);
+    
 
     return (
         <div style={styles.pageContainer}>
