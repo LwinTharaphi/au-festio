@@ -34,6 +34,9 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (status === "loading") return;  // Don't redirect while loading
+    if (!session) {
+      router.push('/')
+    }
     if (status === 'unauthenticated' || session?.user?.role !== "organizer") {
       router.push('/');
     }

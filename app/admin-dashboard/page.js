@@ -6,13 +6,14 @@ import { Container, Row, Col, Button, Card, Dropdown, DropdownButton, Form } fro
 import { useSession } from 'next-auth/react';
 import { Spinner } from 'reactstrap';
 import { BsPeopleFill, BsShop, BsCheckCircle, BsStarFill } from "react-icons/bs";
-import { Bar } from "react-chartjs-2";
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, SubTitle } from "chart.js";
+import { Bar, Pie } from "react-chartjs-2";
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, SubTitle, ArcElement } from "chart.js";
 // Register the components
 ChartJS.register(
   CategoryScale,
   LinearScale,
   BarElement,
+  ArcElement,
   Title,
   Tooltip,
   Legend,
@@ -138,6 +139,137 @@ export default function AdminDashboard() {
     console.log("Staff Chart Data:", staffChartData);
   };
 
+  const PieChartCard = ({ data }) => {
+      if (!data || (data.paidEvents === 0 && data.freeEvents === 0)) {
+        return (
+          <Card className="text-center shadow-sm" style={{ backgroundColor: "#F0F4F8", padding: "20px" }}>
+            <h5 style={{ fontWeight: "bold" }}>Free and Paid Events</h5>
+            <p>No events created yet.</p>
+          </Card>
+        );
+      }
+  
+      const chartData = {
+        labels: ['Paid Events', 'Free Events'],
+        datasets: [
+          {
+            data: [data.paidEvents, data.freeEvents],
+            backgroundColor: ['#B8D8E3', '#F6A9B8'], // Colors for paid and free events
+            borderColor: 'white',
+            borderWidth: 1,
+          },
+        ],
+      };
+  
+      return (
+        <Card className="text-center shadow-sm" style={{ backgroundColor: "#F0F4F8", padding: "20px" }}>
+          <h5 style={{ fontWeight: "bold" }}>Free and Paid Events</h5>
+          <Pie data={chartData} />
+        </Card>
+      );
+  };
+
+  const StudentRegistrationPieChart = ({ events }) => {
+      if (!events || events.length === 0 || events.every(event => event.studentsRegistered === 0)) {
+        return (
+          <Card className="shadow-sm" style={{ backgroundColor: "#F4F9F9", height: '100%', textAlign: 'center' }}>
+            <Card.Body>
+              <h5 style={{ fontWeight: "bold" }}>Registered Participants</h5>
+              <p>No participants have registered yet.</p>
+            </Card.Body>
+          </Card>
+        );
+      }
+      
+      const eventNames = events.map(event => event.eventName);
+      const studentsRegistered = events.map(event => event.studentsRegistered);
+    
+      const chartData = {
+        labels: eventNames,
+        datasets: [
+          {
+            data: studentsRegistered,
+            backgroundColor: ['#B8D8E3', '#F6A9B8', '#F9E2A6', '#A4D9D2', '#F8A8A2'],
+            hoverBackgroundColor: ['#B8D8E3', '#F6A9B8', '#F9E2A6', '#A4D9D2', '#F8A8A2'], // Hover colors
+          },
+        ],
+      };
+    
+      const chartOptions = {
+        plugins: {
+          legend: {
+            position: 'top',  // Set to 'top' to move the legend to the top
+            align: 'end',     // Align the legend to the right
+            labels: {
+              font: {
+                size: 8, // Make the labels smaller
+              },
+            },
+          },
+        },
+      };
+    
+      return (
+        <Card className="shadow-sm" style={{ backgroundColor: "#F4F9F9", height: '100%', textAlign: 'center' }}>
+          <Card.Body>
+            <h5 style={{ fontWeight: "bold" }}>Registered Participants</h5>
+            <Pie data={chartData} options={chartOptions} />
+          </Card.Body>
+        </Card>
+      );
+  };
+  
+  
+  const CheckInPieChart = ({ events }) => {
+    if (!events || events.length === 0 || events.every(event => event.studentsCheckIn === 0)) {
+      return (
+        <Card className="shadow-sm" style={{ backgroundColor: "#F4F9F9", height: '100%', textAlign: 'center' }}>
+          <Card.Body>
+            <h5 style={{ fontWeight: "bold" }}>Check-In Participants</h5>
+            <p>No participants have checked in yet.</p>
+          </Card.Body>
+        </Card>
+      );
+    }
+
+    const eventNames = events.map(event => event.eventName);
+    const studentsCheckIn = events.map(event => event.studentsCheckIn);
+
+    const chartData = {
+      labels: eventNames,
+      datasets: [
+        {
+          data: studentsCheckIn,
+          backgroundColor: ['#B8D8E3', '#F6A9B8', '#F9E2A6', '#A4D9D2', '#F8A8A2'], // Custom colors for each event
+          hoverBackgroundColor: ['#B8D8E3', '#F6A9B8', '#F9E2A6', '#A4D9D2', '#F8A8A2'], // Hover colors
+        },
+      ],
+    };
+
+    const chartOptions = {
+      plugins: {
+        legend: {
+          position: 'top',  // Set to 'top' to move the legend to the top
+          align: 'end',     // Align the legend to the right
+          labels: {
+            font: {
+              size: 8, // Make the labels smaller
+            },
+          },
+        },
+      },
+    };
+
+    return (
+      <Card className="shadow-sm" style={{ backgroundColor: "#F4F9F9", height: '100%', textAlign: 'center' }}>
+        <Card.Body>
+          <h5 style={{ fontWeight: "bold" }}>Check-In Participants</h5>
+          <Pie data={chartData} options={chartOptions}/>
+        </Card.Body>
+      </Card>
+    );
+  };
+
   if (status === 'loading') {
     return (
       <div
@@ -203,19 +335,6 @@ export default function AdminDashboard() {
                       <Card.Body>
                         <BsPeopleFill size={30} className="mb-2 text-primary" />
                         <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
-                          Total Events
-                        </Card.Title>
-                        <Card.Text style={{ fontSize: "1.5rem" }}>
-                          {data.totalEvents}
-                        </Card.Text>
-                      </Card.Body>
-                    </Card>
-                  </Col>
-                  <Col md={4}>
-                    <Card className="text-center shadow-sm">
-                      <Card.Body>
-                        <BsShop size={30} className="mb-2 text-success" />
-                        <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
                           Paid Events
                         </Card.Title>
                         <Card.Text style={{ fontSize: "1.5rem" }}>
@@ -227,40 +346,12 @@ export default function AdminDashboard() {
                   <Col md={4}>
                     <Card className="text-center shadow-sm">
                       <Card.Body>
-                        <BsCheckCircle size={30} className="mb-2 text-info" />
+                        <BsShop size={30} className="mb-2 text-success" />
                         <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
                           Free Events
                         </Card.Title>
                         <Card.Text style={{ fontSize: "1.5rem" }}>
                           {data.freeEvents}
-                        </Card.Text>
-                      </Card.Body>
-                    </Card>
-                  </Col>
-                </Row>
-                <Row className="mb-4 g-4">
-                  <Col md={4}>
-                    <Card className="text-center shadow-sm">
-                      <Card.Body>
-                        <BsPeopleFill size={30} className="mb-2 text-primary" />
-                        <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
-                          Upcoming Events
-                        </Card.Title>
-                        <Card.Text style={{ fontSize: "1.5rem" }}>
-                          {data.upcomingEvent}
-                        </Card.Text>
-                      </Card.Body>
-                    </Card>
-                  </Col>
-                  <Col md={4}>
-                    <Card className="text-center shadow-sm">
-                      <Card.Body>
-                        <BsShop size={30} className="mb-2 text-success" />
-                        <Card.Title style={{ fontSize: "1rem", fontWeight: "bold" }}>
-                          Ongoing Events
-                        </Card.Title>
-                        <Card.Text style={{ fontSize: "1.5rem" }}>
-                          {data.ongoingEvent}
                         </Card.Text>
                       </Card.Body>
                     </Card>
@@ -280,7 +371,7 @@ export default function AdminDashboard() {
                   </Col>
                 </Row>
                 {/* Charts Section */}
-                <Row className="g-4">
+                <Row className="g-4 mb-4">
                   <Col md={6}>
                     <Card className="shadow-sm">
                       <Card.Body>
@@ -382,6 +473,17 @@ export default function AdminDashboard() {
                         </div>
                       </Card.Body>
                     </Card>
+                  </Col>
+                </Row>
+                <Row className="mb-4 g-4">
+                  <Col md={4}>
+                    <PieChartCard data={{ paidEvents: data.paidEvents, freeEvents: data.freeEvents }} />
+                  </Col>
+                  <Col md={4}>
+                    <StudentRegistrationPieChart events={events} />
+                  </Col>
+                  <Col md={4}>
+                    <CheckInPieChart events={events} />
                   </Col>
                 </Row>
               </>
