@@ -43,7 +43,7 @@ export default function OrganizerHistoryPage() {
           const today = new Date();
           const filteredEvents = data.events.filter((event) => {
             const eventDate = new Date(event.eventDate); // Parse eventDate
-            return eventDate < today; // Completed if eventDate is in the past
+            return eventDate < today.getDate()+1; // Completed if eventDate is in the past
           });
 
           setCompletedEvents(filteredEvents); // Update state with filtered events
