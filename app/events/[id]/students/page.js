@@ -162,7 +162,7 @@ export default function RegisteredStudentsPage() {
   //   }
   // };
 
-  const handleRowClick = (student) => {
+  const handlePaymentClick = (student) => {
     setSelectedStudent(student);
     setShowModal(true);
   };
@@ -392,8 +392,8 @@ export default function RegisteredStudentsPage() {
                         filteredStudents.map((student) => (
                           <tr
                             key={student._id}
-                            onClick={isPaid ? () => handleRowClick(student) : undefined} // Only attach onClick for paid events
-                            style={{ cursor: isPaid ? "pointer" : "default" }} // Show pointer cursor only for paid events
+                            // onClick={isPaid ? () => handleRowClick(student) : undefined} // Only attach onClick for paid events
+                            // style={{ cursor: isPaid ? "pointer" : "default" }} // Show pointer cursor only for paid events
                           >
                             <td>{student.sid}</td>
                             <td>{student.name}</td>
@@ -402,7 +402,7 @@ export default function RegisteredStudentsPage() {
                             <td>{student.phone}</td>
                             {/* Conditionally render Payment and Refund cells */}
                             {isPaid && (
-                              <td>
+                              <td onClick={() => handlePaymentClick(student)} style={{ cursor: "pointer" }}>
                                 {student.status === "not viewed" ? (
                                   <FaEyeSlash style={{ fontSize: "15", color: "gray" }} />
                                 ) : student.status === "paid" ? (
@@ -415,7 +415,7 @@ export default function RegisteredStudentsPage() {
                               </td>
                             )}
                             {isPaid && (
-                              <td>
+                              <td onClick={() => handleShowRefundModal(student)} style={{ cursor: "pointer" }}>
                                 {student.refundStatus === "refunded" ? (
                                   <FaRegCheckCircle style={{ fontSize: "15", color: "green" }} />
                                 ) : student.refundStatus === "requested" ? (
@@ -520,7 +520,13 @@ export default function RegisteredStudentsPage() {
                       <strong>Refund Percentage:</strong> {refundPercentage}% which is {price * (refundPercentage / 100)} THB
                     </p>
                   )}
-                  <p>Are you sure you want to process the refund for this student?</p>
+                  {selectedStudent.refundStatus === "requested" ? (
+                    <p>Are you sure you want to process the refund for this student?</p>
+                  ) : selectedStudent.refundStatus === "refunded" ? (
+                    <p>This student has already been refunded.</p>
+                  ) : (
+                    <p>No refund has been requested for this student.</p>
+                  )}
                   
                 </div>
 
@@ -547,9 +553,11 @@ export default function RegisteredStudentsPage() {
               <Button variant="secondary" onClick={() => setShowRefundModal(false)}>
                 Close
               </Button>
-              <Button variant="danger" onClick={handleRefundRequest}>
-                Confirm Refund
-              </Button>
+              {selectedStudent.refundStatus === "requested" && (
+                <Button variant="danger" onClick={handleRefundRequest}>
+                  Confirm Refund
+                </Button>
+              )}
             </Modal.Footer>
           </Modal>
         )}

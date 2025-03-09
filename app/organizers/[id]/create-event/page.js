@@ -308,6 +308,29 @@ function EventForm() {
     setSeatAmount('');
   };
 
+  const handleRefund = async (index) => {
+    const userId = session.user.id;
+    const eventId = events[index]._id;
+    try {
+      const response = await fetch(`/api/organizers/${userId}/events/${eventId}/students`);
+      const registrations = await response.json();
+      if (registrations.length > 0) {
+        const refundPromises = registrations.map(async (student) => {
+          const refundResponse = await fetch(`/api/organizers/${userId}/events/${eventId}/students/${student._id}/refund`, {
+            method: 'POST',
+          });
+          if (!refundResponse.ok) {
+            console.error(`Failed to refund student ${student._id}:`, refundResponse.statusText);
+          }
+        });
+        await Promise.all(refundPromises);
+        console.log("Refund process completed");
+      }
+    } catch (error) {
+      console.error("Error fetching registrations:", error);
+    }
+  }
+
   const handleDelete = async (index) => {
     // console.log("deleted index",index)
     const userId = session.user.id;
@@ -928,7 +951,7 @@ function EventForm() {
                     </Typography>
                     {deleteModalContent.showRefundInfo && (
                       <Typography variant="body2" color="textSecondary" gutterBottom>
-                        Users will be notified and the refund process will start.
+                        Users will be notified and the refund process will start. The event will remain active until the refund is completed.
                       </Typography>
                     )}
                     <Box sx={{ display: "flex", justifyContent: "space-around", marginTop: 3 }}>
@@ -937,13 +960,19 @@ function EventForm() {
                       </Button>
                       <Button
                         variant="contained"
-                        color="error"
+                        color={deleteModalContent.showRefundInfo ? "warning" : "error"}
                         onClick={() => {
-                          handleDelete(eventToDeleteIndex);
+                          // handleDelete(eventToDeleteIndex);
+                          if (deleteModalContent.showRefundInfo) {
+                            // console.log("delete event",eventToDeleteIndex)
+                            handleRefund(eventToDeleteIndex);
+                          } else {
+                            handleDelete(eventToDeleteIndex);
+                          }
                           setDeleteModalOpen(false);
                         }}
                       >
-                        Delete
+                        {deleteModalContent.showRefundInfo ? "Start Refund Process" : "Delete Event"}
                       </Button>
                     </Box>
                   </Box>
