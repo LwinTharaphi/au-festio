@@ -418,7 +418,7 @@ export default function RegisteredStudentsPage() {
                               <td onClick={() => handleShowRefundModal(student)} style={{ cursor: "pointer" }}>
                                 {student.refundStatus === "refunded" ? (
                                   <FaRegCheckCircle style={{ fontSize: "15", color: "green" }} />
-                                ) : student.refundStatus === "requested" ? (
+                                ) : (student.refundStatus === "requested" || student.refundStatus == "refund_progress")? (
                                   <span
                                     style={{ color: "blue", textDecoration: "underline", cursor: "pointer" }}
                                     onClick={(e) => {
@@ -426,7 +426,7 @@ export default function RegisteredStudentsPage() {
                                       handleShowRefundModal(student); // Show the refund modal
                                     }}
                                   >
-                                    requested
+                                    {student.refundStatus}
                                   </span>
                                 ) : (
                                   "-"
@@ -524,7 +524,9 @@ export default function RegisteredStudentsPage() {
                     <p>Are you sure you want to process the refund for this student?</p>
                   ) : selectedStudent.refundStatus === "refunded" ? (
                     <p>This student has already been refunded.</p>
-                  ) : (
+                  ) : selectedStudent.refundStatus === "refund_progress"? (
+                    <p>Refund is in progress for this student.</p>
+                  ): (
                     <p>No refund has been requested for this student.</p>
                   )}
                   

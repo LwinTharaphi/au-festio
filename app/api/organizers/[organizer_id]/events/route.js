@@ -170,6 +170,9 @@ export async function POST(req,{ params}) {
       seats,
       phone,
     };
+    if (isPaid) {
+      newEvent.refundStatus = 'none';
+    }
     const event = new Event(newEvent);
     await event.save();
 

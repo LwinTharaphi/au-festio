@@ -312,23 +312,20 @@ function EventForm() {
     const userId = session.user.id;
     const eventId = events[index]._id;
     try {
-      const response = await fetch(`/api/organizers/${userId}/events/${eventId}/students`);
-      const registrations = await response.json();
-      if (registrations.length > 0) {
-        const refundPromises = registrations.map(async (student) => {
-          const refundResponse = await fetch(`/api/organizers/${userId}/events/${eventId}/students/${student._id}/refund`, {
-            method: 'POST',
-          });
-          if (!refundResponse.ok) {
-            console.error(`Failed to refund student ${student._id}:`, refundResponse.statusText);
-          }
-        });
-        await Promise.all(refundPromises);
-        console.log("Refund process completed");
+      const response = await fetch(`/api/organizers/${userId}/events/${eventId}/refund`, {
+        method: 'POST',
+      });
+      if (response.ok) {
+        console.log('Refund process started successfully');
+        refreshEvents();
+      } else {
+        console.error('Failed to start refund process:', response.statusText);
       }
-    } catch (error) {
-      console.error("Error fetching registrations:", error);
+    } catch(err) {
+      console.error('Error starting refund process:', err);
     }
+    refreshEvents();
+    setAnchorEl(null);
   }
 
   const handleDelete = async (index) => {

@@ -7,7 +7,7 @@ const StudentSchema = new mongoose.Schema({
   email: { type: String, required: true },
   faculty: { type: String, required: true },
   phone: { type: String, required: true },
-  price: { type: Number, required: true },
+  price: { type: Number},
   eventId: { type: mongoose.Schema.Types.ObjectId, ref: 'Event', required: true },
   status: { 
     type: String, 
@@ -16,7 +16,7 @@ const StudentSchema = new mongoose.Schema({
   },
   refundStatus: { 
     type: String, 
-    enum: ['none', 'requested', 'refunded'], 
+    enum: ['none', 'requested','refund_progress', 'refunded'], 
     default: 'none',
     required: true,
   },

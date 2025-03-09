@@ -34,6 +34,7 @@ const EventSchema = new mongoose.Schema({
     type: String, 
     enum: ['none', 'refund_in_progress', 'refunded'], 
     default: 'none', 
+    required: function () { return this.isPaid; },
   },
 } ,{ timestamps: true});
 
