@@ -52,6 +52,11 @@ function EventForm() {
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [eventToDeleteIndex, setEventToDeleteIndex] = useState(null);
+  const [deleteModalContent, setDeleteModalContent] = useState({
+    title: "Confirm Delete",
+    description: "Are you sure you want to delete this event? This action cannot be undone.",
+    showRefundInfo: false,
+  });
 
   const [refresh, setRefresh] = useState(false); // Trigger re-fetch
 
@@ -363,11 +368,35 @@ function EventForm() {
     setShowModal(true);
   };
 
-  const confirmDelete = () => {
-    // console.log("deleted index",eventToDeleteIndex)
-    // setEventToDeleteIndex(index);
-    setDeleteModalOpen(true); // Open the delete confirmation modal
-    setAnchorEl(null); // Close the menu
+  const confirmDelete = async (index) => {
+    const eventToDelete = events[index];
+    const userId = session.user.id;
+    const eventId = eventToDelete._id;
+  
+    try {
+      const response = await fetch(`/api/organizers/${userId}/events/${eventId}/students`);
+      const registrations = await response.json();
+  
+      if (eventToDelete.isPaid && registrations.length > 0) {
+        setDeleteModalContent({
+          title: "Confirm Delete",
+          description: "This event has registered students. Users will be notified and the refund process will start. Are you sure you want to delete this event?",
+          showRefundInfo: true,
+        });
+      } else {
+        setDeleteModalContent({
+          title: "Confirm Delete",
+          description: "Are you sure you want to delete this event? This action cannot be undone.",
+          showRefundInfo: false,
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching registrations:", error);
+    }
+  
+    setEventToDeleteIndex(index);
+    setDeleteModalOpen(true);
+    setAnchorEl(null);
   };
 
   const handleMenuClick = (event, index) => {
@@ -539,20 +568,20 @@ function EventForm() {
                                         }}
                                       >
                                         <MenuItem
-                                          onClick={() => {
-                                            // console.log("delete confirm",eventIndex)
-                                            confirmDelete();
-                                          }}
-                                        >
-                                          Delete
-                                        </MenuItem>
-                                        <MenuItem
                                           onClick={(e) => {
                                             // console.log("clicked edit",event._index)
                                             handleEdit();
                                           }}
                                         >
                                           Edit
+                                        </MenuItem>
+                                        <MenuItem
+                                          onClick={() => {
+                                            console.log("delete confirm",event)
+                                            confirmDelete(eventToDeleteIndex);
+                                          }}
+                                        >
+                                          Delete
                                         </MenuItem>
                                       </Menu>
                                     </Card>
@@ -892,11 +921,16 @@ function EventForm() {
                     }}
                   >
                     <Typography id="delete-confirmation-title" variant="h6" gutterBottom>
-                      Confirm Delete
+                      {deleteModalContent.title}
                     </Typography>
                     <Typography id="delete-confirmation-description" variant="body1" gutterBottom>
-                      Are you sure you want to delete this event? This action cannot be undone.
+                      {deleteModalContent.description}
                     </Typography>
+                    {deleteModalContent.showRefundInfo && (
+                      <Typography variant="body2" color="textSecondary" gutterBottom>
+                        Users will be notified and the refund process will start.
+                      </Typography>
+                    )}
                     <Box sx={{ display: "flex", justifyContent: "space-around", marginTop: 3 }}>
                       <Button variant="outlined" color="primary" onClick={() => { setEventToDeleteIndex(''); setDeleteModalOpen(false) }}>
                         Cancel
