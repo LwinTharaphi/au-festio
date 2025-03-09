@@ -7,6 +7,7 @@ const StudentSchema = new mongoose.Schema({
   email: { type: String, required: true },
   faculty: { type: String, required: true },
   phone: { type: String, required: true },
+  price: { type: Number, required: true },
   eventId: { type: mongoose.Schema.Types.ObjectId, ref: 'Event', required: true },
   status: { 
     type: String, 

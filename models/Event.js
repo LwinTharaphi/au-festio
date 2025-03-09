@@ -30,6 +30,11 @@ const EventSchema = new mongoose.Schema({
   latitude: {type: String},
   longitude: {type: String},
   seats: { type: Number, required: false},
+  refundStatus: { 
+    type: String, 
+    enum: ['none', 'refund_in_progress', 'refunded'], 
+    default: 'none', 
+  },
 } ,{ timestamps: true});
 
 export default mongoose.models.Event || mongoose.model("Event", EventSchema);

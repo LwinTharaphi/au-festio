@@ -515,7 +515,7 @@ export default function RegisteredStudentsPage() {
                     <strong>Name:</strong> {selectedStudent.name}
                   </p>
                   {/* Display the refund percentage */}
-                  {refundPercentage !== undefined && (
+                  {refundPercentage !== undefined &&  selectedStudent.refundStatus === "requested" &&(
                     <p>
                       <strong>Refund Percentage:</strong> {refundPercentage}% which is {price * (refundPercentage / 100)} THB
                     </p>
@@ -677,6 +677,7 @@ export default function RegisteredStudentsPage() {
                 <div style={{ flex: "1" }}>
                   <p><strong>ID:</strong> {selectedStudent.sid}</p>
                   <p><strong>Name:</strong> {selectedStudent.name}</p>
+                  <p><strong>Price:</strong>{selectedStudent.price}</p>
                 </div>
 
                 {/* Right Section: Payment Screenshot */}
