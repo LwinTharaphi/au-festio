@@ -40,130 +40,142 @@ export async function PUT(request, { params }) {
   const { organizer_id, id } = await params;
 
   try {
-    const formData = await request.formData();
-    const eventName = formData.get("eventName");
-    const registerationDate = formData.get("registerationDate");
-    const eventDate = formData.get("eventDate");
-    const startTime = formData.get("startTime");
-    const endTime = formData.get("endTime");
-    const location = formData.get("location");
-    const isPaid = formData.get("isPaid") === "true";
-    const phone = isPaid? formData.get("phone"): null;
-    const price = isPaid ? parseFloat(formData.get('price')) : null; // Parse price only if paid
-    const discount = isPaid && formData.has('discount') 
-      ? parseFloat(formData.get('discount')) 
-      : 0;
-    // const isEarlyBirdValidFlag = isPaid && formData.has('discount') && isEarlyBirdValid(registerationDate);
-    // const discountPrice = isEarlyBirdValidFlag ? price - (price * discount)/100 : 0;
-    // const amount = isEarlyBirdValidFlag ? discountPrice : price;
-    // console.log('Amount:', amount);
-    let refundPolicy = [];
-    if (isPaid && formData.has("refundPolicy")) {
-      try {
-        refundPolicy = JSON.parse(formData.get("refundPolicy"));
-        console.log("Parsed refundPolicy:", refundPolicy);
-      } catch (error) {
-        console.error("Failed to parse refundPolicy:", error);
-        refundPolicy = [];
+    const contentType = request.headers.get("content-type");
+
+    if (contentType && contentType.includes("application/json")) {
+      const body = await request.json();
+      if (body.refundStatus) {
+        const existingEvent = await Event.findById(id);
+        existingEvent.refundStatus = body.refundStatus;
+        await existingEvent.save();
+        console.log("Refund status updated:", existingEvent.refundStatus);
       }
-    }
-    const venueName = formData.get("venueName");
-    const latitude = formData.get("latitude");
-    const longitude = formData.get("longitude");
-
-    const poster = formData.get("poster");
-    const posterName = formData.get("posterName");
-    const seats = formData.get('seats')? Number(formData.get('seats')): undefined;
-
-    // const qrData = isPaid ? generatePayload(phone, { amount: amount }): null;
-    // const qrSvg = isPaid
-    //   ? await qrcode.toString(qrData, { type: "svg", color: { dark: "#000", light: "#fff" } })
-    //   : null;
-    // // Convert the SVG string into a Buffer (file-like object)
-    // const qrBuffer = qrSvg ? Buffer.from(qrSvg) : null;
-
-    // // Upload the QR code if it was generated
-    // const qrPath = qrBuffer ? await uploadFile(qrBuffer, "qrcodes") : null;
-    const existingEvent = await Event.findById(id);
-    // Track changes
-    let changes = [];
-    if (eventName !== existingEvent.eventName) changes.push(`Event name changed to ${eventName}`);
-    if (eventDate !== existingEvent.eventDate) changes.push(`Event date changed to ${eventDate}`);
-    if (startTime !== existingEvent.startTime) changes.push(`Start time changed to ${startTime}`);
-    if (endTime !== existingEvent.endTime) changes.push(`End time changed to ${endTime}`);
-    if (location !== existingEvent.location) changes.push(`Location changed to ${location}`);
-    if (isPaid !== existingEvent.isPaid) changes.push(`Payment status changed`);
-    if (price !== existingEvent.price) changes.push(`Ticket price changed to ${price}`);
-    if (discount !== existingEvent.discount) changes.push(`Discount changed to ${discount}%`);
-    if (venueName !== existingEvent.venueName) changes.push(`Venue name changed to ${venueName}`);
-    if (latitude !== existingEvent.latitude || longitude !== existingEvent.longitude) 
-      changes.push(`Venue GPS location updated`);
-    if (seats !== existingEvent.seats) changes.push(`Total seats changed to ${seats}`);
-    if (poster) changes.push(`New event poster uploaded`);
-    // if (phone !== existingEvent.phone) changes.push(`Contact phone number updated`);
-    const updatedData = {
-      eventName,
-      registerationDate,
-      eventDate,
-      startTime,
-      endTime,
-      location,
-      isPaid,
-      price,
-      discount,
-      refundPolicy: Array.isArray(refundPolicy) ? refundPolicy : [],
-      venueName,
-      latitude,
-      longitude,
-      seats,
-      posterName,
-      // qrName: qrPath ? path.basename(qrPath) : null,
-      // qr: qrPath ? qrPath : null,
-      phone,
-    };
-
-    if (poster) {
-      if(existingEvent.poster) {
-        await deleteFile(existingEvent.poster);
-      }
-      updatedData.poster = await uploadFile(poster, "posters");
-    }
-
-    // Update the event with the new data
-    const updatedEvent = await Event.findByIdAndUpdate(id, updatedData, { new: true });
-
-    if (!updatedEvent) {
-      return new Response(JSON.stringify({ error: "Event not found" }), { status: 404 });
-    }
-
-    // Send notifications to students and staff
-    if (changes.length > 0) {
-      const students = await Student.find({ eventId: id });
-      const expo = new Expo();
-      const messages = [];
-
-      const notificationBody = `The event "${eventName}" has been updated:\n- ${changes.join("\n- ")}`;
-
-      students.forEach(student => {
-        if (Expo.isExpoPushToken(student.expoPushToken)) {
-          messages.push({
-            to: student.expoPushToken,
-            sound: 'default',
-            title: "Event Updated",
-            body: notificationBody,
-            data: { eventId: id, type: "event-updated", organizerId: existingEvent.organizer },
-          });
-        }
-      });
-
-      const chunks = expo.chunkPushNotifications(messages);
-      for (const chunk of chunks) {
+    } else {
+      const formData = await request.formData();
+      const eventName = formData.get("eventName");
+      const registerationDate = formData.get("registerationDate");
+      const eventDate = formData.get("eventDate");
+      const startTime = formData.get("startTime");
+      const endTime = formData.get("endTime");
+      const location = formData.get("location");
+      const isPaid = formData.get("isPaid") === "true";
+      const phone = isPaid? formData.get("phone"): null;
+      const price = isPaid ? parseFloat(formData.get('price')) : null; // Parse price only if paid
+      const discount = isPaid && formData.has('discount') 
+        ? parseFloat(formData.get('discount')) 
+        : 0;
+      // const isEarlyBirdValidFlag = isPaid && formData.has('discount') && isEarlyBirdValid(registerationDate);
+      // const discountPrice = isEarlyBirdValidFlag ? price - (price * discount)/100 : 0;
+      // const amount = isEarlyBirdValidFlag ? discountPrice : price;
+      // console.log('Amount:', amount);
+      let refundPolicy = [];
+      if (isPaid && formData.has("refundPolicy")) {
         try {
-          await expo.sendPushNotificationsAsync(chunk);
+          refundPolicy = JSON.parse(formData.get("refundPolicy"));
+          console.log("Parsed refundPolicy:", refundPolicy);
         } catch (error) {
-          console.error("Error sending push notification:", error);
+          console.error("Failed to parse refundPolicy:", error);
+          refundPolicy = [];
         }
       }
+      const venueName = formData.get("venueName");
+      const latitude = formData.get("latitude");
+      const longitude = formData.get("longitude");
+
+      const poster = formData.get("poster");
+      const posterName = formData.get("posterName");
+      const seats = formData.get('seats')? Number(formData.get('seats')): undefined;
+
+      // const qrData = isPaid ? generatePayload(phone, { amount: amount }): null;
+      // const qrSvg = isPaid
+      //   ? await qrcode.toString(qrData, { type: "svg", color: { dark: "#000", light: "#fff" } })
+      //   : null;
+      // // Convert the SVG string into a Buffer (file-like object)
+      // const qrBuffer = qrSvg ? Buffer.from(qrSvg) : null;
+
+      // // Upload the QR code if it was generated
+      // const qrPath = qrBuffer ? await uploadFile(qrBuffer, "qrcodes") : null;
+      const existingEvent = await Event.findById(id);
+      // Track changes
+      let changes = [];
+      if (eventName !== existingEvent.eventName) changes.push(`Event name changed to ${eventName}`);
+      if (eventDate !== existingEvent.eventDate) changes.push(`Event date changed to ${eventDate}`);
+      if (startTime !== existingEvent.startTime) changes.push(`Start time changed to ${startTime}`);
+      if (endTime !== existingEvent.endTime) changes.push(`End time changed to ${endTime}`);
+      if (location !== existingEvent.location) changes.push(`Location changed to ${location}`);
+      if (isPaid !== existingEvent.isPaid) changes.push(`Payment status changed`);
+      if (price !== existingEvent.price) changes.push(`Ticket price changed to ${price}`);
+      if (discount !== existingEvent.discount) changes.push(`Discount changed to ${discount}%`);
+      if (venueName !== existingEvent.venueName) changes.push(`Venue name changed to ${venueName}`);
+      if (latitude !== existingEvent.latitude || longitude !== existingEvent.longitude) 
+        changes.push(`Venue GPS location updated`);
+      if (seats !== existingEvent.seats) changes.push(`Total seats changed to ${seats}`);
+      if (poster) changes.push(`New event poster uploaded`);
+      // if (phone !== existingEvent.phone) changes.push(`Contact phone number updated`);
+      const updatedData = {
+        eventName,
+        registerationDate,
+        eventDate,
+        startTime,
+        endTime,
+        location,
+        isPaid,
+        price,
+        discount,
+        refundPolicy: Array.isArray(refundPolicy) ? refundPolicy : [],
+        venueName,
+        latitude,
+        longitude,
+        seats,
+        posterName,
+        // qrName: qrPath ? path.basename(qrPath) : null,
+        // qr: qrPath ? qrPath : null,
+        phone,
+      };
+
+      if (poster) {
+        if(existingEvent.poster) {
+          await deleteFile(existingEvent.poster);
+        }
+        updatedData.poster = await uploadFile(poster, "posters");
+      }
+
+      // Update the event with the new data
+      const updatedEvent = await Event.findByIdAndUpdate(id, updatedData, { new: true });
+
+      if (!updatedEvent) {
+        return new Response(JSON.stringify({ error: "Event not found" }), { status: 404 });
+      }
+      // Send notifications to students and staff
+      if (changes.length > 0) {
+        const students = await Student.find({ eventId: id });
+        const expo = new Expo();
+        const messages = [];
+
+        const notificationBody = `The event "${eventName}" has been updated:\n- ${changes.join("\n- ")}`;
+
+        students.forEach(student => {
+          if (Expo.isExpoPushToken(student.expoPushToken)) {
+            messages.push({
+              to: student.expoPushToken,
+              sound: 'default',
+              title: "Event Updated",
+              body: notificationBody,
+              data: { eventId: id, type: "event-updated", organizerId: existingEvent.organizer },
+            });
+          }
+        });
+
+        const chunks = expo.chunkPushNotifications(messages);
+        for (const chunk of chunks) {
+          try {
+            await expo.sendPushNotificationsAsync(chunk);
+          } catch (error) {
+            console.error("Error sending push notification:", error);
+          }
+        }
+      }
+
     }
 
     return NextResponse.json({ message: "Event updated successfully" });

@@ -5,8 +5,10 @@ import {
   IconButton, Card, CardContent, CardActions,
   CardActionArea, CardMedia,
   Grid, Menu, MenuItem,
-  Fab, Modal
+  Fab, Modal, Divider
 } from '@mui/material';
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import FormField from '../../../components/FormField';
 import CloseIcon from '@mui/icons-material/Close';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -19,6 +21,7 @@ import { useSession } from 'next-auth/react';
 import { Spinner } from 'react-bootstrap';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import { HourglassEmpty } from '@mui/icons-material';
 
 function EventForm() {
   const { data: session, status } = useSession();
@@ -397,7 +400,7 @@ function EventForm() {
       const response = await fetch(`/api/organizers/${userId}/events/${eventId}/students`);
       const registrations = await response.json();
   
-      if (eventToDelete.isPaid && registrations.length > 0) {
+      if (eventToDelete.isPaid && registrations.length > 0 && eventToDelete.refundStatus !== "refunded") {
         setDeleteModalContent({
           title: "Confirm Delete",
           description: "This event has registered students. Users will be notified and the refund process will start. Are you sure you want to delete this event?",
@@ -551,6 +554,12 @@ function EventForm() {
                                       <CardContent>
                                         <Typography sx={{ fontSize: '1rem', textAlign: 'center', fontWeight: 'bold' }}>
                                           {event.eventName}
+                                          {event.refundStatus === 'refund_in_progress' && (
+                                            <HourglassEmptyIcon sx={{ marginLeft: 1, color: 'orange' }} />
+                                          )}
+                                          {event.refundStatus === 'refunded' && (
+                                            <CheckCircleIcon sx={{ marginLeft: 1, color: 'red' }} />
+                                          )}
                                         </Typography>
                                       </CardContent>
                                       {/* Delete Button */}
@@ -574,36 +583,43 @@ function EventForm() {
                                       </Box>
 
                                       {/* Menu with options for delete/edit */}
-                                      <Menu
-                                        anchorEl={anchorEl}
-                                        open={Boolean(anchorEl)}
-                                        onClose={handleCloseMenu}
-                                        anchorOrigin={{
-                                          vertical: "top",
-                                          horizontal: "right",
-                                        }}
-                                        transformOrigin={{
-                                          vertical: "top",
-                                          horizontal: "right",
-                                        }}
-                                      >
-                                        <MenuItem
-                                          onClick={(e) => {
-                                            // console.log("clicked edit",event._index)
-                                            handleEdit();
+                                      {selectedEventIndex === event._index && (
+                                        <Menu
+                                          anchorEl={anchorEl}
+                                          open={Boolean(anchorEl)}
+                                          onClose={handleCloseMenu}
+                                          anchorOrigin={{
+                                            vertical: "top",
+                                            horizontal: "right",
+                                          }}
+                                          transformOrigin={{
+                                            vertical: "top",
+                                            horizontal: "right",
                                           }}
                                         >
-                                          Edit
+                                          <MenuItem
+                                            onClick={(e) => {
+                                              handleEdit();
+                                            }}
+                                          >
+                                           Edit
                                         </MenuItem>
-                                        <MenuItem
-                                          onClick={() => {
-                                            console.log("delete confirm",event)
-                                            confirmDelete(eventToDeleteIndex);
-                                          }}
-                                        >
-                                          Delete
-                                        </MenuItem>
+                                        <Divider />
+                                        {event?.refundStatus === "refund_in_progress" ? (
+                                          <MenuItem disabled>
+                                            Refund in Progress
+                                          </MenuItem>
+                                        ) : (
+                                          <MenuItem
+                                            onClick={() => {
+                                              confirmDelete(eventToDeleteIndex);
+                                            }}
+                                          >
+                                            Delete
+                                          </MenuItem>
+                                        )}
                                       </Menu>
+                                    )}
                                     </Card>
                                     <Typography sx={{ fontSize: '0.8rem', textAlign: 'center' }}>
                                       Registeration Deadline: {event.registerationDate

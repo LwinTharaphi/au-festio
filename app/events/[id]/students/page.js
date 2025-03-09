@@ -60,7 +60,7 @@ export default function RegisteredStudentsPage() {
             setEventName(event.eventName);
             setEventData(event); // Store event data in the state
             setIsPaid(event.isPaid);
-            setPrice(event.price);
+            // setPrice(event.price);
           } catch (err) {
             setError(err.message);
           } finally {
@@ -122,6 +122,7 @@ export default function RegisteredStudentsPage() {
       setRefundPercentage(null); // Set refund percentage to null if refund hasn't been requested
       return;
     }
+    setPrice(selectedStudent.price);
   
     try {
       const response = await fetch(`/api/${studentId}/refund`);
@@ -230,6 +231,21 @@ export default function RegisteredStudentsPage() {
       // Update local state with the latest data
       setStudents(updatedStudents);
       setFilteredStudents(updatedStudents); // If you are using a filtered list
+
+      const allRefunded = updatedStudents.every(student => student.refundStatus === "refunded");
+      if (allRefunded && eventData.refundStatus === "refund_in_progress") {
+        // Close the refund modal if all students have been refunded
+        await fetch (`/api/organizers/${userId}/events/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refundStatus: "refunded" }),
+        });
+        // Update the local event data
+        setEventData(prevEventData => ({
+          ...prevEventData,
+          refundStatus: "refunded",
+        }));
+      }
 
       setShowRefundModal(false);
     } catch (error) {
@@ -526,7 +542,7 @@ export default function RegisteredStudentsPage() {
                     <p>This student has already been refunded.</p>
                   ) : selectedStudent.refundStatus === "refund_progress"? (
                     <p>Refund is in progress for this student.</p>
-                  ): (
+                  ):(
                     <p>No refund has been requested for this student.</p>
                   )}
                   
