@@ -6,7 +6,7 @@ import { Expo } from "expo-server-sdk";
 
 export async function POST(req, { params }) {
   await dbConnect(); // Ensure DB connection
-  const { id } = params; // Extract event ID
+  const { id } = await params; // Extract event ID
 
   try {
     // 1️⃣ Find the event
@@ -44,26 +44,26 @@ export async function POST(req, { params }) {
 
     // 6️⃣ Send notifications
     const expo = new Expo();
-    const messages = students
-      .filter((student) => Expo.isExpoPushToken(student.expoPushToken))
-      .map((student) => ({
-        to: student.expoPushToken,
-        sound: "default",
-        title: "Refund Process Started",
-        body: `The event "${event.eventName}" has been canceled. Refund is in progress.`,
-        data: { eventId: id, type: "event_refund", organizerId: event.organizer, studentId: student._id },
-      }));
-
-    if (messages.length > 0) {
-      const chunks = expo.chunkPushNotifications(messages);
+    const messages = [];
+    const notificationBody = `Refund process started for event: ${event.eventName}`;
+    students.forEach(student => {
+        if (Expo.isExpoPushToken(student.expoPushToken)) {
+          messages.push({
+            to: student.expoPushToken,
+            sound: 'default',
+            title: "Refund Process Started",
+            body: notificationBody,
+            data: { eventId: id, type: "event_refund", organizerId: event.organizer, studentId: student._id },
+          });
+        }
+    });
+    const chunks = expo.chunkPushNotifications(messages);
       for (const chunk of chunks) {
-        console.log("Sending push notification chunk:", chunk);
         try {
           await expo.sendPushNotificationsAsync(chunk);
         } catch (error) {
           console.error("Error sending push notification:", error);
         }
-      }
     }
 
     return NextResponse.json({ message: "Refund process started successfully" });
