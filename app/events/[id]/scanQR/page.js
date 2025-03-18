@@ -19,6 +19,7 @@ export default function ScanQRPage() {
   const [processing, setProcessing] = useState(false); // To debounce scanning
   const [cameraStream, setCameraStream] = useState(null);
   const [eventName, setEventName] = useState(null);
+  const [eventDate, setEventDate] = useState(null);
   const [error, setError] = useState(null); // Error state
   const [loading, setLoading] = useState(false); // Loading state
 
@@ -40,6 +41,7 @@ export default function ScanQRPage() {
           }
           const event = await response.json();
           setEventName(event.eventName); // Set the event name
+          setEventDate(event.eventDate); // Set the event date
         } catch (err) {
           setError(err.message);
         } finally {
@@ -121,6 +123,17 @@ export default function ScanQRPage() {
       console.warn(`Event ID mismatch: Expected ${eventId}, got ${eventIdFromQR}`);
       setScanStatus("Invalid Event ID");
       setScanResult("");
+      resetProcessing();
+      return;
+    }
+
+    // Compare today's date with the event date
+    const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
+    const eventDateFormatted = new Date(eventDate).toISOString().split("T")[0]; // Format eventDate
+
+    if (today !== eventDateFormatted) {
+      setScanStatus("Today is not event day. You are not allowed to check in.");
+      setScanResult(""); // Clear previous scan result
       resetProcessing();
       return;
     }
