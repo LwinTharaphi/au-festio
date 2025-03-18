@@ -31,7 +31,7 @@ export async function GET(request,{ params }) {
   const skip = (page - 1) * limit;
 
   const events = await Event.find({organizer: organizer_id})
-        .sort({eventDate: 1}).skip(skip).limit(limit);
+        .sort({eventDate: 1}).skip(skip);
   const totalEvents = await Event.countDocuments({organizer: organizer_id});
 
   // Map through events to process the poster field
