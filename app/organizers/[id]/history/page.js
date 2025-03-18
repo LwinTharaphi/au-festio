@@ -41,11 +41,11 @@ export default function OrganizerHistoryPage() {
 
           // Check if events are completed based on `eventDate`
           const today = new Date();
-          const tomorrow = new Date(today);
-          tomorrow.setDate(today.getDate() + 1);
+          const sevenDaysAgo = new Date(today);
+          sevenDaysAgo.setDate(today.getDate() - 7);
           const filteredEvents = data.events.filter((event) => {
             const eventDate = new Date(event.eventDate); // Parse eventDate
-            return eventDate < tomorrow; // Completed if eventDate is before tomorrow
+            return eventDate < sevenDaysAgo; // Completed if eventDate is before tomorrow
           });
 
           setCompletedEvents(filteredEvents); // Update state with filtered events

@@ -167,7 +167,9 @@ function EventForm() {
   const refreshEvents = () => setRefresh(!refresh);
 
   const categorizeEvents = (events) => {
-    const today = moment();
+    const today = new Date();
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(today.getDate() - 7);
     const groupedEvents = { paid: {}, free: {} };
 
     events.forEach((event, index) => {
@@ -176,7 +178,7 @@ function EventForm() {
 
       let categories = "";
       console.log("Event paid", event.isPaid)
-      if (eventDate > today){
+      if (eventDate > sevenDaysAgo){
         if (event.isPaid) {
           categories = "paid";
         } else {
