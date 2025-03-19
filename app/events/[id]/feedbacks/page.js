@@ -81,13 +81,14 @@ export default function FeedbackPage() {
               throw new Error("Failed to fetch events list.");
             }
             const data = await response.json();
-            const today = moment();
+            const today = new Date();
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(today.getDate() - 7);
             const nonCompletedEvents = data.events.filter((event) => {
-              const registrationDate = moment(event.registerationDate);
               const eventDate = moment(event.eventDate);
 
               // Include events where today is between registration and event date or before registration
-              return today.isBetween(registrationDate, eventDate, "day", "[]") || today.isBefore(registrationDate, "day");
+              return eventDate > sevenDaysAgo;
             });
             setEventsList(nonCompletedEvents);
             console.log("Fetched events:", data); // Log the fetched events
