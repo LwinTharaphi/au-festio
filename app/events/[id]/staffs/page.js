@@ -38,7 +38,7 @@ export default function StaffPage() {
   const [isEditingStaff, setIsEditingStaff] = useState(false);
   const [editStaffId, setEditStaffId] = useState(null);
   const [newStaff, setNewStaff] = useState({
-    id: "",
+    sid: "",
     name: "",
     email: "",
     faculty: "",
@@ -144,7 +144,7 @@ export default function StaffPage() {
       setIsEditingStaff(true);
       setEditStaffId(staffMember._id);
       setNewStaff({
-        id: staffMember.sid,
+        sid: staffMember.sid,
         name: staffMember.name,
         email: staffMember.email,
         faculty: staffMember.faculty,
@@ -154,14 +154,14 @@ export default function StaffPage() {
       });
     } else {
       setIsEditingStaff(false);
-      setNewStaff({ id: "", name: "", email: "", faculty: "", phone: "", role: "", status: "" });
+      setNewStaff({ sid: "", name: "", email: "", faculty: "", phone: "", role: "", status: "" });
     }
     setShowStaffModal(true);
   };
 
   const handleCloseStaffModal = () => {
     setShowStaffModal(false);
-    setNewStaff({ id: "", name: "", email: "", faculty: "", phone: "", role: "", status: "" });
+    setNewStaff({ sid: "", name: "", email: "", faculty: "", phone: "", role: "", status: "" });
   };
 
   const handleShowApprovalModal = (staffMember) => {
@@ -489,7 +489,7 @@ export default function StaffPage() {
                     <tbody>
                       {filteredStaffs.map((staffMember) => (
                         <tr key={staffMember._id}>
-                          <td>{staffMember.id}</td>
+                          <td>{staffMember.sid}</td>
                           <td>{staffMember.name}</td>
                           <td>{staffMember.email}</td>
                           <td>{staffMember.faculty}</td>
@@ -533,8 +533,8 @@ export default function StaffPage() {
                           <Form.Control
                             type="text"
                             placeholder="Enter ID"
-                            value={newStaff.id}
-                            onChange={(e) => setNewStaff({ ...newStaff, id: e.target.value })}
+                            value={newStaff.sid}
+                            onChange={(e) => setNewStaff({ ...newStaff, sid: e.target.value })}
                           />
                         </Form.Group>
                         <Form.Group controlId="formStaffName">
