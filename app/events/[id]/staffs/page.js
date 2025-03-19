@@ -639,10 +639,10 @@ export default function StaffPage() {
 
                   <Modal show={showApprovalModal} onHide={handleCloseApprovalModal}>
                     <Modal.Header closeButton>
-                      <Modal.Title>Approve or Deny Staff</Modal.Title>
+                      <Modal.Title>Approve or Reject Staff</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
-                      <p>Are you sure you want to {approvalStatus === "approved" ? "deny" : "approve"} this staff member?</p>
+                      <p>Are you sure you want to {approvalStatus === "approved" ? "reject" : "approve"} this staff member?</p>
                     </Modal.Body>
                     <Modal.Footer>
                       <Button variant="secondary" onClick={handleCloseApprovalModal}>
@@ -656,9 +656,9 @@ export default function StaffPage() {
                       </Button>
                       <Button
                         variant="danger"
-                        onClick={() => handleSaveApproval("denied")}
+                        onClick={() => handleSaveApproval("rejected")}
                       >
-                        Deny
+                        Reject
                       </Button>
                     </Modal.Footer>
                   </Modal>
