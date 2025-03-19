@@ -144,7 +144,7 @@ export default function StaffPage() {
       setIsEditingStaff(true);
       setEditStaffId(staffMember._id);
       setNewStaff({
-        id: staffMember.id,
+        id: staffMember.sid,
         name: staffMember.name,
         email: staffMember.email,
         faculty: staffMember.faculty,
