@@ -85,6 +85,7 @@ export default function BoothPage() {
             if (!response.ok) {
               throw new Error("Failed to fetch events list.");
             }
+            const data = await response.json();
             const today = new Date();
             const sevenDaysAgo = new Date();
             sevenDaysAgo.setDate(today.getDate() - 7);
