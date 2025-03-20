@@ -401,8 +401,9 @@ function EventForm() {
     try {
       const response = await fetch(`/api/organizers/${userId}/events/${eventId}/students`);
       const registrations = await response.json();
+      const hasPaidStudents = registrations.some(student => student.status === 'paid');
   
-      if (eventToDelete.isPaid && registrations.length > 0 && eventToDelete.refundStatus !== "refunded") {
+      if (eventToDelete.isPaid && registrations.length > 0 && hasPaidStudents && eventToDelete.refundStatus !== "refunded") {
         setDeleteModalContent({
           title: "Confirm Delete",
           description: "This event has registered students. Users will be notified and the refund process will start. Are you sure you want to delete this event?",

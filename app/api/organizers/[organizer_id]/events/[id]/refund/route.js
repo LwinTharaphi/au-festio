@@ -28,7 +28,7 @@ export async function POST(req, { params }) {
     await event.save();
 
     // 4️⃣ Find all students registered for the event
-    const students = await Student.find({ eventId: id, refundStatus: "none" });
+    const students = await Student.find({ eventId: id, refundStatus: "none", status: "paid" });
 
     if (students.length === 0) {
       return NextResponse.json({ message: "No students to refund." });
