@@ -269,9 +269,13 @@ export default function Dashboard() {
                               return (
                                 <tr key={index} style={{ borderBottom: "1px solid #ddd" }}>
                                   <td style={{ padding: "8px 12px" }}>{performance.name}</td>
-                                  <td style={{ padding: "8px 12px" }}>
+                                  {/* <td style={{ padding: "8px 12px" }}>
                                     {startTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} -{" "}
                                     {endTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                  </td> */}
+                                  <td style={{ padding: "8px 12px" }}>
+                                    {startTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hourCycle: "h23" })} -{" "}
+                                    {endTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hourCycle: "h23" })}
                                   </td>
                                 </tr>
                               );
