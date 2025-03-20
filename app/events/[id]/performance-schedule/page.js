@@ -365,8 +365,8 @@ export default function EventPerformancesPage() {
                             <td>{index + 1}</td>
                             <td>{performance.name}</td>
                             <td>{performance.description}</td>
-                            <td>{moment(performance.startTime).format("h:mm A")}</td>
-                            <td>{moment(performance.endTime).format("h:mm A")}</td>
+                            <td>{moment(performance.startTime).format("HH:mm")}</td>
+                            <td>{moment(performance.endTime).format("HH:mm")}</td>
                             <td>
                               <div style={{ display: "flex", alignItems: "center" }}>
                                 <FaEdit
