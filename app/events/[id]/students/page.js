@@ -725,7 +725,7 @@ export default function RegisteredStudentsPage() {
                   updateStatus(selectedStudent._id, "rejected");
                   setShowModal(false);
                 }}
-                disabled={selectedStudent.status === "rejected"}
+                disabled={selectedStudent.status === "rejected" || eventData.refundStatus === "refunded" || eventData.refundStatus === "refund_in_progress"}
               >
                 Deny
               </Button>
@@ -735,7 +735,7 @@ export default function RegisteredStudentsPage() {
                   updateStatus(selectedStudent._id, "paid");
                   setShowModal(false);
                 }}
-                disabled={selectedStudent.status === "paid"}
+                disabled={selectedStudent.status === "paid" || eventData.refundStatus === "refunded" || eventData.refundStatus === "refund_in_progress"}
               >
                 Approve
               </Button>
