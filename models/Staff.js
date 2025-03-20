@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const staffSchema = new mongoose.Schema(
   {
-    id: { type: String, required: true },
+    sid: { type: String, required: true },
     firebaseUID: { type: String, required: true },
     name: { type: String, required: true },
     email: { type: String, required: true },

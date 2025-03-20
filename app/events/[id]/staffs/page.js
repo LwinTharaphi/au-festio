@@ -38,7 +38,7 @@ export default function StaffPage() {
   const [isEditingStaff, setIsEditingStaff] = useState(false);
   const [editStaffId, setEditStaffId] = useState(null);
   const [newStaff, setNewStaff] = useState({
-    id: "",
+    sid: "",
     name: "",
     email: "",
     faculty: "",
@@ -95,13 +95,14 @@ export default function StaffPage() {
               throw new Error("Failed to fetch events list.");
             }
             const data = await response.json();
-            const today = moment();
+            const today = new Date();
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(today.getDate() - 7);
             const nonCompletedEvents = data.events.filter((event) => {
-              const registrationDate = moment(event.registerationDate);
               const eventDate = moment(event.eventDate);
 
               // Include events where today is between registration and event date or before registration
-              return today.isBetween(registrationDate, eventDate, "day", "[]") || today.isBefore(registrationDate, "day");
+              return eventDate > sevenDaysAgo;
             });
             setEventsList(nonCompletedEvents);
             console.log("Fetched events:", data); // Log the fetched events
@@ -144,7 +145,7 @@ export default function StaffPage() {
       setIsEditingStaff(true);
       setEditStaffId(staffMember._id);
       setNewStaff({
-        id: staffMember.id,
+        sid: staffMember.sid,
         name: staffMember.name,
         email: staffMember.email,
         faculty: staffMember.faculty,
@@ -154,14 +155,14 @@ export default function StaffPage() {
       });
     } else {
       setIsEditingStaff(false);
-      setNewStaff({ id: "", name: "", email: "", faculty: "", phone: "", role: "", status: "" });
+      setNewStaff({ sid: "", name: "", email: "", faculty: "", phone: "", role: "", status: "" });
     }
     setShowStaffModal(true);
   };
 
   const handleCloseStaffModal = () => {
     setShowStaffModal(false);
-    setNewStaff({ id: "", name: "", email: "", faculty: "", phone: "", role: "", status: "" });
+    setNewStaff({ sid: "", name: "", email: "", faculty: "", phone: "", role: "", status: "" });
   };
 
   const handleShowApprovalModal = (staffMember) => {
@@ -489,7 +490,7 @@ export default function StaffPage() {
                     <tbody>
                       {filteredStaffs.map((staffMember) => (
                         <tr key={staffMember._id}>
-                          <td>{staffMember.id}</td>
+                          <td>{staffMember.sid}</td>
                           <td>{staffMember.name}</td>
                           <td>{staffMember.email}</td>
                           <td>{staffMember.faculty}</td>
@@ -533,8 +534,8 @@ export default function StaffPage() {
                           <Form.Control
                             type="text"
                             placeholder="Enter ID"
-                            value={newStaff.id}
-                            onChange={(e) => setNewStaff({ ...newStaff, id: e.target.value })}
+                            value={newStaff.sid}
+                            onChange={(e) => setNewStaff({ ...newStaff, sid: e.target.value })}
                           />
                         </Form.Group>
                         <Form.Group controlId="formStaffName">
@@ -639,10 +640,10 @@ export default function StaffPage() {
 
                   <Modal show={showApprovalModal} onHide={handleCloseApprovalModal}>
                     <Modal.Header closeButton>
-                      <Modal.Title>Approve or Deny Staff</Modal.Title>
+                      <Modal.Title>Approve or Reject Staff</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
-                      <p>Are you sure you want to {approvalStatus === "approved" ? "deny" : "approve"} this staff member?</p>
+                      <p>Are you sure you want to {approvalStatus === "approved" ? "reject" : "approve"} this staff member?</p>
                     </Modal.Body>
                     <Modal.Footer>
                       <Button variant="secondary" onClick={handleCloseApprovalModal}>
@@ -656,9 +657,9 @@ export default function StaffPage() {
                       </Button>
                       <Button
                         variant="danger"
-                        onClick={() => handleSaveApproval("denied")}
+                        onClick={() => handleSaveApproval("rejected")}
                       >
-                        Deny
+                        Reject
                       </Button>
                     </Modal.Footer>
                   </Modal>
