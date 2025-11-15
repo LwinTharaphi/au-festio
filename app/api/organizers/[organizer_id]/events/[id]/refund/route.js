@@ -42,7 +42,6 @@ export async function POST(req, { params }) {
       })
     );
     
-
     // 6️⃣ Send notifications
     const expo = new Expo();
     const messages = [];
