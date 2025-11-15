@@ -41,6 +41,7 @@ export async function POST(req, { params }) {
         await student.save();
       })
     );
+    
 
     // 6️⃣ Send notifications
     const expo = new Expo();
